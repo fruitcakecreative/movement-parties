@@ -119,9 +119,5 @@ def main():
     all_events = event_fetcher.fetch_all_events()
     event_fetcher.save_events_to_json(all_events, output_path)
 
-    # Call Rails import task
-    print("Running Rails import...", flush=True)
-    subprocess.run(["bundle", "exec", "rake", "import:events"], cwd=rails_app_path)
-
 if __name__ == "__main__":
     main()
