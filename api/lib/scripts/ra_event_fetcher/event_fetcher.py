@@ -18,8 +18,7 @@ HEADERS = {
 QUERY_TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), "graphql_query_template.json")
 DELAY = 1
 
-rails_app_path = "/opt/render/project/src/api"
-output_dir = os.path.join(rails_app_path, "db")
+output_dir = os.path.join(os.getcwd(), "db")
 os.makedirs(output_dir, exist_ok=True)
 
 # delete .json files older than 3 days
