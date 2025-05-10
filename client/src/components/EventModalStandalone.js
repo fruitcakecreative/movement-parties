@@ -4,8 +4,6 @@ const EventModalStandalone = ({ event, venueHex, fontHex }) => {
     event_url,
     ticket_url,
     description,
-    event_bg_color,
-    event_font_color,
     ticket_price,
     ticket_tier,
     ticket_wave,
@@ -13,8 +11,6 @@ const EventModalStandalone = ({ event, venueHex, fontHex }) => {
     top_artists = [],
     artists = [],
     venue,
-    venue_hex,
-    venue_font_hex,
     formatted_start_time,
     formatted_end_time,
   } = event;
@@ -42,7 +38,6 @@ const EventModalStandalone = ({ event, venueHex, fontHex }) => {
     if (current === total) ticketTier = "– Final release";
   }
   const venueName = typeof venue === "string" ? venue : venue?.name || "";
-  const isTBA = venueName.toLowerCase().includes("tba") || venueName.toLowerCase().includes("secret");
 
   const allArtists = artists.length ? artists : top_artists;
 
