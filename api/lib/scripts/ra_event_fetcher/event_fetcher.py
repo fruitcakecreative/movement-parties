@@ -26,8 +26,13 @@ for file in json_files:
     if os.path.getmtime(file) < three_days_ago:
         os.remove(file)
 
+rails_app_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
+output_dir = os.path.join(rails_app_path, "db")
+os.makedirs(output_dir, exist_ok=True)
+
 filename = f"events_{datetime.now().strftime('%Y%m%d_%H%M')}.json"
-output_path = os.path.join(rails_app_path, "db", filename)
+output_path = os.path.join(output_dir, filename)
+
 
 
 class EventFetcher:
