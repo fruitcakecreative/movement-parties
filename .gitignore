@@ -1,0 +1,36 @@
+# Rails - api/
+api/.bundle
+api/log/*
+api/public/assets
+api/tmp/*
+!api/log/.keep
+!api/tmp/.keep
+api/tmp/pids/*
+!api/tmp/pids/
+!api/tmp/pids/.keep
+api/storage/*
+!api/storage/.keep
+api/tmp/storage/*
+!api/tmp/storage/
+!api/tmp/storage/.keep
+api/.env*
+!api/.env*.erb
+api/config/master.key
+api/config/credentials/production.key
+
+api/lib/scripts/ra_event_fetcher/venv
+
+# React - client/
+client/.env*
+client/node_modules
+client/.pnp
+client/.pnp.js
+client/coverage
+client/build
+client/npm-debug.log*
+client/yarn-debug.log*
+client/yarn-error.log*
+
+# Global
+.DS_Store
+*.log

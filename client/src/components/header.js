@@ -1,0 +1,62 @@
+
+import { useNavigate } from "react-router-dom";
+import { Disclosure } from '@headlessui/react';
+
+const navigation = [
+  { name: 'Home', href: '/' },
+  { name: 'Party Timelines', href: '/' },
+  { name: 'Post a Ticket', href: '/tickets' },
+  { name: 'Find a Ticket', href: '/tickets/new' },
+];
+
+function Header() {
+
+  const navigate = useNavigate();
+
+  const profileClick = () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    navigate(user ? "/profile" : "/login");
+  };
+
+  return (
+  <div className="header-con">
+    <div className="logo-con"><img src="/images/logo_mobile.png" /></div>
+    <div className="menu-con">
+      <div className="profile">
+        <button onClick={profileClick}><i class="fa-solid fa-user"></i></button>
+      </div>
+      <Disclosure as="nav" className="">
+        {({ open }) => (
+          <>
+                <div className="m-hide">
+                  {navigation.map((item) => (
+                    <a key={item.name} href={item.href} className="">
+                      {item.name}
+                    </a>
+                  ))}
+                </div>
+
+                <div className="d-hide">
+                  <Disclosure.Button className="open-close-but">
+                    {open ? <i class="fa-solid fa-xmark"></i>: <i class="fa-solid fa-bars"></i>}
+                  </Disclosure.Button>
+                </div>
+            <Disclosure.Panel className="mobile-menu">
+
+              {navigation.map((item) => (
+                <a key={item.name} href={item.href} className="">
+                  {item.name}
+                </a>
+              ))}
+            </Disclosure.Panel>
+          </>
+        )}
+      </Disclosure>
+
+
+      </div>
+
+  </div>
+)};
+
+export default Header;
