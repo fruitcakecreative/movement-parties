@@ -5,7 +5,9 @@ Rails.application.configure do
   # Code is not reloaded between requests.
   config.enable_reloading = false
 
-  config.hosts << "api-ynr1.onrender.com"
+  config.hosts << "movement-parties.onrender.com"
+  config.log_level = "debug"
+  config.force_ssl = false 
 
   # Eager load code on boot. This eager loads most of Rails and
   # your application in memory, allowing both threaded web servers
@@ -88,5 +90,3 @@ Rails.application.configure do
 
   # Only use :id for inspections in production.
   config.active_record.attributes_for_inspect = [ :id ]
-
-end
