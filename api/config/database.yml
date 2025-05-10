@@ -24,5 +24,4 @@ test:
   database: <%= ENV.fetch("DB_NAME_TEST") { "mp_test" } %>
 
 production:
-  <<: *default
   url: <%= ENV["DATABASE_URL"] %>
