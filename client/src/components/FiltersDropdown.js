@@ -1,5 +1,4 @@
 import { Disclosure } from "@headlessui/react";
-import { useState } from "react";
 
 const costOptions = ["Free", "Under $20", "Under $50"];
 const ageOptions = ["All Ages", "18+", "21+"];
