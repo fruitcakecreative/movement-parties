@@ -24,4 +24,5 @@ test:
   database: <%= ENV.fetch("DB_NAME_TEST") { "mp_test" } %>
 
 production:
+  adapter: postgresql
   url: <%= ENV["DATABASE_URL"] %>
