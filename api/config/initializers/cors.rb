@@ -3,7 +3,7 @@
     origins 'http://localhost:3000',
             'https://movementparties.netlify.app',
             'http://new.movementparties.com',
-            'https://new.movementparties.com'
+            'https://new.movementparties.com',
             'https://www.movementparties.com',
             'https://movementparties.com',
             'https://0668-2601-406-5083-f5d0-10d5-68ad-f764-1f2e.ngrok-free.app',
