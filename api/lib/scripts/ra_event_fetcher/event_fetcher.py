@@ -15,7 +15,7 @@ HEADERS = {
     'Referer': 'https://ra.co/events/uk/london',
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:106.0) Gecko/20100101 Firefox/106.0'
 }
-QUERY_TEMPLATE_PATH = "graphql_query_template.json"
+QUERY_TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), "graphql_query_template.json")
 DELAY = 1
 
 rails_app_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
