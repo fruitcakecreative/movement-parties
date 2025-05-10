@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from ticket_scraper import fetch_ticket_info
 import random
 import os
+import glob
 
 URL = 'https://ra.co/graphql'
 HEADERS = {
@@ -16,8 +17,17 @@ HEADERS = {
 QUERY_TEMPLATE_PATH = "graphql_query_template.json"
 DELAY = 1
 
-rails_app_path = "../../../"
-output_path = os.path.join(rails_app_path, "db", "events.json")
+
+# delete .json files older than 3 days
+json_files = glob.glob(os.path.join(rails_app_path, "db", "events_*.json"))
+three_days_ago = time.time() - 3 * 86400
+
+for file in json_files:
+    if os.path.getmtime(file) < three_days_ago:
+        os.remove(file)
+
+filename = f"events_{datetime.now().strftime('%Y%m%d_%H%M')}.json"
+output_path = os.path.join(rails_app_path, "db", filename)
 
 
 class EventFetcher:
