@@ -4,7 +4,7 @@ require "rails/all"
 Bundler.require(*Rails.groups)
 Dotenv::Railtie.load if defined?(Dotenv)
 
-module EventApp
+module MovementParties
   class Application < Rails::Application
     config.load_defaults 7.2
 
@@ -15,7 +15,7 @@ module EventApp
     config.middleware.use Rack::MethodOverride
 
     config.middleware.use ActionDispatch::Session::CookieStore,
-      key: "_event_app_session",
+      key: "_movement_parties_session",
       same_site: Rails.env.production? ? :none : :lax,
       secure: Rails.env.production?
 

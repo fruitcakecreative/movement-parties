@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useEpg, Epg, Layout } from "@nessprim/planby-pro";
 import Timeline from "./components/Timeline";
 import ChannelItem from "./components/ChannelItem";

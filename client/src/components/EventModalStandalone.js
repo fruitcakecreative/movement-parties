@@ -1,13 +1,9 @@
 const EventModalStandalone = ({ event, venueHex, fontHex }) => {
 
   const {
-    title,
-    short_title,
     event_url,
     ticket_url,
     description,
-    event_bg_color,
-    event_font_color,
     ticket_price,
     ticket_tier,
     ticket_wave,
@@ -15,8 +11,6 @@ const EventModalStandalone = ({ event, venueHex, fontHex }) => {
     top_artists = [],
     artists = [],
     venue,
-    venue_hex,
-    venue_font_hex,
     formatted_start_time,
     formatted_end_time,
   } = event;
@@ -36,7 +30,6 @@ const EventModalStandalone = ({ event, venueHex, fontHex }) => {
 
   const sinceTime = formatTime(formatted_start_time);
   const tillTime = formatTime(formatted_end_time);
-  const isMobile = window.innerWidth < 768;
   const ticketLabel = ticket_price === "0.0" ? "FREE" : `$${ticket_price}`;
 
   let ticketTier = ticket_tier ? `– ${ticket_tier}` : "";
@@ -45,9 +38,7 @@ const EventModalStandalone = ({ event, venueHex, fontHex }) => {
     if (current === total) ticketTier = "– Final release";
   }
   const venueName = typeof venue === "string" ? venue : venue?.name || "";
-  const isTBA = venueName.toLowerCase().includes("tba") || venueName.toLowerCase().includes("secret");
-  const bgColor = isTBA ? event_bg_color : venue_hex || "#ccc";
-  const fontColor = isTBA ? event_font_color : venue_font_hex || "#000";
+
   const allArtists = artists.length ? artists : top_artists;
 
   return (

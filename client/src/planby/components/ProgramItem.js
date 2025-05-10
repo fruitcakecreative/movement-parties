@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   ProgramBox,
   ProgramContent,
@@ -13,17 +13,12 @@ const ProgramItem = ({ program, scrollLeft, ...rest }) => {
   const { styles } = useProgram({ program, ...rest });
 
   const {
-    id,
     title,
     short_title,
     start_time,
     end_time,
-    event_url,
-    ticket_url,
-    description,
     bg_color,
     font_color,
-    event_age,
     ticket_label,
     ticket_tier,
     genres = [],
@@ -86,7 +81,7 @@ const ProgramItem = ({ program, scrollLeft, ...rest }) => {
 
           <div className="bottom-half">
             <div className="left-side" style={{ borderColor: font_color }}>
-              <p className="hide-m top-artists"><i class="fa-solid fa-headphones"></i>&nbsp;
+              <p className="hide-m top-artists"><i className="fa-solid fa-headphones"></i>&nbsp;
                 {top_artists.length > 0
                   ? top_artists.map((artist, i) => (
                       <span key={i} className="artist-name">
@@ -113,20 +108,20 @@ const ProgramItem = ({ program, scrollLeft, ...rest }) => {
 
             <div className="right-side" style={{ borderColor: font_color }}>
               <p className="time-venue">
-                <span className="hide-m emoji"><i class="fa-solid fa-clock"></i>&nbsp;</span>
+                <span className="hide-m emoji"><i className="fa-solid fa-clock"></i>&nbsp;</span>
                 <span className="hide-m time"> {start_time}-{end_time}&nbsp;</span>
-                <span className="hide-m emoji"> <i class="fa-solid fa-map-pin"></i>&nbsp;</span>
+                <span className="hide-m emoji"> <i className="fa-solid fa-map-pin"></i>&nbsp;</span>
                 <span className="hide-m venue">{venue.name}</span>
               </p>
               <p className={`hide-m ${ticket_label}`}>
-                <span className="emoji"><i class="fa-solid fa-ticket"></i></span> {ticket_label}
+                <span className="emoji"><i className="fa-solid fa-ticket"></i></span> {ticket_label}
                 <span className="tier"> {ticket_tier}</span>
               </p>
             </div>
           </div>
         </ProgramContent>
       </ProgramBox>
-      
+
       <ProgramModal
           isOpen={isOpen}
           onClose={closeModal}

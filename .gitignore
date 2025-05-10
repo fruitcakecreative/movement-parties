@@ -19,6 +19,7 @@ api/config/master.key
 api/config/credentials/production.key
 
 api/lib/scripts/ra_event_fetcher/venv
+api/lib/scripts/export_seeds.rb
 
 # React - client/
 client/.env*

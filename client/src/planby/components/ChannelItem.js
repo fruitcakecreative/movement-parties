@@ -8,7 +8,6 @@ const ChannelItem = ({ channel, allEvents, modalStack, setModalStack }) => {
     position,
     logo,
     name,
-    title,
     short_name,
     subheading,
     tba_class,

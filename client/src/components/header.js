@@ -20,10 +20,10 @@ function Header() {
 
   return (
   <div className="header-con">
-    <div className="logo-con"><img src="/images/logo_mobile.png" /></div>
+    <div className="logo-con"><img alt="movement parties logo" src="/images/logo_mobile.png" /></div>
     <div className="menu-con">
       <div className="profile">
-        <button onClick={profileClick}><i class="fa-solid fa-user"></i></button>
+        <button onClick={profileClick}><i className="fa-solid fa-user"></i></button>
       </div>
       <Disclosure as="nav" className="">
         {({ open }) => (
@@ -38,7 +38,7 @@ function Header() {
 
                 <div className="d-hide">
                   <Disclosure.Button className="open-close-but">
-                    {open ? <i class="fa-solid fa-xmark"></i>: <i class="fa-solid fa-bars"></i>}
+                    {open ? <i className="fa-solid fa-xmark"></i>: <i className="fa-solid fa-bars"></i>}
                   </Disclosure.Button>
                 </div>
             <Disclosure.Panel className="mobile-menu">

@@ -9,11 +9,8 @@ import { userLogout,
 function Profile() {
   const [user, setUser] = useState(null);
   const [userEvents, setUserEvents] = useState({});
-  const [avatarFile, setAvatarFile] = useState(null);
   const [profile, setProfile] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("friends");
-
 
 
   const openModal = () => {
@@ -57,12 +54,6 @@ function Profile() {
     acc[dateStr].push(event);
     return acc;
   }, {});
-
-  const tags = [
-    { key: "friends", label: "All Friends" },
-    { key: "requests", label: "Friend Requests" },
-    { key: "add", label: "Add Friends" },
-  ];
 
   if (!user || !profile) return null;
 
@@ -132,8 +123,8 @@ function Profile() {
     >
       <div className="profile-photo">
         <p className="heading">Change profile photo:</p>
-        <input type="file" onChange={(e) => setAvatarFile(e.target.files[0])} />
-        <button class="white-bg" onClick={'none'}>Upload Profile Picture</button>
+        <input type="file" />
+        <button className="white-bg" onClick={'none'}>Upload Profile Picture</button>
       </div>
 
     </ModalLayout>
