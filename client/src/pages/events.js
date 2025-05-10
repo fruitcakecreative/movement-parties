@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import { fetchEvents } from "../services/api";
 import { createChannels } from "../planby/data/buildChannels";
@@ -11,7 +10,6 @@ import MultiDayTimeline from "../planby/MultiDayTimeline";
 import CustomChannelItem from "../planby/components/ChannelItem";
 import ModalLayout from "../components/ModalLayout";
 
-import { Listbox, Disclousure } from "@headlessui/react";
 import DateDropdown from "../components/DateDropdown";
 import FiltersDropdown from "../components/FiltersDropdown";
 
@@ -20,7 +18,6 @@ function Events({ modalStack, setModalStack }) {
 
   const [eventsByDate, setEventsByDate] = useState({});
   const [isLoaded, setIsLoaded] = useState(false);
-  const [selectedGenres, setSelectedGenres] = useState([]);
   const [allEvents, setAllEvents] = useState([]);
   const [selectedDate, setSelectedDate] = useState("all");
   const [genreOptions, setGenreOptions] = useState([]);
@@ -32,12 +29,6 @@ function Events({ modalStack, setModalStack }) {
   const [artistOptions, setArtistOptions] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredArtists, setFilteredArtists] = useState([]);
-
-  const navigate = useNavigate();
-
-  const handleClick = () => {
-    navigate("/profile");
-  };
 
   const customDateRanges = {
     "2025-05-22": { start: "2025-05-22T15:00:00", end: "2025-05-23T06:00:00" },
@@ -87,7 +78,7 @@ function Events({ modalStack, setModalStack }) {
         console.error("Error fetching events:", error);
         setIsLoaded(true);
       });
-  }, []);
+  }, [dates]);
 
 
 
@@ -102,7 +93,7 @@ function Events({ modalStack, setModalStack }) {
               <br></br>I am recently unemployed so I decided to upgrade the party timeline to a website this year.
             </p>
             <p className="mini-heading">
-              Relevant Info <i class="fa-solid fa-circle-info"></i>
+              Relevant Info <i className="fa-solid fa-circle-info"></i>
             </p>
             <ul>
               <li>The site scrapes basic event data from RA.
@@ -113,7 +104,7 @@ function Events({ modalStack, setModalStack }) {
                 </li>
                 <li>
                   You can click on both events on the timline and venues on the left for more information.
-                  I am still updating all the venue info so be patient with me there <i class="fa-regular fa-heart"></i>
+                  I am still updating all the venue info so be patient with me there <i className="fa-regular fa-heart"></i>
                 </li>
                 <li>
                   PLEASE NO HATE ABOUT THE GENRES! I am just a girl. If you would like to offer your services and help with assigning genres to each party I will gladly accept.
@@ -123,27 +114,27 @@ function Events({ modalStack, setModalStack }) {
             <p className="mini-heading">
               Connect with Me <i className="fa-solid fa-heart"></i>
             </p>
-            <div class="socials">
-              <a target="_blank" href="https://instagram.com/carlymarsh"><i class="fa-brands fa-instagram"></i> Instagram</a>
-              <a target="_blank" href="https://facebook.com/carly.marsh1"><i class="fa-brands fa-square-facebook"></i> Facebook</a>
-              <a target="_blank" href="mailto:carlypmarsh@gmail.com"><i class="fa-solid fa-envelope"></i> carlypmarsh@gmail.com</a>
-              <a target="_blank" href="https://www.linkedin.com/in/carly-marsh-a4735316a/"><i class="fa-brands fa-linkedin"></i> LinkedIn *sigh*</a>
+            <div className="socials">
+              <a target="_blank" rel="noreferrer" href="https://instagram.com/carlymarsh"><i className="fa-brands fa-instagram"></i> Instagram</a>
+              <a target="_blank" rel="noreferrer" href="https://facebook.com/carly.marsh1"><i className="fa-brands fa-square-facebook"></i> Facebook</a>
+              <a target="_blank" rel="noreferrer" href="mailto:carlypmarsh@gmail.com"><i className="fa-solid fa-envelope"></i> carlypmarsh@gmail.com</a>
+              <a target="_blank" rel="noreferrer" href="https://www.linkedin.com/in/carly-marsh-a4735316a/"><i className="fa-brands fa-linkedin"></i> LinkedIn *sigh*</a>
             </div>
 
             <p className="mini-heading">
-              Support the Cause <i class="fa-solid fa-handshake-angle"></i>
+              Support the Cause <i className="fa-solid fa-handshake-angle"></i>
             </p>
             <p className="pay-me-blurb">I made this out of pure love for the party and expect nothing in return. But, I do pay for the domain, server and software costs.
-              If you'd like to show your unemployed techno compadre some love or buy me a drink for my efforts, I wouldn't mind <i class="fa-regular fa-heart"></i>
+              If you'd like to show your unemployed techno compadre some love or buy me a drink for my efforts, I wouldn't mind <i className="fa-regular fa-heart"></i>
             </p>
-            <div class="pay-me">
-              <a target="_blank" href="https://venmo.com/u/CarlyMarsh7">Venmo</a>
-              <a target="_blank" href="https://cash.app/$carlymarsh7">CashApp</a>
-              <a target="_blank" href="https://paypal.me/carlypmarsh">PayPal</a>
+            <div className="pay-me">
+              <a target="_blank" rel="noreferrer" href="https://venmo.com/u/CarlyMarsh7">Venmo</a>
+              <a target="_blank" rel="noreferrer" href="https://cash.app/$carlymarsh7">CashApp</a>
+              <a target="_blank" rel="noreferrer" href="https://paypal.me/carlypmarsh">PayPal</a>
             </div>
-            <p className="etrans-con"><span className="etrans">carlypmarsh@gmail.com</span><br></br><span className="etrans-blurb">e-transfer email for my fellow Canadians<i class="fa-brands fa-canadian-maple-leaf"></i></span></p>
+            <p className="etrans-con"><span className="etrans">carlypmarsh@gmail.com</span><br></br><span className="etrans-blurb">e-transfer email for my fellow Canadians<i className="fa-brands fa-canadian-maple-leaf"></i></span></p>
               <p className="mini-heading">
-                And Finally... THE PARTIES <i class="fa-solid fa-arrow-down"></i>
+                And Finally... THE PARTIES <i className="fa-solid fa-arrow-down"></i>
               </p>
         </div>
 

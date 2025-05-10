@@ -4,7 +4,6 @@ export function createChannels(epg) {
   const ordered = [];
 
   epg.forEach(event => {
-    console.log('Event data: ' , event);
     const uuid = event.channelUuid;
     const venue = event.venue;
 

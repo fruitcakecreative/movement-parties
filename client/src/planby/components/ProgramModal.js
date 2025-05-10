@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import ModalLayout from "../../components/ModalLayout";
 import formatVenueName from "../../helpers/formatVenueName"
 import UserEventButtons from "../../components/profile/userEventButtons";
@@ -9,7 +8,6 @@ const EventModal = ({isOpen, onClose, data, friends}) => {
     const {
       id,
       title,
-      short_title,
       start_time,
       end_time,
       event_url,
@@ -55,7 +53,7 @@ const EventModal = ({isOpen, onClose, data, friends}) => {
         <UserEventButtons eventId={id} bgColor={bg_color} fontColor={font_color} />
 
     {friends.length > 0 && (
-      <p><i class="fa-solid fa-people-group"></i> Friends Attending: &nbsp;
+      <p><i className="fa-solid fa-people-group"></i> Friends Attending: &nbsp;
         {friends.map(f => f.username).join(", ")}</p>
       )}
 
