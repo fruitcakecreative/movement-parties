@@ -18,6 +18,10 @@ QUERY_TEMPLATE_PATH = "graphql_query_template.json"
 DELAY = 1
 
 
+rails_app_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
+output_dir = os.path.join(rails_app_path, "db")
+os.makedirs(output_dir, exist_ok=True)
+
 # delete .json files older than 3 days
 json_files = glob.glob(os.path.join(rails_app_path, "db", "events_*.json"))
 three_days_ago = time.time() - 3 * 86400
@@ -26,13 +30,8 @@ for file in json_files:
     if os.path.getmtime(file) < three_days_ago:
         os.remove(file)
 
-rails_app_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
-output_dir = os.path.join(rails_app_path, "db")
-os.makedirs(output_dir, exist_ok=True)
-
 filename = f"events_{datetime.now().strftime('%Y%m%d_%H%M')}.json"
 output_path = os.path.join(output_dir, filename)
-
 
 
 class EventFetcher:
