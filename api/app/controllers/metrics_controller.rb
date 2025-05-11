@@ -16,7 +16,7 @@ class MetricsController < ActionController::Base
     end
 
     begin
-      metrics = Yabeda::Prometheus::Exporter.export
+      metrics = Yabeda::Prometheus::Exporter.new.export
       Rails.logger.info "Successfully served /metrics"
       render plain: metrics
     rescue => e
