@@ -23,12 +23,11 @@ jobs:
         run: |
           echo "@nessprim:registry=https://npm.pkg.github.com" >> ~/.npmrc
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.NODE_AUTH_TOKEN }}" >> ~/.npmrc
-
-      - name: Install dependencies
-        run: |
+              
+    - name: Install dependencies
+      run: |
         cd client
         npm install --legacy-peer-deps
-        working-directory: ./client
 
       - name: Run ESLint
         run: npx eslint .
