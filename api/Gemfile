@@ -11,7 +11,9 @@ gem "puma", ">= 5.0"
 gem 'rack-cors'
 gem 'dotenv-rails', groups: [:development, :test]
 gem "aws-sdk-s3"
-gem 'prometheus_exporter'
+gem 'yabeda'
+gem 'yabeda-prometheus'
+gem 'yabeda-rails'
 
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 # gem "jbuilder"
