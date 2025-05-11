@@ -54,9 +54,5 @@
     "sass": "^1.85.1",
     "util": "^0.12.5",
     "whatwg-url": "^14.2.0"
-  },
-  "jest": {
-    "setupFiles": ["./jest.setup.js"],
-    "testEnvironment": "jsdom"
   }
 }
