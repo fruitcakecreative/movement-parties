@@ -1,18 +1,26 @@
+if Rails.env.development?
   Rails.application.config.middleware.insert_before 0, Rack::Cors do
-  allow do
-    origins 'http://localhost:3000',
-            'https://movementparties.netlify.app',
-            'http://new.movementparties.com',
-            'https://new.movementparties.com',
-            'https://new.movementparties.com',
-            'https://www.movementparties.com',
-            'https://movementparties.com',
-            'https://0668-2601-406-5083-f5d0-10d5-68ad-f764-1f2e.ngrok-free.app',
-            /https:\/\/.*--steady-sunshine-e9c556\.netlify\.app/
+    allow do
+      origins 'http://localhost:3000'
+      resource '*', headers: :any, methods: :any, credentials: true
+    end
+  end
+end
 
-    resource '*',
-      headers: :any,
-      methods: [:get, :post, :put, :patch, :delete, :options],
-      credentials: true
+if Rails.env.staging?
+  Rails.application.config.middleware.insert_before 0, Rack::Cors do
+    allow do
+      origins 'https://staging.movementparties.com'
+      resource '*', headers: :any, methods: :any, credentials: true
+    end
+  end
+end
+
+if Rails.env.production?
+  Rails.application.config.middleware.insert_before 0, Rack::Cors do
+    allow do
+      origins 'https://movementparties.com', 'https://new.movementparties.com'
+      resource '*', headers: :any, methods: :any, credentials: true
+    end
   end
 end
