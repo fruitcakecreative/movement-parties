@@ -19,11 +19,12 @@ jobs:
         with:
           node-version: 18
 
+      - name: Set up .npmrc for GitHub Packages
+        run: echo "@nessprim:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=${{ secrets.NODE_AUTH_TOKEN }}" > ~/.npmrc
+
       - name: Install dependencies
         run: npm install --legacy-peer-deps
         working-directory: ./client
-        env:
-          NODE_AUTH_TOKEN: ${{ vars.NODE_AUTH_TOKEN }}
 
       - name: Run ESLint
         run: npx eslint .
