@@ -22,6 +22,8 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
         working-directory: ./client
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
 
       - name: Run ESLint
         run: npx eslint .
