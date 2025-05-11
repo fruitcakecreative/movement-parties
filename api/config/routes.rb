@@ -39,5 +39,7 @@ Rails.application.routes.draw do
     delete 'api/logout', to: 'api/users/sessions#destroy'
   end
 
+  mount PrometheusExporter::Server::WebCollector.new, at: '/metrics'
+  
   get "up" => "rails/health#show", as: :rails_health_check
 end
