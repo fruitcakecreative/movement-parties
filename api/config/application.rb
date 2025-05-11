@@ -17,7 +17,7 @@ module MovementParties
       key: "_movement_parties_session",
       same_site: Rails.env.production? ? :none : :lax,
       secure: Rails.env.production?
-
+    
     config.autoload_lib(ignore: %w[assets])
   end
 end

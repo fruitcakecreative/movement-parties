@@ -1,8 +1,8 @@
-Rails.application.routes.draw do
-  
-  mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
+require 'middleware/metrics_authentication'
 
-  get "/metrics", to: "metrics#index"
+Rails.application.routes.draw do
+  mount MetricsAuthentication.new(Yabeda::Prometheus::Exporter), at: "/metrics"
+  mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
 
   namespace :api do
     post 'users/create_from_facebook', to: 'users#create_from_facebook'
