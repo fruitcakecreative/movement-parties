@@ -32,3 +32,8 @@ plugin :tmp_restart
 # Specify the PID file. Defaults to tmp/pids/server.pid in development.
 # In other environments, only set the PID file if requested.
 pidfile ENV["PIDFILE"] if ENV["PIDFILE"]
+
+ssl_bind '127.0.0.1', '3001', {
+  key: 'localhost-key.pem',
+  cert: 'localhost.pem'
+}

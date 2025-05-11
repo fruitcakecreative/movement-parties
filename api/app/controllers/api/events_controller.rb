@@ -1,24 +1,27 @@
 class Api::EventsController < ApplicationController
   before_action :set_event, only: [:show, :update, :destroy]
 
-  def index
-    events = Event.includes(:genres, :venue, :artists)
-                  .order(start_time: :asc, end_time: :asc)
 
-    render json: events.map { |e|
-      e.as_json(
-        methods: [:formatted_start_time, :formatted_end_time, :top_artists],
-        include: {
-          venue: {
-            only: [:id, :name, :image_filename, :address, :location, :venue_url, :description, :distance, :serves_alcohol, :venue_type, :additional_images, :bg_color, :font_color, :subheading]
-          },
-          genres: {
-            only: [:id, :name, :hex_color, :font_color, :short_name]
-          }
+  def index
+    events = Event.includes(:genres, :venue, :artists).order(start_time: :asc, end_time: :asc)
+
+    render json: events.as_json(
+      include: {
+        genres: {
+          only: [:id, :name, :short_name, :hex_color, :font_color]
+        },
+        venue: {
+          only: [
+            :id, :name, :image_filename, :address, :location,
+            :venue_url, :description, :distance, :serves_alcohol,
+            :venue_type, :additional_images, :bg_color, :font_color, :subheading
+          ]
         }
-      )
-    }
+      },
+      methods: [:formatted_start_time, :formatted_end_time, :top_artists]
+    )
   end
+
 
 
 

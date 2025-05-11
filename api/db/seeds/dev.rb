@@ -1,4 +1,5 @@
 # Clear existing data to avoid duplicates
+ArtistEvent.destroy_all
 EventAttendee.destroy_all
 User.destroy_all
 Event.destroy_all
@@ -27,7 +28,7 @@ event1 = Event.create!(
   start_time: "2025-05-30 22:00:00",
   end_time: "2025-05-31 04:00:00",
   venue: venue1,
-  genre: techno,
+  genres: [techno, house],
   description: "A night of pure underground techno vibes.",
   event_url: "https://ra.co/events/1",
   source: "RA",
@@ -40,7 +41,7 @@ event2 = Event.create!(
   start_time: "2025-06-15 18:00:00",
   end_time: "2025-06-16 02:00:00",
   venue: venue2,
-  genre: house,
+  genres: [house],
   description: "Experience the best in house music with top DJs.",
   event_url: "https://ra.co/events/2",
   source: "Manual",
@@ -54,11 +55,11 @@ event2.artists << artist2
 event2.artists << artist3
 
 # Create users
-user1 = User.create!(name: "Alice", email: "alice@example.com", password: "password", profile_info: "Techno lover")
-user2 = User.create!(name: "Bob", email: "bob@example.com", password: "password", profile_info: "Hip-Hop enthusiast")
+user1 = User.create!(name: "Alice", username: "alice", email: "alice@example.com", password: "password", profile_info: "Techno lover")
+user2 = User.create!(name: "Bob", username: "alice", email: "bob@example.com", password: "password", profile_info: "Hip-Hop enthusiast")
 
 # Users attending events
 EventAttendee.create!(user: user1, event: event1)
 EventAttendee.create!(user: user2, event: event2)
 
-puts "✅ Seed data added!"
+puts "Seed data added!"

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_05_09_005703) do
+ActiveRecord::Schema[7.2].define(version: 2025_05_11_045137) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -125,6 +125,12 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_09_005703) do
     t.index ["genre_id"], name: "index_events_genres_on_genre_id"
   end
 
+  create_table "examples", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "friendships", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "friend_id", null: false
@@ -202,6 +208,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_09_005703) do
     t.text "description"
     t.integer "distance"
     t.text "additional_images"
+    t.string "hex_color"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"

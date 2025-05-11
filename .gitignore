@@ -35,3 +35,7 @@ client/yarn-error.log*
 # Global
 .DS_Store
 *.log
+
+scripts/
+localhost.pem
+localhost-key.pem

@@ -1,5 +1,6 @@
 env = Rails.env.to_sym
-seed_file = Rails.root.join("db", "seeds", "#{env}.rb")
+filename = env == :development ? "dev.rb" : "#{env}.rb"
+seed_file = Rails.root.join("db", "seeds", filename)
 
 if File.exist?(seed_file)
   puts "Seeding #{env}..."

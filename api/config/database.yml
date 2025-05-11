@@ -21,7 +21,10 @@ staging:
 
 test:
   <<: *default
-  database: <%= ENV.fetch("DB_NAME_TEST") { "mp_test" } %>
+  database: mp_test
+  username: postgres
+  password:
+  host: localhost
 
 production:
   url: <%= ENV["DATABASE_URL"] %>

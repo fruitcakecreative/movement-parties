@@ -3,10 +3,11 @@ require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
 
-  config.hosts << "0668-2601-406-5083-f5d0-10d5-68ad-f764-1f2e.ngrok-free.app"
 
-  config.session_store :cookie_store, key: "_event_app_session"
-  
+  config.ssl_options = { redirect: false }
+
+  config.session_store :cookie_store, key: "_movement_parties_session"
+
   config.enable_reloading = true
 
   # Do not eager load code on boot.

@@ -3,6 +3,7 @@ class Api::UserEventsController < ApplicationController
   before_action :set_event, only: [:create, :destroy]
 
   def index
+    return render json: {}, status: :unauthorized unless current_user
     events = current_user.user_events.includes(:event)
     grouped = events.group_by(&:status).transform_values do |user_events|
       user_events.map do |ue|
