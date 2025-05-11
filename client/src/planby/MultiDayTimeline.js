@@ -1,15 +1,34 @@
-import { useEffect } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { useEpg, Epg, Layout } from "@nessprim/planby-pro";
 import Timeline from "./components/Timeline";
 import ChannelItem from "./components/ChannelItem";
 import ProgramItem from "./components/ProgramItem";
 
 const MultiDayTimeline = ({ date, epg, channels, startDate, endDate, allEvents, modalStack, setModalStack }) => {
-  const isMobile = window.innerWidth < 768;
+  
+  const [dimensions, setDimensions] = useState({
+    isMobile: window.innerWidth < 768,
+    hourWidth: window.innerWidth < 768 ? 35 : 65,
+    itemHeight: window.innerWidth < 768 ? 60 : 90,
+    sidebarWidth: window.innerWidth < 768 ? 65 : 120
+  });
 
-  const hourWidth = isMobile ? 35 : 65;
-  const itemHeight = isMobile ? 60 : 90;
-  const sidebarWidth = isMobile ? 65 : 120;
+  useEffect(() => {
+    const handleResize = () => {
+      const isMobile = window.innerWidth < 768;
+      setDimensions({
+        isMobile,
+        hourWidth: isMobile ? 35 : 65,
+        itemHeight: isMobile ? 60 : 90,
+        sidebarWidth: isMobile ? 65 : 120
+      });
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const { hourWidth, itemHeight, sidebarWidth } = dimensions;
 
   const start = new Date(startDate);
   const end = new Date(endDate);
@@ -56,10 +75,7 @@ const MultiDayTimeline = ({ date, epg, channels, startDate, endDate, allEvents, 
   useEffect(() => {
     if (epg.length === 0) return;
 
-    const firstStart = new Date(
-      Math.min(...epg.map((e) => new Date(e.since)))
-    );
-
+    const firstStart = new Date(Math.min(...epg.map((e) => new Date(e.since))));
     const timelineContainer = document.querySelector("#planby-layout-scrollbox");
 
     if (timelineContainer) {
@@ -68,7 +84,6 @@ const MultiDayTimeline = ({ date, epg, channels, startDate, endDate, allEvents, 
       timelineContainer.scrollTo({ left: scrollX, behavior: "smooth" });
     }
   }, [epg, startDate, hourWidth]);
-
 
   return (
     <div
@@ -98,6 +113,7 @@ const MultiDayTimeline = ({ date, epg, channels, startDate, endDate, allEvents, 
               {...rest}
             />
           )}
+
         />
       </Epg>
     </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ProgramBox,
   ProgramContent,
@@ -6,12 +6,13 @@ import {
 } from "@nessprim/planby-pro";
 import formatVenueName from "../../helpers/formatVenueName";
 import ProgramModal from "./ProgramModal";
-import useFriendAttendees from "../hooks/useFriendAttendees";
+import { useIsMobile } from "../hooks/useIsMobile";
+// import useFriendAttendees from "../hooks/useFriendAttendees";
+
 
 const ProgramItem = ({ program, scrollLeft, ...rest }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { styles } = useProgram({ program, ...rest });
-
   const {
     title,
     short_title,
@@ -26,9 +27,11 @@ const ProgramItem = ({ program, scrollLeft, ...rest }) => {
     venue =[],
   } = program.data;
 
-  const friendAttendees = useFriendAttendees(program.data?.id);
 
-  const isMobile = window.innerWidth < 768;
+  // const friendAttendees = useFriendAttendees(program.data?.id);
+
+  const isMobile = useIsMobile();
+
   const displayTitle = isMobile && short_title ? short_title : title;
 
 
@@ -48,7 +51,6 @@ const ProgramItem = ({ program, scrollLeft, ...rest }) => {
     document.body.style.overflow = '';
     setIsOpen(false);
   };
-
 
   return (
     <>
@@ -126,7 +128,6 @@ const ProgramItem = ({ program, scrollLeft, ...rest }) => {
           isOpen={isOpen}
           onClose={closeModal}
           data={program.data}
-          friends={friendAttendees}
         />
     </>
   );

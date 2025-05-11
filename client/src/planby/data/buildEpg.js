@@ -22,14 +22,15 @@ export function createEpg(events) {
       const isTBA = event.venue.name?.toLowerCase().includes("tba") || event.venue.name?.toLowerCase().includes("secret");
 
       const formatToHourLabel = (dateString) => {
-        const date = new Date(dateString);
-        return date.toLocaleTimeString("en-US", {
-          hour: "numeric",
-          hour12: true,
-        }).toLowerCase().replace(/\s/g, '');
-      }
-
+        const [, timePart] = dateString.split("T");
+        let [hour, minute] = timePart.split(":").map(Number);
+        const ampm = hour >= 12 ? "pm" : "am";
+        hour = hour % 12 || 12;
+        return minute === 0 ? `${hour}${ampm}` : `${hour}:${minute}${ampm}`;
+      };
+      
       let tierLabel = event.ticket_tier ? `– ${event.ticket_tier}` : "";
+
       if (event.ticket_wave) {
         const [current, total] = event.ticket_wave.split(" of ").map(Number);
         if (current === total) tierLabel = "– Final release";
@@ -48,10 +49,15 @@ export function createEpg(events) {
         end_time: formatToHourLabel(event.end_time),
         ticket_label: event.ticket_price === "0.0" ? "FREE" : `$${event.ticket_price}`,
         tier_label: tierLabel,
-        ...(!isTBA && {
-          bg_color: event.venue.bg_color,
-          font_color: event.venue.font_color
-         })
+        ...(isTBA
+            ? {
+                bg_color: event.bg_color || "#fff",
+                font_color: event.font_color || "#111"
+              }
+            : {
+                bg_color: event.venue.bg_color || "#fff",
+                font_color: event.venue.font_color || "#000"
+              })
 
       };
     })

@@ -3,7 +3,7 @@ import formatVenueName from "../../helpers/formatVenueName"
 import UserEventButtons from "../../components/profile/userEventButtons";
 
 
-const EventModal = ({isOpen, onClose, data, friends}) => {
+const EventModal = ({isOpen, onClose, data}) => {
 
     const {
       id,
@@ -22,6 +22,8 @@ const EventModal = ({isOpen, onClose, data, friends}) => {
       top_artists = [],
       venue =[],
     } = data;
+
+    const friends = [];
 
   return (
 

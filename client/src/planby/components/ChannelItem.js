@@ -33,31 +33,8 @@ const ChannelItem = ({ channel, allEvents, modalStack, setModalStack }) => {
   }, {});
 
   const openVenueModal = () => {
-    let event;
-        if (location_tba && eventsAtVenue.length > 1) {
-          event = eventsAtVenue.find((e) =>
-            channelTitle === e.title || channelTitle === e.short_title
-          ) || eventsAtVenue[0];
-        } else {
-          event = eventsAtVenue[0];
-        }
 
-    if (location_tba && event) {
-      document.body.style.overflow = 'hidden';
-      setModalStack(prev => [
-        ...prev,
-        {
-          isOpen: true,
-          header: <h2 style={{ color: font_color }}>{event.title}</h2>,
-          onClose: () => {
-            setModalStack(prev => prev.slice(0, -1));
-            document.body.style.overflow = '';
-          },
-          innerStyle: { borderColor: bg_color, scrollBarColor: bg_color },
-          topRowStyle: { borderColor: bg_color, backgroundColor: bg_color, color: font_color },
-          children: <EventModalStandalone event={event} venueHex={bg_color} fontHex={font_color} />,
-        },
-      ]);
+    if (location_tba) {
       return;
     }
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { fetchEvents } from "../services/api";
 import { createChannels } from "../planby/data/buildChannels";
@@ -41,6 +41,7 @@ function Events({ modalStack, setModalStack }) {
 
   const dates = Object.keys(customDateRanges);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchEvents()
     .then((data) => {
@@ -78,7 +79,8 @@ function Events({ modalStack, setModalStack }) {
         console.error("Error fetching events:", error);
         setIsLoaded(true);
       });
-  }, [dates]);
+  // eslint-disable-next-line
+    }, []);
 
 
 
