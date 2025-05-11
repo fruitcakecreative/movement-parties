@@ -1,4 +1,4 @@
-require 'middleware/metrics_authentication'
+require Rails.root.join("app/middleware/metrics_authentication")
 
 Rails.application.routes.draw do
   mount MetricsAuthentication.new(Yabeda::Prometheus::Exporter), at: "/metrics"
