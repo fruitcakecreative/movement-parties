@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
+  mount PrometheusExporter::Middleware::Exporter, at: '/metrics'
 
   namespace :api do
     post 'users/create_from_facebook', to: 'users#create_from_facebook'
@@ -39,7 +40,5 @@ Rails.application.routes.draw do
     delete 'api/logout', to: 'api/users/sessions#destroy'
   end
 
-  mount PrometheusExporter::Server::WebCollector.new, at: '/metrics'
-  
   get "up" => "rails/health#show", as: :rails_health_check
 end
