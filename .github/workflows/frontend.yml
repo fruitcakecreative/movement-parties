@@ -25,13 +25,15 @@ jobs:
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.NODE_AUTH_TOKEN }}" >> ~/.npmrc
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: |
+        cd client
+        npm install --legacy-peer-deps
         working-directory: ./client
 
       - name: Run ESLint
         run: npx eslint .
         working-directory: ./client
-        
+
       - name: Run tests
         run: npm test --
         working-directory: ./client
