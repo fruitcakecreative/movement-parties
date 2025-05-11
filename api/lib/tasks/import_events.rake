@@ -1,18 +1,28 @@
-namespace :import do
-  desc "Import events from latest JSON file"
-  task events: :environment do
-    require 'json'
+require "aws-sdk-s3"
+require "json"
 
-    files = Dir.glob(Rails.root.join("db/events_*.json"))
+namespace :import do
+  desc "Import events from latest S3 JSON file"
+  task from_s3: :environment do
+    bucket = "movement-parties-events-data"
+    prefix = "events/"
+
+    s3 = Aws::S3::Client.new(region: "us-east-1")
+
+    files = s3.list_objects_v2(bucket: bucket, prefix: prefix).contents
     if files.empty?
-      puts "No JSON files found!"
+      puts "No S3 JSON files found!"
       exit
     end
 
-    latest_file = files.max_by { |f| File.mtime(f) }
-    puts "Importing from #{latest_file}"
+    latest_file = files.max_by(&:last_modified)
+    filename = latest_file.key
+    puts "Downloading latest file: #{filename}"
 
-    events = JSON.parse(File.read(latest_file))
+    temp_path = "/tmp/#{filename.split('/').last}"
+    s3.get_object(bucket: bucket, key: filename, response_target: temp_path)
+
+    events = JSON.parse(File.read(temp_path))
 
     skip_urls = [
       "https://ra.co/events/2136172",
@@ -82,6 +92,6 @@ namespace :import do
       end
     end
 
-    puts "Finished importing events from #{latest_file}"
+    puts "✅ Finished importing #{events.size} events from #{filename}"
   end
 end
