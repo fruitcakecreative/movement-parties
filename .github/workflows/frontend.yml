@@ -19,8 +19,10 @@ jobs:
         with:
           node-version: 18
 
-      - name: Set up .npmrc for GitHub Packages
-        run: echo "@nessprim:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=${{ secrets.NODE_AUTH_TOKEN }}" > ~/.npmrc
+      - name: Auth to GitHub Package Registry
+        run: |
+          echo "@nessprim:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.NODE_AUTH_TOKEN }}" >> ~/.npmrc
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps
