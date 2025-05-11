@@ -1,6 +1,8 @@
+require 'prometheus_exporter/exporter'
+
 Rails.application.routes.draw do
   mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
-  mount PrometheusExporter::Middleware::Exporter, at: '/metrics'
+  mount PrometheusExporter::Exporter, at: '/metrics'
 
   namespace :api do
     post 'users/create_from_facebook', to: 'users#create_from_facebook'
