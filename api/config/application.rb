@@ -13,7 +13,7 @@ module MovementParties
     config.middleware.use ActionDispatch::Cookies
     config.middleware.use ActionDispatch::Flash
     config.middleware.use Rack::MethodOverride
-
+    config.middleware.use PrometheusExporter::Middleware
     config.middleware.use ActionDispatch::Session::CookieStore,
       key: "_movement_parties_session",
       same_site: Rails.env.production? ? :none : :lax,
