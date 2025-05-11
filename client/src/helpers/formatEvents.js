@@ -16,7 +16,7 @@ export function formatEvents(rawData, targetDate = "2025-05-25") {
   const eventsData = filteredEvents.map(event => {
     if (!venues[event.venue.id]) {
       venues[event.venue.id] = {
-        uuid: event.venue.id.toString();
+        uuid: event.venue.id.toString(),
       };
     }
     return {

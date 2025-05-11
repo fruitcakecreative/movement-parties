@@ -1,5 +1,4 @@
 import React from "react";
-import { ProgramBox, ProgramContent } from "@nessprim/planby-pro";
 
 const EventModalView = ({ event }) => {
   const {
