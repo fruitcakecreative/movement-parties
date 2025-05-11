@@ -1,7 +1,15 @@
 
 Rails.application.routes.draw do
   mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
-  mount Yabeda::Prometheus::Exporter => '/metrics'
+
+  constraints lambda { |request|
+    ActionController::HttpAuthentication::Basic.authenticate(request) do |username, password|
+      ActiveSupport::SecurityUtils.secure_compare(username, ENV['METRICS_USERNAME']) &
+        ActiveSupport::SecurityUtils.secure_compare(password, ENV['METRICS_PASSWORD'])
+    end
+  } do
+    mount Yabeda::Prometheus::Exporter => '/metrics'
+  end
 
   namespace :api do
     post 'users/create_from_facebook', to: 'users#create_from_facebook'
