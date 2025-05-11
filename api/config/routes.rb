@@ -2,8 +2,6 @@
 Rails.application.routes.draw do
   mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
 
-  get "/metrics", to: "metrics#index"
-
   namespace :api do
     post 'users/create_from_facebook', to: 'users#create_from_facebook'
     get "user_events/:event_id/friend_attendees", to: "user_events#friend_attendees"
