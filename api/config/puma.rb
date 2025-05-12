@@ -12,7 +12,7 @@ plugin :tmp_restart
 pidfile ENV["PIDFILE"] if ENV["PIDFILE"]
 
 # add certs for local https testing
-if Rails.env.development?
+if ENV["RAILS_ENV"] == "development"
   ssl_bind '127.0.0.1', '3001', {
     key: 'localhost-key.pem',
     cert: 'localhost.pem'
