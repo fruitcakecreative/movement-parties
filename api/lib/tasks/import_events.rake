@@ -94,6 +94,7 @@ namespace :import do
       end
 
       puts "Finished importing #{events.size} events from #{filename}"
+      Honeybadger.notify("Import succeeded: #{events.size} events from #{filename}")
     rescue => e
       Honeybadger.notify(e)
       raise e
