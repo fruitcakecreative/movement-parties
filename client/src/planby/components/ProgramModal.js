@@ -5,7 +5,6 @@ import formatVenueName from "../../helpers/formatVenueName"
 const EventModal = ({isOpen, onClose, data}) => {
 
     const {
-      id,
       title,
       start_time,
       end_time,

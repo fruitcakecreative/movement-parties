@@ -5,8 +5,6 @@ import EventModalStandalone from "../../components/EventModalStandalone";
 
 const ChannelItem = ({ channel, allEvents, modalStack, setModalStack }) => {
   const {
-    uuid,
-    title,
     position,
     logo,
     name,
@@ -85,7 +83,7 @@ const ChannelItem = ({ channel, allEvents, modalStack, setModalStack }) => {
                         }}
                       />
                     );
-                  })}                  
+                  })}
                 </div>
               ))}
             </div>
