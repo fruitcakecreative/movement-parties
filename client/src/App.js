@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import './App.scss';
+import './styles/App.scss';
 import Events from './pages/events';
 import Layout from './layout';
-
 
 function App() {
   const [modalStack, setModalStack] = useState([]);
@@ -11,12 +10,12 @@ function App() {
   return (
     <Router>
       <Routes>
-         <Route element={<Layout />}>
-            <Route
-              path="/"
-              element={<Events modalStack={modalStack} setModalStack={setModalStack} />}
-            />
-          </Route>
+        <Route element={<Layout />}>
+          <Route
+            path="/"
+            element={<Events modalStack={modalStack} setModalStack={setModalStack} />}
+          />
+        </Route>
       </Routes>
     </Router>
   );

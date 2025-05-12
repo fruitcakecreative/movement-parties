@@ -26,6 +26,8 @@
   "scripts": {
     "start": "react-scripts start",
     "test": "NODE_PATH=./node_modules react-scripts test",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write .",
     "eject": "react-scripts eject",
     "build": "sentry-cli releases new $REACT_APP_RELEASE --org fruitcakecreative --project movement-parties-react-client && react-scripts build && yarn sentry:sourcemaps",
     "sentry:sourcemaps": "sentry-cli releases files $REACT_APP_RELEASE upload-sourcemaps ./build --rewrite --url-prefix '~/static' --org fruitcakecreative --project movement-parties-react-client"
@@ -54,10 +56,13 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "babel-jest": "^29.7.0",
+    "husky": "^9.1.7",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
+    "lint-staged": "^16.0.0",
     "node-fetch": "^2.7.0",
+    "prettier": "^3.5.3",
     "sass": "^1.85.1",
     "util": "^0.12.5",
     "whatwg-url": "^14.2.0"
@@ -66,5 +71,10 @@
     "transformIgnorePatterns": [
       "/node_modules/(?!axios)/"
     ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-push": "yarn test && yarn eslint . && yarn format && if [ \"$NODE_ENV\" = \"production\" ]; then yarn build; else echo 'Skipping full build'; fi"
+    }
   }
 }

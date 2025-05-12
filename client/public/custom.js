@@ -1,5 +1,5 @@
 function runCustomScript() {
-  console.log("ready");
+  console.log('ready');
 }
 
 if (document.readyState !== 'loading') {
