@@ -4,7 +4,7 @@ import MainHeader from './components/MainHeader';
 
 const Layout = () => (
   <>
-    <Header />
+    <MainHeader />
     <main>
       <Outlet />
     </main>
