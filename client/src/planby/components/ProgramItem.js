@@ -7,7 +7,6 @@ import {
 import formatVenueName from "../../helpers/formatVenueName";
 import ProgramModal from "./ProgramModal";
 import { useIsMobile } from "../hooks/useIsMobile";
-// import useFriendAttendees from "../hooks/useFriendAttendees";
 
 
 const ProgramItem = ({ program, scrollLeft, ...rest }) => {
@@ -26,9 +25,6 @@ const ProgramItem = ({ program, scrollLeft, ...rest }) => {
     top_artists = [],
     venue =[],
   } = program.data;
-
-
-  // const friendAttendees = useFriendAttendees(program.data?.id);
 
   const isMobile = useIsMobile();
 
@@ -86,7 +82,7 @@ const ProgramItem = ({ program, scrollLeft, ...rest }) => {
               <p className="hide-m top-artists"><i className="fa-solid fa-headphones"></i>&nbsp;
                 {top_artists.length > 0
                   ? top_artists.map((artist, i) => (
-                      <span key={i} className="artist-name">
+                      <span key={`${artist.id}-${i}`} className="artist-name">
                         {artist.name}{i < top_artists.length - 1 ? ', ' : ''}
                       </span>
                     ))
@@ -95,7 +91,7 @@ const ProgramItem = ({ program, scrollLeft, ...rest }) => {
               <p className="genre-tags">
                 {genres.map((genre, i) => (
                   <span
-                    key={i}
+                    key={genre.id}
                     className="genre-pill"
                     style={{
                       backgroundColor: genre.hex_color || "#ccc",

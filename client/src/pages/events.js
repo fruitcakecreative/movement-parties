@@ -90,9 +90,7 @@ function Events({ modalStack, setModalStack }) {
       <div className="heading" style={{ textAlign: "center", margin: "20px 0" }}>
         <div className="info-con">
             <p className="bio">
-              <b>Hellurrr, friends. My name is Carly.</b> <br></br>You may have seen one of my party timeline spreadsheets before.
-              Aside from being a Detriot local,  avid party-goer, and spreadsheet Queen... I am also a web developer.
-              <br></br>I am recently unemployed so I decided to upgrade the party timeline to a website this year.
+              <b>Welcome to MovementParties.com<i className="fa-regular fa-heart"></i></b> <br></br>
             </p>
             <p className="mini-heading">
               Relevant Info <i className="fa-solid fa-circle-info"></i>
@@ -107,9 +105,6 @@ function Events({ modalStack, setModalStack }) {
                 <li>
                   You can click on both events on the timline and venues on the left for more information.
                   I am still updating all the venue info so be patient with me there <i className="fa-regular fa-heart"></i>
-                </li>
-                <li>
-                  PLEASE NO HATE ABOUT THE GENRES! I am just a girl. If you would like to offer your services and help with assigning genres to each party I will gladly accept.
                 </li>
             </ul>
 
@@ -127,7 +122,7 @@ function Events({ modalStack, setModalStack }) {
               Support the Cause <i className="fa-solid fa-handshake-angle"></i>
             </p>
             <p className="pay-me-blurb">I made this out of pure love for the party and expect nothing in return. But, I do pay for the domain, server and software costs.
-              If you'd like to show your unemployed techno compadre some love or buy me a drink for my efforts, I wouldn't mind <i className="fa-regular fa-heart"></i>
+              If you'd like to show me some love or buy me a coffee for my efforts, I wouldn't mind <i className="fa-regular fa-heart"></i>
             </p>
             <div className="pay-me">
               <a target="_blank" rel="noreferrer" href="https://venmo.com/u/CarlyMarsh7">Venmo</a>

@@ -56,7 +56,7 @@ const MultiDayTimeline = ({ date, epg, channels, startDate, endDate, allEvents, 
         const existing = cornerBox.querySelector(`.corner-label-${date}`);
         if (!existing) {
           const label = document.createElement("div");
-          label.className = `my-custom-label corner-label-${date}`;
+          label.className = `corner-label corner-label-${date}`;
           label.innerText = new Date(`${date}T12:00:00`).toLocaleDateString("en-US", {
             weekday: "short",
             month: "short",
@@ -95,6 +95,7 @@ const MultiDayTimeline = ({ date, epg, channels, startDate, endDate, allEvents, 
           renderTimeline={(props) => <Timeline {...props} />}
           renderChannel={({ channel }) => (
             <ChannelItem
+              key={channel.uuid || channel.name}
               channel={channel}
               allEvents={allEvents}
               modalStack={modalStack}
@@ -103,7 +104,7 @@ const MultiDayTimeline = ({ date, epg, channels, startDate, endDate, allEvents, 
           )}
           renderProgram={({ program, ...rest }) => (
             <ProgramItem
-              key={program.id}
+              key={`${program.id || program.title || Math.random()}`}
               program={{
                 ...program,
                 hourWidth,

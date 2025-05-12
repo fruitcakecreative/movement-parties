@@ -1,6 +1,5 @@
 import ModalLayout from "../../components/ModalLayout";
 import formatVenueName from "../../helpers/formatVenueName"
-import UserEventButtons from "../../components/profile/userEventButtons";
 
 
 const EventModal = ({isOpen, onClose, data}) => {
@@ -43,7 +42,7 @@ const EventModal = ({isOpen, onClose, data}) => {
       <p className="time"><i className="fa-solid fa-clock"></i> {start_time}-{end_time}</p>
       <p className="tickets">
         <span className="emoji"><i className="fa-solid fa-ticket"></i></span> {ticket_label}
-        <span className="tier"> {ticket_tier}</span>
+        <span className="tier"> — {ticket_tier}</span>
       </p>
 
       {event_age && (
@@ -51,8 +50,6 @@ const EventModal = ({isOpen, onClose, data}) => {
             <i className="fa-solid fa-id-card"></i> {event_age}
           </p>
         )}
-
-        <UserEventButtons eventId={id} bgColor={bg_color} fontColor={font_color} />
 
     {friends.length > 0 && (
       <p><i className="fa-solid fa-people-group"></i> Friends Attending: &nbsp;

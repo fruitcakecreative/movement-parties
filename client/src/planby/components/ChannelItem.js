@@ -5,6 +5,8 @@ import EventModalStandalone from "../../components/EventModalStandalone";
 
 const ChannelItem = ({ channel, allEvents, modalStack, setModalStack }) => {
   const {
+    uuid,
+    title,
     position,
     logo,
     name,
@@ -62,25 +64,28 @@ const ChannelItem = ({ channel, allEvents, modalStack, setModalStack }) => {
               {Object.entries(groupedByDay).map(([day, events]) => (
                 <div key={day} className="group-day">
                   <h5>{day}</h5>
-                  {events.map((event, i) => (
-                    <MiniProgramBox
-                      key={i}
-                      event={event}
-                      onClick={() => {
-                        setModalStack(prev => [
-                          ...prev,
-                          {
-                            isOpen: true,
-                            header: <h2>{event.title}</h2>,
-                            onClose: () => setModalStack(prev => prev.slice(0, -1)),
-                            innerStyle: { borderColor: bg_color, scrollBarColor: bg_color },
-                            topRowStyle: { borderColor: bg_color, backgroundColor: bg_color, color: font_color },
-                            children: <EventModalStandalone event={event} venueHex={bg_color} />,
-                          },
-                        ]);
-                      }}
-                    />
-                  ))}
+                  {events.map((event, i) => {
+                    const uniqueKey = event.uuid || event.title || `${day}-${i}`;
+                    return (
+                      <MiniProgramBox
+                        key={uniqueKey}
+                        event={event}
+                        onClick={() => {
+                          setModalStack(prev => [
+                            ...prev,
+                            {
+                              isOpen: true,
+                              header: <h2>{event.title}</h2>,
+                              onClose: () => setModalStack(prev => prev.slice(0, -1)),
+                              innerStyle: { borderColor: bg_color, scrollBarColor: bg_color },
+                              topRowStyle: { borderColor: bg_color, backgroundColor: bg_color, color: font_color },
+                              children: <EventModalStandalone event={event} venueHex={bg_color} />,
+                            },
+                          ]);
+                        }}
+                      />
+                    );
+                  })}                  
                 </div>
               ))}
             </div>

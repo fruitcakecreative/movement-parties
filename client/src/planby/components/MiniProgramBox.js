@@ -44,7 +44,6 @@ const MiniProgramBox = ({ event, onClick }) => {
   }
 
 
-
   return (
     <div onClick={onClick} style={{ cursor: "pointer" }}>
       <div className="party-box">

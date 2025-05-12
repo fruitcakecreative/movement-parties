@@ -1,6 +1,6 @@
 $black: #0D0D0D;
 
-$white: #F9F9F9;
+$white: #fdfdfd;
 
 $pink: #FF69B4;
 
@@ -14,12 +14,15 @@ $purple: #9C27B0;
 
 
 .hide { display: none !important;}
+
+
 .m-hide {
   display: none;
     @media (min-width: 768px) {
       display: inline-block;
     }
 }
+
 .d-hide {
   @media (min-width: 768px) {
     display: none;
@@ -29,6 +32,7 @@ $purple: #9C27B0;
 html, body {
   overscroll-behavior-x: none;
 }
+
 
 .page-con {
   padding: 20px;
@@ -137,6 +141,7 @@ form {
     }
   }
 }
+
 .main-title {
   margin-bottom: 5px;
   font-size: 1.6em;
@@ -219,7 +224,7 @@ form {
       justify-content: center;
       text-decoration: none;
       column-gap: 5px;
-      color: $white;
+      color: $black;
       i {
         color: $blue;
         font-size: 1.5em;
@@ -231,8 +236,8 @@ form {
   }
   .pay-me {
     a {
-      background-color: $green;
-      color: $black;
+      background-color: $orange;
+      color: $white;
       width: 90px;
       padding: 3px;
       border-radius: 5px;
@@ -248,7 +253,7 @@ form {
     }
   }
   .etrans {
-    color: $green;
+    color: $orange;
     font-size: 1.2em;
     font-weight: bold;
   }
@@ -265,7 +270,8 @@ form {
     padding: 5px;
 }
 
-.my-custom-label {
+.corner-label {
+  color: $white;
   white-space: normal;
   font-size: 18px;
   line-height: 17px;
@@ -514,6 +520,7 @@ form {
     margin-bottom: 50px;
     @media (min-width: 768px) {
       width: calc(100vw - 100px);
+      max-width: 900px;
     }
     .top-row {
       height: 80px;
@@ -528,6 +535,8 @@ form {
       margin-top: -1px;
       @media (min-width: 768px) {
         width: calc(100% - 140px);
+        max-width: 864px;
+        margin-left: -1px;
       }
       h3 {
         margin: 0;
@@ -620,7 +629,6 @@ form {
 
 
 .planby {
-  // border: 1px solid pink;
   padding-left:25px !important;
   padding-right: 25px !important;
   width: calc(100% - 50px) !important;
@@ -628,13 +636,12 @@ form {
   @media (max-width: 768px) {
     padding-left:10px !important;
     padding-right: 10px !important;
-    width: calc(100% - 40px) !important;
+    width: calc(100% - 55px) !important;
     max-height: calc(100dvh - 120px) !important;
     margin: 0 auto;
   }
   #planby-wrapper {
-    // border: 1px solid orange;
-    border: 2px solid $white;
+    border: 2px solid $black;
     max-height: calc(100dvh - 120px);
     margin: 0 auto;
     .planby-corner-box {
@@ -755,9 +762,22 @@ form {
         }
 
 
-        .detroiteagle .party-content, .halobarandlounge .party-content {
+        .halobarandlounge .party-content {
           border: 4px solid transparent !important;
   background: linear-gradient(rgb(255, 102, 207), rgb(255, 102, 207)) padding-box,
+              linear-gradient(to right,
+                #e40303,
+                #ff8c00,
+                #ffed00,
+                #008026,
+                #004dff,
+                #750787,
+              ) border-box !important;
+        }
+
+        .detroiteagle .party-content {
+          border: 4px solid transparent !important;
+  background: linear-gradient(#e40303, #e40303) padding-box,
               linear-gradient(to right,
                 #e40303,
                 #ff8c00,
@@ -914,6 +934,7 @@ form {
     .modal-outer  {
       margin: 0 auto;
       width: calc(100vw - 50px);
+      max-width: 910px;
       height: 70vh;
       border-radius: 10px;
       background: linear-gradient(
@@ -977,6 +998,7 @@ form {
     .modal-outer  {
       margin: 0 auto;
       width: calc(100vw - 50px);
+      max-width: 910px;
       height: 70vh;
       border-radius: 10px;
       background: linear-gradient(135deg,
@@ -1107,9 +1129,9 @@ form {
 //dropdown date menu
 .dropdown-btn {
   padding: 8px 12px;
-    background: $black;
-    color: $white;
-    border: 2px solid $white;
+    background: $white;
+    color: $black;
+    border: 2px solid $black;
     border-radius: 6px;
     width: calc(100vw - 80px);
     margin: 0 auto;
@@ -1128,9 +1150,9 @@ form {
 background: $white;
 border-radius: 6px;
 overflow: hidden;
-border: 2px solid $white;
-width: calc(100% - 45px);
-margin-left: 20px;
+border: 2px solid $black;
+width: calc(100% - 55px);
+margin-left: 25px;
   @media (min-width: 768px) {
     margin-left: 30px;
     width: calc(100% - 62px);
