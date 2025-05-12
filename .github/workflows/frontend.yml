@@ -29,8 +29,8 @@ jobs:
 
       - name: Auth to GitHub Package Registry
         run: |
-          echo "@nessprim:registry=https://npm.pkg.github.com" >> ~/.yarnrc
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.NODE_AUTH_TOKEN }}" >> ~/.yarnrc
+          echo "@nessprim:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.NODE_AUTH_TOKEN }}" >> ~/.npmrc
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
