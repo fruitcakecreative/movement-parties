@@ -55,3 +55,5 @@ gem "devise", "~> 4.9"
 gem "omniauth-facebook", "~> 10.0"
 
 gem "rspec-rails", "~> 8.0", :groups => [:development, :test]
+
+gem "honeybadger", "~> 5.28"

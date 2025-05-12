@@ -46,6 +46,7 @@ function Events({ modalStack, setModalStack }) {
     fetchEvents()
     .then((data) => {
         const grouped = {};
+        console.log(data);
         dates.forEach((date) => {
           grouped[date] = data.filter((event) =>
             event.formatted_start_time?.startsWith(date)
