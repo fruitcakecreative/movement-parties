@@ -17,4 +17,6 @@ echo "Release: $APP_RELEASE"
 
 bundle exec honeybadger deploy \
   --environment="$RAILS_ENV" \
-  --revision="$APP_RELEASE"
+  --revision="$APP_RELEASE" \
+  --repository="https://github.com/fruitcakecreative/movement-parties" \
+  --user="$(whoami)"
