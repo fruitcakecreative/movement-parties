@@ -23,6 +23,7 @@ jobs:
         with:
           node-version: 20
           cache: yarn
+          cache-dependency-path: client/yarn.lock
 
       - name: Auth to GitHub Package Registry
         run: |
