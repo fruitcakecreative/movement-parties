@@ -25,10 +25,10 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "sentry-cli releases new $REACT_APP_RELEASE --org fruitcakecreative --project movement-parties-react-client && react-scripts build && yarn sentry:sourcemaps",
     "test": "NODE_PATH=./node_modules react-scripts test",
     "eject": "react-scripts eject",
-    "sentry:sourcemaps": "sentry-cli releases files $REACT_APP_RELEASE upload-sourcemaps ./build --rewrite --url-prefix '~/static'"
+    "build": "sentry-cli releases new $REACT_APP_RELEASE --org fruitcakecreative --project movement-parties-react-client && react-scripts build && yarn sentry:sourcemaps",
+    "sentry:sourcemaps": "sentry-cli releases files $REACT_APP_RELEASE upload-sourcemaps ./build --rewrite --url-prefix '~/static' --org fruitcakecreative --project movement-parties-react-client"
   },
   "eslintConfig": {
     "extends": [
