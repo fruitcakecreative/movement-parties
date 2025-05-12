@@ -13,6 +13,11 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+        
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
 
       - name: Auth to GitHub Package Registry
         run: |
@@ -23,11 +28,6 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
         working-directory: ./client
-
-      - name: Set up Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
 
       - name: Verify react-router-dom installation
         run: ls node_modules/react-router-dom
