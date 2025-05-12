@@ -12,8 +12,8 @@ if [ -z "$RAILS_ENV" ]; then
 fi
 
 echo "Notifying Honeybadger of deploy:"
-echo "  ➤ Environment: $RAILS_ENV"
-echo "  ➤ Release: $APP_RELEASE"
+echo "Environment: $RAILS_ENV"
+echo "Release: $APP_RELEASE"
 
 bundle exec honeybadger deploy \
   --environment="$RAILS_ENV" \
