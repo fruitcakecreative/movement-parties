@@ -2,7 +2,10 @@ require Rails.root.join("app/middleware/metrics_authentication")
 
 Rails.application.routes.draw do
   mount MetricsAuthentication.new(Yabeda::Prometheus::Exporter), at: "/metrics"
-  mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
+
+  authenticate :user, ->(u) { u.admin? } do
+    mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
+  end
 
   namespace :api do
     post "logs", to: "logs#create"
