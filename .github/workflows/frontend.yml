@@ -1,0 +1,49 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main, staging]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+
+    defaults:
+      run:
+        working-directory: ./client
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: yarn
+          cache-dependency-path: client/yarn.lock
+
+      - name: Auth to GitHub Package Registry
+        run: |
+          echo "@nessprim:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.NODE_AUTH_TOKEN }}" >> ~/.npmrc
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Lint code
+        run: yarn eslint .
+
+      - name: Run tests
+        run: yarn test --ci --watchAll=false
+
+      - name: Build app (optional)
+        run: yarn build
+        env:
+          REACT_APP_RELEASE: ${{ github.ref_name == 'main' && 'movement-parties@production' || format('movement-parties@{0}', github.ref_name) }}
+          SENTRY_ENV: ${{ github.ref_name == 'main' && 'production' || github.ref_name }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
