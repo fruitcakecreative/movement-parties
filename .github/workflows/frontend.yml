@@ -43,3 +43,5 @@ jobs:
 
       - name: Build app (optional)
         run: yarn build
+        env:
+          REACT_APP_RELEASE=movement-parties@${{ github.ref_name }}
