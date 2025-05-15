@@ -1,29 +1,32 @@
 class Api::EventsController < ApplicationController
   before_action :set_event, only: [:show, :update, :destroy]
 
-
   def index
-    events = Event.includes(:genres, :venue, :artists).order(start_time: :asc, end_time: :asc)
+    cache_key = "events-v1"
 
-    render json: events.as_json(
-      include: {
-        genres: {
-          only: [:id, :name, :short_name, :hex_color, :font_color]
-        },
-        venue: {
-          only: [
-            :id, :name, :image_filename, :address, :location,
-            :venue_url, :description, :distance, :serves_alcohol,
-            :venue_type, :additional_images, :bg_color, :font_color, :subheading
-          ]
-        }
-      },
-      methods: [:formatted_start_time, :formatted_end_time, :top_artists]
-    )
+    events = Rails.cache.fetch(cache_key, expires_in: 5.minutes) do
+      Event.includes(:genres, :venue, :artists)
+           .order(start_time: :asc, end_time: :asc)
+           .as_json(
+             include: {
+               genres: {
+                 only: [:id, :name, :short_name, :hex_color, :font_color]
+               },
+               venue: {
+                 methods: [:logo_url],
+                 only: [
+                   :id, :name, :image_filename, :address, :location,
+                   :venue_url, :description, :distance, :serves_alcohol,
+                   :venue_type, :additional_images, :bg_color, :font_color, :subheading
+                 ]
+               }
+             },
+             methods: [:formatted_start_time, :formatted_end_time, :top_artists]
+           )
+    end
+
+    render json: { events: events }
   end
-
-
-
 
   def formatted_start_time
     start_time&.iso8601

@@ -16,6 +16,8 @@ export const fetchEvents = async () => {
   return response.data;
 };
 
+
+
 //login/logout
 export const userLogin = async (credentials) => {
   const response = await api.post('/login', { user: credentials });
