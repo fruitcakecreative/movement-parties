@@ -32,6 +32,7 @@ client/npm-debug.log*
 client/yarn-debug.log*
 client/yarn-error.log*
 client/.sentryclirc
+client/.npmrc.local
 
 # Global
 .DS_Store

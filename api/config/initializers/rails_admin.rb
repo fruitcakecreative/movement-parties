@@ -22,7 +22,7 @@ RailsAdmin.config do |config|
       items_per_page 50
       sort_by :start_time
     end
-    
+
   edit do
     field :title
     field :manual_override_title, :boolean
@@ -45,6 +45,7 @@ RailsAdmin.config do |config|
       help "Comma-separated list of artist names to manually add"
     end
     field :manual_override_artists, :boolean
+    field :logo, :active_storage
     field :description
     field :bg_color do
       partial 'color_picker'
@@ -82,6 +83,7 @@ end
       field :name
       field :location
       field :image_filename
+      field :logo, :active_storage
       field :venue_url
       field :address
       field :description

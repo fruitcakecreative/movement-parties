@@ -55,8 +55,8 @@ event2.artists << artist2
 event2.artists << artist3
 
 # Create users
-user1 = User.create!(name: "Alice", username: "alice", email: "alice@example.com", password: "password", profile_info: "Techno lover")
-user2 = User.create!(name: "Bob", username: "alice", email: "bob@example.com", password: "password", profile_info: "Hip-Hop enthusiast")
+user1 = User.create!(name: "Alice", username: "alice", email: "alice@example.com", password: "password", profile_info: "Techno lover", admin: true)
+user2 = User.create!(name: "Bob", username: "bob", email: "bob@example.com", password: "password", profile_info: "Hip-Hop enthusiast")
 
 # Users attending events
 EventAttendee.create!(user: user1, event: event1)

@@ -44,23 +44,24 @@ function Events({ modalStack, setModalStack }) {
   useEffect(() => {
     fetchEvents()
       .then((data) => {
+        console.log("Fetched data:", data);
         const grouped = {};
-        console.log(data);
+        const eventList = data.events || [];
         dates.forEach((date) => {
-          grouped[date] = data.filter((event) => event.formatted_start_time?.startsWith(date));
+          grouped[date] = eventList.filter((event) => event.formatted_start_time?.startsWith(date));
         });
         setEventsByDate(grouped);
-        setAllEvents(data);
+        setAllEvents(eventList);
 
         const genresFromEvents = Array.from(
-          new Set(data.flatMap((event) => event.genres.map((g) => g.name)))
+          new Set(eventList.flatMap((event) => event.genres.map((g) => g.name)))
         ).sort();
 
         setGenreOptions(genresFromEvents);
 
         const allArtists = Array.from(
           new Set(
-            data.flatMap((event) => (event.artists || event.top_artists || []).map((a) => a.name))
+            eventList.flatMap((event) => (event.artists || event.top_artists || []).map((a) => a.name))
           )
         ).sort();
 

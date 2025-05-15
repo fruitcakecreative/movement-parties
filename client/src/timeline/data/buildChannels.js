@@ -12,7 +12,7 @@ export function createChannels(epg) {
       name: event.location_tba ? event.short_title || event.title : venue.name,
       title: event.short_title || event.title || venue.name,
       short_name: event.even_shorter_title,
-      logo: venue.image_filename,
+      logo: venue.logo_url || null,
       subheading: event.location_tba ? 'Location TBA' : venue.venue_subheading,
       tba_class: event.location_tba ? 'tba' : '',
       location_tba: event.location_tba,
@@ -21,6 +21,7 @@ export function createChannels(epg) {
       address: venue.adresss,
       location: venue.location,
     };
+
 
     venues[uuid] = channel;
 

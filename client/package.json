@@ -25,6 +25,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "start:local": "NODE_AUTH_TOKEN=$(cat .env | grep NODE_AUTH_TOKEN | cut -d '=' -f2) yarn start",
     "test": "NODE_PATH=./node_modules react-scripts test",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",

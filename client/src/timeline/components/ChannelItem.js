@@ -49,7 +49,9 @@ const ChannelItem = ({ channel, allEvents, modalStack, setModalStack }) => {
         header: (
           <div className="venue-logo-name">
             <div className="venue-logo">
-              <img alt="venue logo" src={`/images/${logo}`} />
+            {logo && (
+              <img alt="venue logo" src={logo} />
+            )}
             </div>
             <div className="venue-name">
               <h3 style={{ color: bg_color }}>{name}</h3>
@@ -110,7 +112,7 @@ const ChannelItem = ({ channel, allEvents, modalStack, setModalStack }) => {
         <div className="channel-box-inner" style={{ borderColor: bg_color }}>
           {logo ? (
             <ChannelLogo
-              src={`/images/${logo}`}
+              src={logo}
               alt={name}
               className="venue-logo"
               style={subheading ? { height: '50%' } : {}}
