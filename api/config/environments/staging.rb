@@ -5,7 +5,8 @@ Rails.application.configure do
   # Code is not reloaded between requests.
   config.enable_reloading = false
 
-  config.hosts << "movement-parties.onrender.com"
+  config.hosts << "movement-parties-1.onrender.com"
+  config.hosts << "stagingapi.movementparties.com"
   config.log_level = "debug"
   config.force_ssl = false
 
