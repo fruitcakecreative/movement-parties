@@ -96,7 +96,7 @@ end
         end
       end
       field :subheading
-      field :hex_color do
+      field :bg_color do
         partial 'color_picker'
       end
       field :font_color do
