@@ -7,12 +7,16 @@ import * as Sentry from '@sentry/react';
 import reportWebVitals from './setup/reportWebVitals';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-    <div id="modal-root"></div>
-  </React.StrictMode>
-);
+Sentry.startSpan({ name: 'pageload', op: 'pageload' }, () => {
+  const root = ReactDOM.createRoot(document.getElementById('root'));
+  root.render(
+    <React.StrictMode>
+      <App />
+      <div id="modal-root"></div>
+    </React.StrictMode>
+  );
+});
+
+
 
 reportWebVitals((metric) => Sentry.captureMessage(JSON.stringify(metric), { level: 'info' }));

@@ -14,6 +14,8 @@ import ModalLayout from '../timeline/components/modals/ModalLayout';
 import DateDropdown from '../timeline/components/ui/DateDropdown';
 import FiltersDropdown from '../timeline/components/ui/FiltersDropdown';
 
+import * as Sentry from '@sentry/react';
+
 function Events({ modalStack, setModalStack }) {
   const [eventsByDate, setEventsByDate] = useState({});
   const [isLoaded, setIsLoaded] = useState(false);
@@ -40,11 +42,11 @@ function Events({ modalStack, setModalStack }) {
 
   const dates = Object.keys(customDateRanges);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    fetchEvents()
-      .then((data) => {
-        console.log("Fetched data:", data);
+    Sentry.startSpan({ name: '/api/events', op: 'fetch' }, async (span) => {
+      try {
+        const data = await fetchEvents();
+
         const grouped = {};
         const eventList = data.events || [];
         dates.forEach((date) => {
@@ -66,12 +68,13 @@ function Events({ modalStack, setModalStack }) {
         ).sort();
 
         setArtistOptions(allArtists);
-        setIsLoaded(true);
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error('Error fetching events:', error);
+      } finally {
         setIsLoaded(true);
-      });
+        span.end();
+      }
+    });
     // eslint-disable-next-line
   }, []);
 
