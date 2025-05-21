@@ -4,7 +4,6 @@ Rails.application.configure do
 
   config.enable_reloading = false
 
-  config.hosts << "api-ynr1.onrender.com"
   config.hosts << "api.movementparties.com"
 
   config.eager_load = true
@@ -18,10 +17,9 @@ Rails.application.configure do
 
   config.force_ssl = true
 
-  # Log to STDOUT by default
-  config.logger = ActiveSupport::Logger.new(STDOUT)
-    .tap  { |logger| logger.formatter = ::Logger::Formatter.new }
-    .then { |logger| ActiveSupport::TaggedLogging.new(logger) }
+  config.logger = ActiveSupport::TaggedLogging.new(
+    ActiveSupport::Logger.new("log/production_requests.log", 10, 50.megabytes)
+  )
 
   # Prepend all log lines with the following tags.
   config.log_tags = [ :request_id ]
