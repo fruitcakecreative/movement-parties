@@ -10,7 +10,7 @@ Sentry.init({
     Sentry.replayIntegration()
   ],
   replaysSessionSampleRate: 0.1,
-  replaysOnErrorSampleRate: 1.0
+  replaysOnErrorSampleRate: 1.0,
   tracesSampleRate: 1.0,
   tracePropagationTargets: ['localhost', 'https://stagingapi.movementparties.com', 'https://api.movementparties.com'],
 });
