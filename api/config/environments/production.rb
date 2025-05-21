@@ -5,6 +5,7 @@ Rails.application.configure do
   config.enable_reloading = false
 
   config.hosts << "api.movementparties.com"
+  config.hosts << "movement-parties-3hop.onrender.com"
 
   config.eager_load = true
 
@@ -17,9 +18,12 @@ Rails.application.configure do
 
   config.force_ssl = true
 
-  config.logger = ActiveSupport::TaggedLogging.new(
-    ActiveSupport::Logger.new("log/production_requests.log", 10, 50.megabytes)
-  )
+  logger = ActiveSupport::Logger.new(STDOUT)
+  logger.formatter = proc do |severity, datetime, _progname, msg|
+    "[RAILS] #{datetime.utc.iso8601} #{severity}: #{msg}\n"
+  end
+
+  config.logger = ActiveSupport::TaggedLogging.new(logger)
 
   # Prepend all log lines with the following tags.
   config.log_tags = [ :request_id ]

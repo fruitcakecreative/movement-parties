@@ -5,7 +5,12 @@ Sentry.init({
   environment: process.env.REACT_APP_ENV || 'development',
   release: process.env.REACT_APP_RELEASE,
   sendDefaultPii: true,
-  integrations: [Sentry.browserTracingIntegration()],
+  integrations: [
+    Sentry.browserTracingIntegration(),
+    Sentry.replayIntegration()
+  ],
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1.0
   tracesSampleRate: 1.0,
-  tracePropagationTargets: ['localhost', /^https:\/\/movement-parties\.onrender\.com\/api/],
+  tracePropagationTargets: ['localhost', 'https://stagingapi.movementparties.com', 'https://api.movementparties.com'],
 });
