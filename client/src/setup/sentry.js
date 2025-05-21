@@ -1,16 +1,16 @@
 import * as Sentry from '@sentry/react';
 
 Sentry.init({
-  dsn: process.env.SENTRY_DSN,
+  dsn: process.env.REACT_APP_SENTRY_DSN,
   environment: process.env.REACT_APP_ENV || 'development',
   release: process.env.REACT_APP_RELEASE,
   sendDefaultPii: true,
   integrations: [
+    Sentry.replayIntegration(),
     Sentry.browserTracingIntegration(),
-    Sentry.replayIntegration()
   ],
+  tracesSampleRate: 1.0,
   replaysSessionSampleRate: 1.0,
   replaysOnErrorSampleRate: 1.0,
-  tracesSampleRate: 1.0,
-  tracePropagationTargets: ['localhost', 'https://stagingapi.movementparties.com', 'https://api.movementparties.com'],
+  tracePropagationTargets: ['localhost', 'stagingapi.movementparties.com', 'api.movementparties.com'],
 });
