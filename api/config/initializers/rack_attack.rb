@@ -2,6 +2,7 @@ require "rack/attack"
 class Rack::Attack
 
   blocklist('block user agents') do |req|
+    next false if Rails.env.development?
     req.user_agent =~ /curl|httpie|Postman/i
   end
 

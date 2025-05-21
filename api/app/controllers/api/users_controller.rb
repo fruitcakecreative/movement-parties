@@ -59,7 +59,7 @@ class Api::UsersController < ApplicationController
       name: current_user.name,
       email: current_user.email,
       username: current_user.username,
-      avatar_url: current_user.avatar.attached? ? url_for(current_user.avatar) : nil
+      avatar_url: current_user.avatar.attached? ? url_for(current_user.avatar) : current_user.picture
     }
   end
 end

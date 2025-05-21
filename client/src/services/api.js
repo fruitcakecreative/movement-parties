@@ -57,4 +57,19 @@ export const fetchUserInfo = async (token) => {
   return response.data;
 };
 
+
+export const loginWithFacebook = async (userData) => {
+  const res = await fetch(`${process.env.REACT_APP_API_BASE}/users/create_from_facebook`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify({ user: userData }),
+  });
+
+  return res.json();
+};
+
 export default api;
