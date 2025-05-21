@@ -2,6 +2,7 @@ class Api::EventsController < ApplicationController
   before_action :set_event, only: [:show, :update, :destroy]
 
   def index
+    request.env['action_dispatch.request_start_time'] = Time.now
     cache_key = "events-v1"
 
     events = Rails.cache.fetch(cache_key, expires_in: 5.minutes) do
@@ -24,7 +25,7 @@ class Api::EventsController < ApplicationController
              methods: [:formatted_start_time, :formatted_end_time, :top_artists]
            )
     end
-
+    Rails.logger.info("[RAILS] Completed Api::EventsController#index with #{events.length} events in #{(Time.now - request.env['action_dispatch.request_start_time']) * 1000}ms")
     render json: { events: events }
   end
 
