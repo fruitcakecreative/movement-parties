@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from 'react';
 import FacebookLogin from 'react-facebook-login';
 import { loginWithFacebook } from "../../services/api";
 
