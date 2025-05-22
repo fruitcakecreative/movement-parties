@@ -20,10 +20,11 @@ staging:
   database: <%= ENV.fetch("DB_NAME") { "mp_staging" } %>
 
 test:
-  <<: *default
+  adapter: postgresql
+  encoding: unicode
   database: mp_test
   username: postgres
-  password: ""
+  password: postgres
   host: localhost
 
 production:
