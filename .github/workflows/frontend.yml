@@ -44,6 +44,6 @@ jobs:
       - name: Build app (optional)
         run: yarn build
         env:
-          REACT_APP_RELEASE: ${{ github.ref_name == 'main' && 'movement-parties@production' || format('movement-parties@{0}', github.ref_name) }}
+          REACT_APP_RELEASE: ${{ github.ref_name == 'main' && 'movement-parties@production' || format('movement-parties@{0}', github.ref_name).replace('/', '-') }}
           SENTRY_ENV: ${{ github.ref_name == 'main' && 'production' || github.ref_name }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
