@@ -7,7 +7,7 @@ on:
     branches: [main, staging]
 
 jobs:
-  test:
+  backend-test:
     runs-on: ubuntu-latest
 
     services:
