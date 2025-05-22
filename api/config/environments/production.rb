@@ -25,7 +25,6 @@ Rails.application.configure do
 
   config.logger = ActiveSupport::TaggedLogging.new(logger)
 
-  # Prepend all log lines with the following tags.
   config.log_tags = [ :request_id ]
 
 
