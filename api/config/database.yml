@@ -23,7 +23,7 @@ test:
   <<: *default
   database: mp_test
   username: postgres
-  password:
+  password: ""
   host: localhost
 
 production:
