@@ -11,6 +11,9 @@ export function useApp() {
   const channelsData = React.useMemo(() => channels, [channels]);
   const epgData = React.useMemo(() => epg, [epg]);
 
+  const now = new Date();
+  const currentDateStr = now.toISOString().split('T')[0];
+
   const { getEpgProps, getLayoutProps } = useEpg({
     channels: channelsData,
     epg: epgData,
@@ -20,8 +23,8 @@ export function useApp() {
     isSidebar: true,
     isTimeline: true,
     isLine: true,
-    startDate: '2022-10-18T00:00:00',
-    endDate: '2022-10-18T24:00:00',
+    startDate: `${currentDateStr}T00:00:00`,
+    endDate: `${currentDateStr}T23:59:59`,
     isBaseTimeFormat: true,
     theme,
   });
