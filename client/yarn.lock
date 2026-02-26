@@ -1094,6 +1094,11 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
+"@commander-js/extra-typings@^13.1.0":
+  version "13.1.0"
+  resolved "https://registry.yarnpkg.com/@commander-js/extra-typings/-/extra-typings-13.1.0.tgz#026e29b04401c92fc4307223fbaadf1ff3e5551e"
+  integrity sha512-q5P52BYb1hwVWE6dtID7VvuJWrlfbCv4klj7BjUUOqMz4jbSZD4C9fJ9lRjL2jnBGTg+gDDlaXN51rkWcLk4fg==
+
 "@csstools/normalize.css@*":
   version "12.1.1"
   resolved "https://registry.yarnpkg.com/@csstools/normalize.css/-/normalize.css-12.1.1.tgz#f0ad221b7280f3fc814689786fd9ee092776ef8f"
@@ -5084,6 +5089,15 @@ entities@^6.0.0:
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/entities/-/entities-6.0.0.tgz#09c9e29cb79b0a6459a9b9db9efb418ac5bb8e51"
   integrity sha512-aKstq2TDOndCn4diEyp9Uq/Flu2i1GlLkc6XIDQSDMuaFE3OPW5OphLCyQ5SpSJZTb4reN+kTcYru5yIfXoRPw==
+
+env-cmd@^11.0.0:
+  version "11.0.0"
+  resolved "https://registry.yarnpkg.com/env-cmd/-/env-cmd-11.0.0.tgz#5912634c865f294a74745747d852aae07fd0d9a5"
+  integrity sha512-gnG7H1PlwPqsGhFJNTv68lsDGyQdK+U9DwLVitcj1+wGq7LeOBgUzZd2puZ710bHcH9NfNeGWe2sbw7pdvAqDw==
+  dependencies:
+    "@commander-js/extra-typings" "^13.1.0"
+    commander "^13.1.0"
+    cross-spawn "^7.0.6"
 
 environment@^1.0.0:
   version "1.1.0"

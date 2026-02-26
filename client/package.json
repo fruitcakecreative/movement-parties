@@ -27,13 +27,15 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start:movement": "env-cmd -f .env.movement react-scripts start",
+    "build:movement": "env-cmd -f .env.movement react-scripts build",
+    "start:othercity": "env-cmd -f .env.othercity react-scripts start",
+    "build:othercity": "env-cmd -f .env.othercity react-scripts build",
     "start:local": "NODE_AUTH_TOKEN=$(cat .env | grep NODE_AUTH_TOKEN | cut -d '=' -f2) yarn start",
     "test": "NODE_PATH=./node_modules react-scripts test",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
-    "eject": "react-scripts eject",
-    "build": "react-scripts build"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
@@ -59,6 +61,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "babel-jest": "^29.7.0",
+    "env-cmd": "^11.0.0",
     "husky": "^9.1.7",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^29.7.0",
