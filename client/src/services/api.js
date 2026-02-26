@@ -72,4 +72,32 @@ export const loginWithFacebook = async (userData) => {
   return res.json();
 };
 
+
+export const fetchAllUsers = async () => {
+  const res = await api.get('/users');
+  return res.data;
+};
+
+export const fetchFriendshipList = async () => {
+  const res = await api.get('/friendships');
+  return res.data;
+};
+
+export const sendFriendRequest = async (username) => {
+  return api.post('/friendships', { username });
+};
+
+export const acceptFriendRequest = async (user_id) => {
+  return api.post("/friendships/accept", { user_id });
+};
+
+export const cancelFriendRequest = async (username) => {
+  return api.delete("/friendships", { data: { username } });
+};
+
+export const rejectFriendRequest = async (user_id) => {
+  return api.post("/friendships/reject", { user_id });
+};
+
+
 export default api;

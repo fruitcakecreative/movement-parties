@@ -12,6 +12,7 @@ $orange: #ff6700;
 
 $purple: #9c27b0;
 
+
 .hide {
   display: none !important;
 }
@@ -56,6 +57,11 @@ button {
 .white-bg {
   background-color: $white;
   color: $black;
+}
+
+.max-width {
+  max-width: 768px;
+  margin: 0 auto;
 }
 
 img {
@@ -1537,7 +1543,7 @@ form {
     }
   }
   .friendship-con {
-    border: 1px solid black;
+    // border: 1px solid black;
     margin-top: 25px;
     margin-bottom: 25px;
     height: 200px;
@@ -1568,3 +1574,5 @@ form {
     }
   }
 }
+
+@import'./profile.scss';

@@ -1,0 +1,68 @@
+input {
+  border: 2px solid $black;
+  border-radius: 5px;
+}
+
+
+
+
+
+.friendship-section {
+  .find-friends {
+    input {
+      width: calc(100% - 25px);
+      padding: 10px;
+    }
+    .search-results {
+      border: 2px solid $black;
+      border-radius: 5px;
+      padding: 10px;
+      margin-top: 4px;
+      max-height: 200px;
+      overflow-y: scroll;
+      .search-result-item {
+        border-bottom: 1px solid $black;
+        padding-bottom: 5px;
+        margin-bottom: 5px;
+        display: flex;
+        justify-content: space-between;
+        .profile {
+          display: flex;
+          align-items: center;
+          column-gap: 10px;
+          p {
+            font-size: 13px;
+          }
+        }
+        img {
+          height: 40px;
+        }
+        .request-buttons {
+          display: flex;
+          column-gap: 6px;
+        }
+        button {
+          text-align: center;
+          font-size: 14px;
+          font-weight: bold;
+          font-size: 13px;
+        }
+        .add {
+          background-color: #007bff;
+        }
+        .accept {
+          background-color: #28a745;
+        }
+        .pending {
+          background-color: #6c757d;
+        }
+        .friends {
+          background-color: $black;
+        }
+        .reject {
+          background-color: #dc3545;
+        }
+      }
+    }
+  }
+}
