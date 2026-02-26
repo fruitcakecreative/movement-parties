@@ -27,12 +27,8 @@ namespace :import do
       events = JSON.parse(File.read(temp_path))
 
       skip_urls = [
-        "https://ra.co/events/2136172",
-        "https://ra.co/events/2061680",
-        "https://ra.co/events/2085466",
-        "https://ra.co/events/2101035",
-        "https://ra.co/events/2130939",
-        "https://ra.co/events/2149596",
+        "https://ra.co/events/2370518",
+        "https://ra.co/events/2353591"
       ]
 
       events.each_with_index do |event_data, index|
