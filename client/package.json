@@ -27,10 +27,11 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "build": "react-scripts build"
     "start:movement": "env-cmd -f .env.movement react-scripts start",
     "build:movement": "env-cmd -f .env.movement react-scripts build",
-    "start:othercity": "env-cmd -f .env.othercity react-scripts start",
-    "build:othercity": "env-cmd -f .env.othercity react-scripts build",
+    "start:mmw": "env-cmd -f .env.mmw react-scripts start",
+    "build:mmw": "env-cmd -f .env.mmw react-scripts build",
     "start:local": "NODE_AUTH_TOKEN=$(cat .env | grep NODE_AUTH_TOKEN | cut -d '=' -f2) yarn start",
     "test": "NODE_PATH=./node_modules react-scripts test",
     "format": "prettier --check .",
