@@ -2,6 +2,9 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Disclosure } from '@headlessui/react';
 
+const cityKey = process.env.REACT_APP_CITY_KEY;
+const logoSrc = `${process.env.PUBLIC_URL}/${cityKey}/logo.png`;
+
 const navigation = [
   { name: 'Home', href: '/' },
   { name: 'Party Timelines', href: '/' },
@@ -20,7 +23,7 @@ function MainHeader() {
 
   return (
   <div className="header-con">
-    <div className="logo-con"><img alt="movement parties logo" src="/images/logo_mobile.png" /></div>
+    <div className="logo-con"><img alt={`${cityKey} parties logo`} src={logoSrc} /></div>
     <div className="menu-con">
       <div className="hide profile">
         <button onClick={profileClick}><i className="fa-solid fa-user"></i></button>

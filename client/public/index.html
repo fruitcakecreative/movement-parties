@@ -2,42 +2,35 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
-    <meta name="description" content="Movement 2026 Parties/Afterparties" />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
 
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
     <title>%REACT_APP_SITE_TITLE%</title>
-    <meta property="og:title" content="Movement 2026 Parties" />
-    <meta property="og:description" content="Track all Movement weekend events in one place." />
-    <meta property="og:image" content="https://movementparties.com/preview.png" />
-    <meta property="og:url" content="https://movementparties.com" />
+    <meta name="description" content="%REACT_APP_META_DESCRIPTION%" />
+
+    <!-- City-specific assets -->
+    <link rel="icon" href="%PUBLIC_URL%/%REACT_APP_CITY_KEY%/favicon.ico" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/%REACT_APP_CITY_KEY%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/%REACT_APP_CITY_KEY%/manifest.json" />
+
+    <!-- Social -->
+    <meta property="og:title" content="%REACT_APP_OG_TITLE%" />
+    <meta property="og:description" content="%REACT_APP_OG_DESCRIPTION%" />
+    <meta property="og:image" content="%PUBLIC_URL%/%REACT_APP_CITY_KEY%/preview.png" />
+    <meta property="og:url" content="%REACT_APP_OG_URL%" />
     <meta name="twitter:card" content="summary_large_image" />
+
     <!-- Facebook SDK for JavaScript -->
     <script>
       window.fbAsyncInit = function () {
         FB.init({
-          appId: '1371232790678843', // Replace with your Facebook App ID
+          appId: '%REACT_APP_FB_APP_ID%',
           cookie: true,
           xfbml: true,
-          version: 'v12.0', // Specify the Facebook API version
+          version: 'v12.0',
         });
 
-        FB.AppEvents.logPageView(); // Logs page view events for Facebook Analytics
+        FB.AppEvents.logPageView();
       };
 
       (function (d, s, id) {
@@ -51,9 +44,10 @@
       })(document, 'script', 'facebook-jssdk');
     </script>
 
+    <!-- Plausible -->
     <script
       defer
-      data-domain="movementparties.com"
+      data-domain="%REACT_APP_PLAUSIBLE_DOMAIN%"
       src="https://plausible.io/js/script.outbound-links.pageview-props.tagged-events.js"
     ></script>
   </head>
