@@ -47,12 +47,55 @@ function Events({ modalStack, setModalStack }) {
       try {
         const data = await fetchEvents();
 
-        const grouped = {};
         const eventList = data.events || [];
-        dates.forEach((date) => {
-          grouped[date] = eventList.filter((event) => event.formatted_start_time?.startsWith(date));
-        });
-        setEventsByDate(grouped);
+
+        const MIN_OVERLAP_MS = 3 * 60 * 60 * 1000;
+
+const parse = (v) => (v ? new Date(v) : null);
+const getStart = (e) => parse(e.formatted_start_time || e.start_time);
+const getEnd = (e) => parse(e.formatted_end_time || e.end_time);
+
+const grouped = Object.fromEntries(dates.map((d) => [d, []]));
+
+// always include on the day it starts (normal behavior)
+for (const event of eventList) {
+  const startStr = event.formatted_start_time || event.start_time;
+  const startDay = startStr?.slice(0, 10);
+  if (grouped[startDay]) grouped[startDay].push(event);
+}
+
+// ALSO include on other days if it overlaps that day's timeline window >= 3 hours
+for (const date of dates) {
+  const windowStart = parse(customDateRanges[date].start);
+  const windowEnd = parse(customDateRanges[date].end);
+
+  const existing = new Set(grouped[date].map((e) => e.id));
+
+  for (const event of eventList) {
+    const startStr = event.formatted_start_time || event.start_time;
+    const startDay = startStr?.slice(0, 10);
+    if (startDay === date) continue; // don't "threshold-filter" its own day
+    if (existing.has(event.id)) continue;
+
+    const start = getStart(event);
+    if (!start) continue;
+
+    const endReal = getEnd(event);
+    const end = endReal || windowEnd; // fallback for overlap test
+
+    const overlapMs =
+      Math.min(end.getTime(), windowEnd.getTime()) -
+      Math.max(start.getTime(), windowStart.getTime());
+
+    if (overlapMs >= MIN_OVERLAP_MS) {
+      grouped[date].push(event);
+      existing.add(event.id);
+    }
+  }
+}
+
+setEventsByDate(grouped);
+
         setAllEvents(eventList);
 
         const genresFromEvents = Array.from(
