@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import ModalLayout from "../timeline/components/modals/ModalLayout";
 import MiniProgramBox from "../timeline/components/MiniProgramBox";
 
-import FriendshipSection from "../components/Profile/Friends/FriendshipSection";
 
 import { userLogout,
         fetchUserInfo,
@@ -80,7 +79,6 @@ function Profile() {
 
       <button onClick={openModal}>edit profile settings</button>
 
-      <FriendshipSection />
 
       {attEventsByDay?.length > 0 && (
         Object.entries(attEventsByDay).map(([day, events]) => (
