@@ -41,16 +41,16 @@ namespace :import do
 
         begin
           ActiveRecord::Base.transaction do
-            venue_data = event_info["venue"] || {}
-            venue_name = venue_data["name"] || "Unknown Venue"
-            venue_url  = venue_data["contentUrl"] ? "https://ra.co#{venue_data['contentUrl']}" : venue_data["url"]
+            venue_name = (event_info.dig("venue", "name") || "Unknown Venue")
+                          .to_s.strip.gsub(/\s+/, " ")
 
-            venue =
-              if venue_url.present?
-                Venue.find_or_create_by!(city_key: city, venue_url: venue_url) { |v| v.name = venue_name }
-              else
-                Venue.find_or_create_by!(city_key: city, name: venue_name)
-              end
+            # Prefer an existing “rich” venue if duplicates exist
+            venue = Venue.where(city_key: city)
+                         .where("lower(name) = ?", venue_name.downcase)
+                         .order(Arel.sql("(bg_color IS NOT NULL)::int + (font_color IS NOT NULL)::int + (address IS NOT NULL)::int + (location IS NOT NULL)::int + (image_filename IS NOT NULL)::int DESC"))
+                         .first
+
+            venue ||= Venue.create!(city_key: city, name: venue_name)
 
             genres =
               if event_info["genres"].is_a?(Array) && event_info["genres"].any?

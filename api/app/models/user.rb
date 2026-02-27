@@ -14,7 +14,7 @@ class User < ApplicationRecord
   has_many :event_attendees
   has_one_attached :avatar
   has_many :events, through: :event_attendees
-  has_many :user_events
+  has_many :user_events, dependent: :destroy
   has_many :events, through: :user_events
   has_many :friendships
   has_many :friends, -> { where(friendships: { status: 'accepted' }) }, through: :friendships

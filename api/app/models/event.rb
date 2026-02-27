@@ -3,9 +3,9 @@ class Event < ApplicationRecord
   has_and_belongs_to_many :genres
   has_many :event_attendees
   has_many :users, through: :event_attendees
-  has_many :artist_events
+  has_many :artist_events, dependent: :destroy
   has_many :artists, through: :artist_events
-  has_many :user_events, class_name: 'UserEvent'
+  has_many :user_events, class_name: 'UserEvent', dependent: :destroy
   has_many :users, through: :user_events
   has_many :ticket_posts
   has_one_attached :logo
