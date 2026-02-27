@@ -31,7 +31,15 @@ RailsAdmin.config do |config|
     field :start_time
     field :end_time
     field :manual_override_times
-    field :venue
+    field :venue do
+      associated_collection_cache_all true
+      associated_collection_scope do
+        Proc.new do |scope|
+          key = (defined?(Current) && Current.city_key.present?) ? Current.city_key : "movement"
+          scope.where(city_key: key).order(:name)
+        end
+      end
+    end
     field :manual_override_location
     field :genres
     field :manual_override_genres
