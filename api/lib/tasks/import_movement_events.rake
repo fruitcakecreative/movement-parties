@@ -3,9 +3,10 @@ require "json"
 require "honeybadger"
 
 namespace :import do
-  desc "Import events from latest S3 JSON file"
-  task from_s3: :environment do
+  desc "Import MOVEMENT events from latest S3 JSON file"
+  task movement_from_s3: :environment do
     begin
+      city   = "movement"
       bucket = "movement-parties-events-data"
       prefix = "events/"
 
@@ -40,28 +41,39 @@ namespace :import do
 
         begin
           ActiveRecord::Base.transaction do
-            venue_name = event_info.dig("venue", "name") || "Unknown Venue"
-            venue = Venue.find_or_create_by!(name: venue_name)
+            venue_data = event_info["venue"] || {}
+            venue_name = venue_data["name"] || "Unknown Venue"
+            venue_url  = venue_data["contentUrl"] ? "https://ra.co#{venue_data['contentUrl']}" : venue_data["url"]
 
-            genres = if event_info["genres"].is_a?(Array) && event_info["genres"].any?
-                       event_info["genres"].map { |g| Genre.find_or_create_by!(name: g["name"]) }
-                     else
-                       []
-                     end
+            venue =
+              if venue_url.present?
+                Venue.find_or_create_by!(city_key: city, venue_url: venue_url) { |v| v.name = venue_name }
+              else
+                Venue.find_or_create_by!(city_key: city, name: venue_name)
+              end
+
+            genres =
+              if event_info["genres"].is_a?(Array) && event_info["genres"].any?
+                event_info["genres"].map { |g| Genre.find_or_create_by!(name: g["name"]) }
+              else
+                []
+              end
 
             ticket_info = event_data["ticket_info"] || {}
             raw_price = ticket_info["price"]&.to_s&.split("+")&.first&.strip
 
-            event = Event.find_or_initialize_by(event_url: event_url)
+            event = Event.find_or_initialize_by(city_key: city, event_url: event_url)
+
             attrs = {
               description: event_info["description"],
               source: "RA",
-              attending_count: event_info["attending"] || 0
+              attending_count: event_info["attending"] || 0,
+              city_key: city
             }
-            attrs[:title] = event_info["title"] unless event.manual_override_title
+            attrs[:title]      = event_info["title"]     unless event.manual_override_title
             attrs[:start_time] = event_info["startTime"] unless event.manual_override_times
-            attrs[:end_time] = event_info["endTime"] unless event.manual_override_times
-            attrs[:venue] = venue unless event.manual_override_location
+            attrs[:end_time]   = event_info["endTime"]   unless event.manual_override_times
+            attrs[:venue]      = venue                  unless event.manual_override_location
 
             event.assign_attributes(attrs)
             event.save!
@@ -89,8 +101,9 @@ namespace :import do
         end
       end
 
+      Rails.cache.delete("events-v1:movement") rescue nil
       puts "Finished importing #{events.size} events from #{filename}"
-      Honeybadger.notify("Import succeeded: #{events.size} events from #{filename}")
+      Honeybadger.notify("Movement import succeeded: #{events.size} events from #{filename}")
     rescue => e
       Honeybadger.notify(e)
       raise e

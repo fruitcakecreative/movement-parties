@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE;
+const city = process.env.REACT_APP_CITY_KEY;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -9,6 +10,14 @@ const api = axios.create({
     'Content-Type': 'application/json',
     Accept: 'application/json',
   },
+});
+
+api.interceptors.request.use((config) => {
+  config.headers = config.headers || {};
+  config.headers["X-City-Key"] = city;     // server supports this
+  // optional also add query param for easier debugging:
+  // config.params = { ...(config.params || {}), city };
+  return config;
 });
 
 export const fetchEvents = async () => {

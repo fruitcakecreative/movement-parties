@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_05_12_063411) do
+ActiveRecord::Schema[7.2].define(version: 2026_02_27_015220) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -115,6 +115,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_12_063411) do
     t.boolean "manual_override_title"
     t.boolean "manual_override_artists"
     t.text "manual_artist_names"
+    t.string "city_key"
+    t.index ["city_key", "event_url"], name: "index_events_on_city_key_and_event_url"
     t.index ["venue_id"], name: "index_events_on_venue_id"
   end
 
@@ -181,7 +183,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_12_063411) do
     t.datetime "remember_created_at"
     t.string "encrypted_password"
     t.string "username"
-    t.string "avatar"
     t.string "picture"
     t.string "authentication_token"
     t.boolean "admin"
@@ -210,6 +211,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_12_063411) do
     t.integer "distance"
     t.text "additional_images"
     t.string "hex_color"
+    t.string "city_key"
+    t.index ["city_key", "venue_url"], name: "index_venues_on_city_key_and_venue_url"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
