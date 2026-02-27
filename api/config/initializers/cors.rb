@@ -19,7 +19,7 @@ end
 if Rails.env.production?
   Rails.application.config.middleware.insert_before 0, Rack::Cors do
     allow do
-      origins 'https://movementparties.com', 'https://new.movementparties.com'
+      origins 'https://movementparties.com', 'https://new.movementparties.com', "https://mmw-parties-client.netlify.app"
       resource '*', headers: :any, methods: :any, credentials: true
     end
   end
