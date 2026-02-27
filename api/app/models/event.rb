@@ -17,6 +17,16 @@ class Event < ApplicationRecord
     list do
       scopes [:movement, :mmw]
     end
+    edit do
+      field :venue do
+        associated_collection_scope do
+          Proc.new do |scope|
+            key = (defined?(Current) && Current.city_key.present?) ? Current.city_key : "movement"
+            scope.where(city_key: key)
+          end
+        end
+      end
+    end
   end
 
   before_validation :default_city_key, on: :create
