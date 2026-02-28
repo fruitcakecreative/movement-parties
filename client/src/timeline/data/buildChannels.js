@@ -13,7 +13,7 @@ export function createChannels(epg) {
       title: event.short_title || event.title || venue.name,
       short_name: event.even_shorter_title,
       logo: venue.logo_url || null,
-      subheading: event.location_tba ? 'Location TBA' : venue.venue_subheading,
+      subheading: venue.subheading,
       tba_class: event.location_tba ? 'tba' : '',
       location_tba: event.location_tba,
       bg_color: venue.bg_color,
