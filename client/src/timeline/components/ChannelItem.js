@@ -115,7 +115,7 @@ const ChannelItem = ({ channel, allEvents, modalStack, setModalStack }) => {
               src={logo}
               alt={name}
               className="venue-logo"
-              style={subheading ? { height: '50%' } : {}}
+              style={subheading ? { height: 'auto' } : {}}
             />
           ) : (
             <div className="party-venue">
