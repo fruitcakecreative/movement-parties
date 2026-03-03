@@ -6,17 +6,16 @@ class Venue < ApplicationRecord
   scope :mmw,      -> { where(city_key: "mmw") }
 
   VENUE_TYPE_STYLES = {
-    "Pool" => { bg: "#FFEB3B", font: "#111827" },  # bright yellow
-    "Boat" => { bg: "#0284C7", font: "#FFFFFF" },  # sea blue
-    "Rooftop Bar" => { bg: "#EC4899", font: "#FFFFFF" },     # pink
-    "Outdoor Event/Festival Space" => { bg: "#86EFAC", font: "#052E16" }, # light green
-    "Indoor Event Venue" => { bg: "#7C3AED", font: "#FFFFFF" },          # purple
-    "Open-Air Venue" => { bg: "#38BDF8", font: "#082F49" },              # sky blue
-    "Eclectic Indoor/Music Venue" => { bg: "#C026D3", font: "#FFFFFF" }, # magenta
-    "Nightclub" => { bg: "#0F172A", font: "#FFFFFF" },                   # navy blue
-    "Bar & Lounge" => { bg: "#7F1D1D", font: "#FFFFFF" },                # maroon
-    "Restaurant/Bar" => { bg: "#F97316", font: "#111827" },              # orange
-    "Warehouse" => { bg: "#6B7280", font: "#FFFFFF" },                   # grey
+    "Pool" => { bg: "#FFEB3B", font: "#111827" },                 # bright yellow
+    "Boat" => { bg: "#0284C7", font: "#FFFFFF" },                 # sea blue
+    "Rooftop Bar/Restaurant" => { bg: "#EC4899", font: "#FFFFFF" }, # pink
+    "Resto/Bar/Lounge" => { bg: "#7F1D1D", font: "#FFFFFF" },     # maroon
+    "Indoor Music Venue" => { bg: "#7C3AED", font: "#FFFFFF" },   # purple
+    "Outdoor Music Venue" => { bg: "#86EFAC", font: "#052E16" },  # light green
+    "Open-Air Music Venue" => { bg: "#38BDF8", font: "#082F49" }, # sky blue
+    "Nightclub" => { bg: "#0F172A", font: "#FFFFFF" },            # navy blue
+    "Warehouse" => { bg: "#374151", font: "#FFFFFF" },            # dark grey
+    "Theatre" => { bg: "#7A0C0C", font: "#FFFFFF" },              # dark red
     "Other" => { bg: "#6B7280", font: "#FFFFFF" }
   }.freeze
 
