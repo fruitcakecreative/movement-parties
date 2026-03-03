@@ -46,8 +46,6 @@ class Event < ApplicationRecord
   end
 
 
-
-
   # Convert start_time to Planby-compatible format (remove 'Z')
   def formatted_start_time
     start_time&.strftime("%Y-%m-%dT%H:%M:%S") # Removes 'Z'
@@ -57,4 +55,15 @@ class Event < ApplicationRecord
   def formatted_end_time
     end_time&.strftime("%Y-%m-%dT%H:%M:%S") # Removes 'Z'
   end
+
+  before_validation :inherit_colors_from_venue
+
+  def inherit_colors_from_venue
+    return unless venue
+    return unless city_key == "mmw" # only MMW (or venue.city_key == "mmw")
+    self.bg_color   = venue.bg_color
+    self.font_color = venue.font_color
+  end
+  private :inherit_colors_from_venue
+
 end

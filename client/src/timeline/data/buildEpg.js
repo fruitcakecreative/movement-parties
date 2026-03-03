@@ -55,7 +55,7 @@ export function createEpg(events) {
               font_color: event.font_color || '#111',
             }
           : {
-              bg_color: event.venue.bg_color || '#fff',
+              bg_color: event.bg_color || '#fff',
               font_color: event.venue.font_color || '#000',
             }),
       };

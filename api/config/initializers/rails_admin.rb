@@ -100,7 +100,22 @@ end
       field :serves_alcohol
       field :venue_type, :enum do
         enum do
-          ['Warehouse', 'Club', 'Bar/Restaurant', 'Outdoor Event Space', 'Theatre', 'Music Venue']
+          ['Warehouse',
+            'Club',
+            'Restaurant/Bar',
+            'Theatre',
+            'Small Music Venue',
+            'Nightclub',
+            'Bar/Lounge',
+            'Rooftop Bar',
+            'Pool',
+            'Boat',
+            'Outdoor Event Space',
+            'Indoor Event Venue',
+            'Open-air music venue',
+            'Eclectic Indoor Music Venue',
+            'Underground Venue'
+          ]
         end
       end
       field :subheading
