@@ -5,18 +5,15 @@ class Venue < ApplicationRecord
   scope :movement, -> { where(city_key: "movement") }
   scope :mmw,      -> { where(city_key: "mmw") }
 
-  VENUE_TYPE_STYLES = {
-    "Pool" => { bg: "#FFEB3B", font: "#111827" },                 # bright yellow
-    "Boat" => { bg: "#0284C7", font: "#FFFFFF" },                 # sea blue
-    "Rooftop Bar/Restaurant" => { bg: "#EC4899", font: "#FFFFFF" }, # pink
-    "Resto/Bar/Lounge" => { bg: "#7F1D1D", font: "#FFFFFF" },     # maroon
-    "Indoor Music Venue" => { bg: "#7C3AED", font: "#FFFFFF" },   # purple
-    "Outdoor Music Venue" => { bg: "#86EFAC", font: "#052E16" },  # light green
-    "Open-Air Music Venue" => { bg: "#38BDF8", font: "#082F49" }, # sky blue
-    "Nightclub" => { bg: "#0F172A", font: "#FFFFFF" },            # navy blue
-    "Warehouse" => { bg: "#374151", font: "#FFFFFF" },            # dark grey
-    "Theatre" => { bg: "#7A0C0C", font: "#FFFFFF" },              # dark red
-    "Other" => { bg: "#6B7280", font: "#FFFFFF" }
+  BASE_VENUE_TYPE_STYLES = {
+    "Restaurant/Bar/Lounge"     => { bg: "#EF4444", font: "#FFFFFF" }, # red
+    "Small Intimate Venue"      => { bg: "#F97316", font: "#111827" }, # orange
+    "Pool"                      => { bg: "#FFEB3B", font: "#111827" }, # yellow
+    "Music Venue/Event Space"   => { bg: "#22C55E", font: "#052E16" }, # green
+    "Boat"                      => { bg: "#3B82F6", font: "#FFFFFF" }, # blue
+    "Nightclub/Club"            => { bg: "#7C3AED", font: "#FFFFFF" }, # purple
+    "Rooftop"                   => { bg: "#EC4899", font: "#FFFFFF" }, # pink
+    "Other"                     => { bg: "#6B7280", font: "#FFFFFF" }  # grey
   }.freeze
 
   rails_admin do
@@ -51,4 +48,31 @@ class Venue < ApplicationRecord
       client: Aws::S3::Client.new
     ).public_url
   end
+  require "zlib"
+
+  before_validation :apply_type_colors
+
+  def apply_type_colors
+    return unless city_key == "mmw"
+    base = BASE_VENUE_TYPE_STYLES[venue_type] || BASE_VENUE_TYPE_STYLES["Other"]
+
+    self.bg_color   = shade_hex(base[:bg], shade_seed)
+    self.font_color = base[:font]
+  end
+
+  def shade_seed
+    # stable per-venue; name changes will change shade (ok) — use id if you prefer once present
+    Zlib.crc32((id || name || "venue").to_s)
+  end
+
+  def shade_hex(hex, seed)
+    # create a lighter/darker shade by adjusting brightness 0.80..1.10
+    factor = 0.80 + ((seed % 31) / 100.0) # 0.80..1.10
+    r, g, b = hex.delete("#").scan(/../).map { |c| c.to_i(16) }
+    r = [[(r * factor).round, 0].max, 255].min
+    g = [[(g * factor).round, 0].max, 255].min
+    b = [[(b * factor).round, 0].max, 255].min
+    format("#%02X%02X%02X", r, g, b)
+  end
+  private :shade_seed, :shade_hex
 end

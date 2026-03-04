@@ -101,16 +101,14 @@ end
       field :venue_type, :enum do
         enum do
           [
+            "Restaurant/Bar/Lounge",
+            "Small Intimate Venue",
             "Pool",
+            "Music Venue/Event Space",
             "Boat",
-            "Rooftop Bar/Restaurant",
-            "Resto/Bar/Lounge",
-            "Indoor Music Venue",
-            "Outdoor Music Venue",
-            "Open-Air Music Venue",
-            "Nightclub",
-            "Warehouse",
-            "Theatre"
+            "Nightclub/Club",
+            "Rooftop",
+            "Other"
           ]
         end
       end
