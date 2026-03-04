@@ -66,13 +66,15 @@ class Venue < ApplicationRecord
   end
 
   def shade_hex(hex, seed)
-    # create a lighter/darker shade by adjusting brightness 0.80..1.10
-    factor = 0.80 + ((seed % 31) / 100.0) # 0.80..1.10
+    # much wider: 0.55 .. 1.25 (noticeable)
+    factor = 0.55 + ((seed % 71) / 100.0) # 0.55..1.25
+
     r, g, b = hex.delete("#").scan(/../).map { |c| c.to_i(16) }
     r = [[(r * factor).round, 0].max, 255].min
     g = [[(g * factor).round, 0].max, 255].min
     b = [[(b * factor).round, 0].max, 255].min
     format("#%02X%02X%02X", r, g, b)
   end
+  
   private :shade_seed, :shade_hex
 end
