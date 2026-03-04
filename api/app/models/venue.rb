@@ -67,7 +67,7 @@ class Venue < ApplicationRecord
 
   def shade_hex(hex, seed)
     # much wider: 0.55 .. 1.25 (noticeable)
-    factor = 0.55 + ((seed % 71) / 100.0) # 0.55..1.25
+    factor = 0.40 + ((seed % 96) / 100.0) # 0.55..1.25
 
     r, g, b = hex.delete("#").scan(/../).map { |c| c.to_i(16) }
     r = [[(r * factor).round, 0].max, 255].min
@@ -75,6 +75,6 @@ class Venue < ApplicationRecord
     b = [[(b * factor).round, 0].max, 255].min
     format("#%02X%02X%02X", r, g, b)
   end
-  
+
   private :shade_seed, :shade_hex
 end
