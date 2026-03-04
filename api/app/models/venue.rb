@@ -1,20 +1,59 @@
+# app/models/venue.rb
 class Venue < ApplicationRecord
+  require "zlib"
+
   has_many :events
   has_one_attached :logo
 
   scope :movement, -> { where(city_key: "movement") }
   scope :mmw,      -> { where(city_key: "mmw") }
 
-  BASE_VENUE_TYPE_STYLES = {
-    "Restaurant/Bar/Lounge"     => { bg: "#EF4444", font: "#FFFFFF" }, # red
-    "Small Intimate Venue"      => { bg: "#F97316", font: "#111827" }, # orange
-    "Pool"                      => { bg: "#FFEB3B", font: "#111827" }, # yellow
-    "Music Venue/Event Space"   => { bg: "#22C55E", font: "#052E16" }, # green
-    "Boat"                      => { bg: "#3B82F6", font: "#FFFFFF" }, # blue
-    "Nightclub/Club"            => { bg: "#7C3AED", font: "#FFFFFF" }, # purple
-    "Rooftop"                   => { bg: "#EC4899", font: "#FFFFFF" }, # pink
-    "Other"                     => { bg: "#6B7280", font: "#FFFFFF" }  # grey
+  # Palettes (light -> dark)
+  RED_SHADES = %w[
+    #F2C1C3 #E18D91 #D5575D #C72C35 #75191F #4B1013
+  ].freeze
+
+  ORANGE_SHADES = %w[
+    #F8D4B8 #F5C79E #F0AE79 #EA9B5C #E6873F #E06F1F #D25E14 #A94A10 #78340B #4C2006
+  ].freeze
+
+  YELLOW_SHADES = %w[
+    #FFF3C4 #FFE682 #FFD433 #E6B300 #B88F00 #7F6200
+  ].freeze
+
+  GREEN_SHADES = %w[
+    #CFF2D9 #95DFAE #52C77B #1FA950 #1A8640 #12602E #0A3A1B
+  ].freeze
+
+  BLUE_SHADES = %w[
+    #C8E0F4 #8DBEE4 #4692CF #1969B1 #0D3A62 #071F33
+  ].freeze
+
+  PURPLE_SHADES = %w[
+    #E2D4F3 #BB9EE4 #8C5ECE #642FB1 #4E248B #351760 #1F0C33
+  ].freeze
+
+  PINK_SHADES = %w[
+    #EEC2D9 #DD9BBF #DF6C99 #D33171 #732046 #492033
+  ].freeze
+
+  GREY_SHADES = %w[
+    #D1D5DB #A8AFB8 #767F8C #4B535F #2A2F37 #1B1F24
+  ].freeze
+
+  VENUE_TYPE_PALETTES = {
+    "Restaurant/Bar/Lounge"     => RED_SHADES,
+    "Small Intimate Venue"      => ORANGE_SHADES,
+    "Pool"                      => YELLOW_SHADES,
+    "Music Venue/Event Space"   => GREEN_SHADES,
+    "Boat"                      => BLUE_SHADES,
+    "Nightclub/Club"            => PURPLE_SHADES,
+    "Rooftop"                   => PINK_SHADES,
+    "Other"                     => GREY_SHADES
   }.freeze
+
+  # Choose a readable font color per type
+  LIGHT_TEXT_TYPES = %w[Nightclub/Club Rooftop Boat].freeze
 
   rails_admin do
     list do
@@ -29,15 +68,30 @@ class Venue < ApplicationRecord
     self.city_key ||= (Current.city_key.presence || "movement")
   end
 
-  def type_style
-    VENUE_TYPE_STYLES[venue_type] || VENUE_TYPE_STYLES["Other"]
+  def palette_for_type
+    VENUE_TYPE_PALETTES[venue_type] || GREY_SHADES
+  end
+
+  def shade_seed
+    Zlib.crc32((id || name || "venue").to_s)
+  end
+
+  def shade_index
+    shade_seed % palette_for_type.length
   end
 
   def apply_type_colors
-    return unless city_key == "mmw" # only MMW
-    self.bg_color   = type_style[:bg]
-    self.font_color = type_style[:font]
+    return unless city_key == "mmw"
+
+    self.bg_color = palette_for_type[shade_index]
+    self.font_color =
+      if %w[Pool Small\ Intimate\ Venue].include?(venue_type)
+        "#111827" # dark text on bright colors
+      else
+        "#FFFFFF" # default light text
+      end
   end
+  private :palette_for_type, :shade_seed, :shade_index, :apply_type_colors
 
   def logo_url
     return nil unless logo.attached?
@@ -48,33 +102,4 @@ class Venue < ApplicationRecord
       client: Aws::S3::Client.new
     ).public_url
   end
-  require "zlib"
-
-  before_validation :apply_type_colors
-
-  def apply_type_colors
-    return unless city_key == "mmw"
-    base = BASE_VENUE_TYPE_STYLES[venue_type] || BASE_VENUE_TYPE_STYLES["Other"]
-
-    self.bg_color   = shade_hex(base[:bg], shade_seed)
-    self.font_color = base[:font]
-  end
-
-  def shade_seed
-    # stable per-venue; name changes will change shade (ok) — use id if you prefer once present
-    Zlib.crc32((id || name || "venue").to_s)
-  end
-
-  def shade_hex(hex, seed)
-    # much wider: 0.55 .. 1.25 (noticeable)
-    factor = 0.40 + ((seed % 96) / 100.0) # 0.55..1.25
-
-    r, g, b = hex.delete("#").scan(/../).map { |c| c.to_i(16) }
-    r = [[(r * factor).round, 0].max, 255].min
-    g = [[(g * factor).round, 0].max, 255].min
-    b = [[(b * factor).round, 0].max, 255].min
-    format("#%02X%02X%02X", r, g, b)
-  end
-
-  private :shade_seed, :shade_hex
 end
