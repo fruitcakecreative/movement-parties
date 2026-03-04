@@ -62,7 +62,7 @@ class Venue < ApplicationRecord
   end
 
   before_validation :default_city_key, on: :create
-  before_validation :apply_type_colors
+  # before_validation :apply_type_colors
 
   def default_city_key
     self.city_key ||= (Current.city_key.presence || "movement")
