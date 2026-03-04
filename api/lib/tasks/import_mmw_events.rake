@@ -82,9 +82,9 @@ namespace :import do
 
             unless event.manual_override_ticket
               event.update!(
-                ticket_tier: ticket_info["tier"],
-                ticket_price: raw_price ? raw_price.gsub("$", "").to_f : 0,
-                ticket_wave: ticket_info["current_tier"]
+                ticket_tier:  ticket_info["tier"],
+                ticket_price: raw_price.present? ? raw_price.delete("$").to_f : nil,
+                ticket_wave:  ticket_info["current_tier"]
               )
             end
 
