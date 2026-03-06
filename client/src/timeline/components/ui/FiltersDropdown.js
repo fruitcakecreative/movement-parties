@@ -35,7 +35,7 @@ const FiltersDropdown = ({
   return (
     <div className="dropdown-wrapper filters">
     {/* Party Type Section */}
-    <div className="small-opt-wrapper party-wrapper padding">
+    <div className="small-opt-wrapper party-wrapper">
       <div className="hide-movement option-item bold parent party">Event Type Legend (click to filter):</div>
       <div className="hide-movement pill-row flex-wrap">
         {partyOptions.map((party) => (

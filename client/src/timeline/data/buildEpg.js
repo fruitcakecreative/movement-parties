@@ -47,7 +47,7 @@ export function createEpg(events) {
         till: event.formatted_end_time,
         start_time: formatToHourLabel(event.start_time),
         end_time: formatToHourLabel(event.end_time),
-        ticket_label: event.ticket_price === '0.0' ? 'FREE' : `$${event.ticket_price}`,
+        ticket_label: event.ticket_price === '0.0' ? '??' : `$${event.ticket_price}`,
         tier_label: tierLabel,
         ...(isTBA
           ? {

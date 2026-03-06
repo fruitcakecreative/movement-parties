@@ -61,8 +61,18 @@ namespace :import do
                 []
               end
 
-            ticket_info = event_data["ticket_info"] || {}
-            raw_price = ticket_info["price"]&.to_s&.split("+")&.first&.strip
+              ticket_info = event_data["ticket_info"] || {}
+
+              raw_price = ticket_info["price"]&.to_s&.split("+")&.first&.strip
+              raw_price = nil if raw_price.blank? || raw_price.downcase == "null"
+
+              unless event.manual_override_ticket
+                event.update!(
+                  ticket_tier:  ticket_info["tier"],
+                  ticket_price: raw_price ? BigDecimal(raw_price.delete("$,")) : nil,
+                  ticket_wave:  ticket_info["current_tier"]
+                )
+              end
 
             event = Event.find_or_initialize_by(city_key: city, event_url: event_url)
 
@@ -79,14 +89,6 @@ namespace :import do
 
             event.assign_attributes(attrs)
             event.save!
-
-            unless event.manual_override_ticket
-              event.update!(
-                ticket_tier:  ticket_info["tier"],
-                ticket_price: raw_price.present? ? raw_price.delete("$").to_f : nil,
-                ticket_wave:  ticket_info["current_tier"]
-              )
-            end
 
             event.genres = genres unless event.manual_override_genres
 
