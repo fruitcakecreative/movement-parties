@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Disclosure } from '@headlessui/react';
 
 const cityKey = process.env.REACT_APP_CITY_KEY;
-const logoSrc = `${process.env.PUBLIC_URL}/${cityKey}/logo.png`;
 const pageTitle = process.env.REACT_APP_PAGE_TITLE;
 
 
@@ -23,8 +22,6 @@ function MainHeader() {
     const user = JSON.parse(localStorage.getItem("user"));
     navigate(user ? "/profile" : "/login");
   };
-
-  const [logoError, setLogoError] = useState(false);
 
   return (
   <div className="section header-con">
