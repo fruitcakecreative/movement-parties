@@ -2,10 +2,8 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Disclosure } from '@headlessui/react';
 
-const cityKey = process.env.REACT_APP_CITY_KEY;
+
 const pageTitle = process.env.REACT_APP_PAGE_TITLE;
-
-
 
 const navigation = [
   { name: 'Home', href: '/' },
