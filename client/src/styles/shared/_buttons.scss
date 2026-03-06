@@ -1,0 +1,61 @@
+@use "./variables" as *;
+@use "./mixins" as *;
+
+.button {
+  @include button-reset;
+  @include flex-center($space-2);
+
+  padding: 0.5em 1em;
+  border-radius: var(--radius-button);
+  font-family: var(--font-body);
+  font-size: $text-base;
+  font-weight: $weight-semibold;
+  line-height: 1;
+  background: var(--color-primary);
+  color: var(--color-button-text);
+  transition: background $transition-base, color $transition-base, border-color $transition-base, transform $transition-fast;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+.button--secondary {
+  background: transparent;
+  color: var(--color-primary);
+  border: $border-thin solid var(--color-primary);
+}
+
+.button--ghost {
+  background: transparent;
+  color: var(--color-text);
+}
+
+.button--sm {
+  font-size: $text-sm;
+  padding: 0.65em 1em;
+}
+
+.button--lg {
+  font-size: $text-lg;
+  padding: 0.85em 1.5em;
+}
+
+.button--full {
+  width: 100%;
+}
+
+.icon {
+  font-size: 1.5rem;
+}

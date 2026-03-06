@@ -1,0 +1,85 @@
+@use "./variables" as *;
+@use "./mixins" as *;
+
+/* Main page container */
+.container {
+   @include container;
+}
+
+/* Section spacing */
+.section {
+  padding-block: $space-7;
+
+  @media (min-width: $bp-md) {
+    padding-block: $space-9;
+  }
+}
+
+
+
+/* Vertical spacing utilities */
+
+.stack-xs > * + * {
+  margin-top: $space-2;
+}
+
+.stack-sm > * + * {
+  margin-top: $space-3;
+}
+
+.stack-md > * + * {
+  margin-top: $space-4;
+}
+
+.stack-lg > * + * {
+  margin-top: $space-6;
+}
+
+.stack-xl > * + * {
+  margin-top: $space-8;
+}
+
+/* Simple grid */
+
+.grid {
+  display: grid;
+  gap: $space-6;
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Flex helpers */
+
+.flex {
+  display: flex;
+  column-gap: 15px;
+}
+
+.flex-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 15px;
+  row-gap: 5px;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

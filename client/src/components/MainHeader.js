@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Disclosure } from '@headlessui/react';
 
 const cityKey = process.env.REACT_APP_CITY_KEY;
 const logoSrc = `${process.env.PUBLIC_URL}/${cityKey}/logo.png`;
+const pageTitle = process.env.REACT_APP_PAGE_TITLE;
+
+
 
 const navigation = [
   { name: 'Home', href: '/' },
@@ -21,10 +24,14 @@ function MainHeader() {
     navigate(user ? "/profile" : "/login");
   };
 
+  const [logoError, setLogoError] = useState(false);
+
   return (
-  <div className="header-con">
-    <div className="logo-con"><img alt={`${cityKey} parties logo`} src={logoSrc} /></div>
-    <div className="menu-con">
+  <div className="section header-con">
+    <div className="container logo-con">
+        <h1>{pageTitle}</h1>
+    </div>
+    <div className="hide menu-con">
       <div className="hide profile">
         <button onClick={profileClick}><i className="fa-solid fa-user"></i></button>
       </div>

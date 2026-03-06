@@ -1,0 +1,79 @@
+// Spacing
+$space-0: 0;
+$space-1: 0.25rem;   // 4px
+$space-2: 0.5rem;    // 8px
+$space-3: 0.75rem;   // 12px
+$space-4: 1rem;      // 16px
+$space-5: 1.25rem;   // 20px
+$space-6: 1.5rem;    // 24px
+$space-7: 2rem;      // 32px
+$space-8: 2.5rem;    // 40px
+$space-9: 3rem;      // 48px
+$space-10: 4rem;     // 64px
+
+// Font sizes
+$text-xs: 0.75rem;   // 12px
+$text-sm: 0.875rem;  // 14px
+$text-base: 1rem;    // 16px
+$text-md: 1.125rem;  // 18px
+$text-lg: 1.25rem;   // 20px
+$text-xl: 1.5rem;    // 24px
+$text-2xl: 1.75rem;     // 32px
+$text-3xl: 2rem;   // 40px
+$text-4xl: 2.5rem;     // 48px
+$text-5xl: 3rem;
+
+// Line heights
+$line-tight: 1.1;
+$line-snug: 1.25;
+$line-normal: 1.5;
+$line-relaxed: 1.7;
+
+// Font weights
+$weight-regular: 400;
+$weight-medium: 500;
+$weight-semibold: 600;
+$weight-bold: 700;
+
+// Border radius
+$radius-sm: 0.375rem;  // 6px
+$radius-md: 0.625rem;  // 10px
+$radius-lg: 1rem;      // 16px
+$radius-xl: 1.5rem;    // 24px
+$radius-pill: 9999rem;
+
+// Borders
+$border-thin: 1px;
+$border-thick: 2px;
+
+// Layout widths
+$container-sm: 40rem;   // 640px
+$container-md: 48rem;   // 768px
+$container-lg: 64rem;   // 1024px
+$container-xl: 75rem;   // 1200px
+$container-2xl: 87.5rem; // 1400px
+
+// Breakpoints
+$bp-sm: 36rem;   // 576px
+$bp-md: 48rem;   // 768px
+$bp-lg: 64rem;   // 1024px
+$bp-xl: 75rem;   // 1200px
+$bp-2xl: 87.5rem; // 1400px
+
+// Z-index
+$z-base: 1;
+$z-dropdown: 100;
+$z-sticky: 200;
+$z-overlay: 500;
+$z-modal: 1000;
+$z-tooltip: 1100;
+
+// Transitions
+$transition-fast: 0.15s ease;
+$transition-base: 0.25s ease;
+$transition-slow: 0.4s ease;
+
+// Shadows
+$shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.08);
+$shadow-md: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.12);
+$shadow-lg: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.16);

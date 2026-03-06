@@ -10,7 +10,7 @@ class Venue < ApplicationRecord
 
   # Palettes (light -> dark)
   RED_SHADES = %w[
-    #F2C1C3 #E18D91 #D5575D #C72C35 #75191F #4B1013
+    #F2C1C3 #EBAEB0 #E18D91 #D87378 #D5575D #CF3B43 #C72C35 #A2242C #75191F
   ].freeze
 
   ORANGE_SHADES = %w[
@@ -22,7 +22,18 @@ class Venue < ApplicationRecord
   ].freeze
 
   GREEN_SHADES = %w[
-    #CFF2D9 #95DFAE #52C77B #1FA950 #1A8640 #12602E #0A3A1B
+    #E6F7ED
+    #CFF2D9
+    #B8EBC8
+    #95DFAE
+    #74D395
+    #52C77B
+    #2FBB60
+    #1FA950
+    #1A8640
+    #12602E
+    #0A3A1B
+    #051F0F
   ].freeze
 
   BLUE_SHADES = %w[

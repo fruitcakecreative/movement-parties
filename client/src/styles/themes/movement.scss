@@ -1,0 +1,44 @@
+:root {
+  --font-body: "Roboto", sans-serif;
+  --font-heading: "Techno", sans-serif;
+
+  --color-background: #ffeeda;
+
+  --color-bg-dark: #0c0c0c;
+  --color-text-light: #ffeeda;
+  --color-text: #0c0c0c;
+
+  --color-text-dark: #0c0c0c;
+  --color-link: #737373;
+
+  --color-primary: #ff6e26;
+  --color-button-text: #ffffff;
+
+  --color-title: #ff6e26;
+
+  --color-search-bar: #444;
+  --color-filter-text: #ffeeda;
+
+  --color-soft: #242424;
+
+  --radius-button: .25rem;
+  --radius-card: .5rem;
+}
+
+.movement-hide {
+  display: none;
+}
+
+$black: #0d0d0d;
+
+$white: #fdfdfd;
+
+$pink: #ff69b4;
+
+$green: #a8ff60;
+
+$blue: #4fc3f7;
+
+$orange: #ff6700;
+
+$purple: #9c27b0;

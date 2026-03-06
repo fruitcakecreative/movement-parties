@@ -120,17 +120,12 @@ setEventsByDate(grouped);
 
   return (
     <div style={{ width: '100%', height: '100%', whiteSpace: 'nowrap' }}>
-      <div className="heading" style={{ textAlign: 'center', margin: '20px 0' }}>
-        <div className="info-con">
-          <p className="bio">
-            <b>
-              Welcome to MovementParties.com<i className="fa-regular fa-heart"></i>
-            </b>{' '}
-            <br></br>
-          </p>
-          <p className="mini-heading">
+      <div className="section info-con">
+
+        <div className="container">
+          <h3 className="mini-heading">
             Relevant Info <i className="fa-solid fa-circle-info"></i>
-          </p>
+        </h3>
           <ul>
             <li>
               The site scrapes basic event data from RA. All other events + specific event info that
@@ -151,61 +146,70 @@ setEventsByDate(grouped);
               <i className="fa-regular fa-heart"></i>
             </li>
           </ul>
+          </div>
 
-          <p className="mini-heading">
+          <div className="container">
+          <h3 className="mini-heading">
             Connect with Me <i className="fa-solid fa-heart"></i>
-          </p>
-          <div className="socials">
-            <a target="_blank" rel="noreferrer" href="https://instagram.com/carlymarsh">
-              <i className="fa-brands fa-instagram"></i> Instagram
+        </h3>
+
+          <div className="socials flex-wrap">
+            <a className="flex-center" target="_blank" rel="noreferrer" href="https://instagram.com/carlymarsh">
+              <i className="highlight icon fa-brands fa-instagram"></i> Instagram
             </a>
-            <a target="_blank" rel="noreferrer" href="https://facebook.com/carly.marsh1">
-              <i className="fa-brands fa-square-facebook"></i> Facebook
+            <a className="flex-center" target="_blank" rel="noreferrer" href="https://facebook.com/carly.marsh1">
+              <i className="highlight icon fa-brands fa-square-facebook"></i> Facebook
             </a>
-            <a target="_blank" rel="noreferrer" href="mailto:carlypmarsh@gmail.com">
-              <i className="fa-solid fa-envelope"></i> carlypmarsh@gmail.com
+            <a className="flex-center" target="_blank" rel="noreferrer" href="mailto:carlypmarsh@gmail.com">
+              <i className="highlight icon fa-solid fa-envelope"></i> carlypmarsh@gmail.com
             </a>
             <a
+              className="flex-center"
               target="_blank"
               rel="noreferrer"
               href="https://www.linkedin.com/in/carly-marsh-a4735316a/"
             >
-              <i className="fa-brands fa-linkedin"></i> LinkedIn *sigh*
+              <i className="highlight icon fa-brands fa-linkedin"></i> LinkedIn *sigh*
             </a>
           </div>
 
-          <p className="mini-heading">
-            Support the Cause <i className="fa-solid fa-handshake-angle"></i>
-          </p>
-          <p className="pay-me-blurb">
+          </div>
+
+          <div className="container">
+            <h3 className="mini-heading">
+              Support the Cause <i className="fa-solid fa-handshake-angle"></i>
+          </h3>
+
+          <p className="mb-sm">
             I made this out of pure love for the party and expect nothing in return. But, I do pay
             for the domain, server and software costs. If you'd like to show me some love or buy me
             a coffee for my efforts, I wouldn't mind <i className="fa-regular fa-heart"></i>
           </p>
-          <div className="pay-me">
-            <a target="_blank" rel="noreferrer" href="https://venmo.com/u/CarlyMarsh7">
+          <div className="flex mb-sm">
+            <a className="button" target="_blank" rel="noreferrer" href="https://venmo.com/u/CarlyMarsh7">
               Venmo
             </a>
-            <a target="_blank" rel="noreferrer" href="https://cash.app/$carlymarsh7">
+            <a className="button" target="_blank" rel="noreferrer" href="https://cash.app/$carlymarsh7">
               CashApp
             </a>
-            <a target="_blank" rel="noreferrer" href="https://paypal.me/carlypmarsh">
+            <a className="button" target="_blank" rel="noreferrer" href="https://paypal.me/carlypmarsh">
               PayPal
             </a>
           </div>
-          <p className="etrans-con">
-            <span className="etrans">carlypmarsh@gmail.com</span>
+          <p className="">
+            <span className="highlight bold">carlypmarsh@gmail.com</span>
             <br></br>
             <span className="etrans-blurb">
               e-transfer email for my fellow Canadians
               <i className="fa-brands fa-canadian-maple-leaf"></i>
             </span>
           </p>
-          <p className="mini-heading">
-            And Finally... THE PARTIES <i className="fa-solid fa-arrow-down"></i>
-          </p>
-        </div>
+          </div>
       </div>
+
+    <div class="section timeline-con">
+
+    <div class="container">
 
       <DateDropdown selectedDate={selectedDate} setSelectedDate={setSelectedDate} dates={dates} />
 
@@ -259,6 +263,7 @@ setEventsByDate(grouped);
             </div>
           )}
 
+
           {(selectedDate === 'all' ? dates : [selectedDate]).map((date) => {
             let dayEvents = eventsByDate[date] || [];
 
@@ -309,6 +314,7 @@ setEventsByDate(grouped);
               );
             }
 
+
             return (
               <MultiDayTimeline
                 key={date}
@@ -328,10 +334,12 @@ setEventsByDate(grouped);
           <LoadCustomScript />
         </>
       )}
+      </div>
 
       {modalStack.map((modalProps, i) => (
         <ModalLayout key={i} {...modalProps} />
       ))}
+    </div>
     </div>
   );
 }

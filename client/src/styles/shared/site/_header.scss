@@ -1,0 +1,11 @@
+@use "../variables" as *;
+
+.header-con {
+  text-align: center;
+  padding-bottom: 0;
+  h1 {
+    font-size: 3rem;
+    line-height: 3rem;
+    color: var(--color-title);
+  }
+}

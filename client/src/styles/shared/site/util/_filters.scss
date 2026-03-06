@@ -1,0 +1,225 @@
+@use "../../variables" as *;
+
+.dropdown-wrapper {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.dropdown-arrow {
+  float: right;
+}
+
+//dropdown date menu
+.dropdown-btn {
+  padding: 8px 12px;
+  background: var(--color-bg-dark);
+  color: var(--color-text-light);
+  border-radius: var(--radius-card);
+  @media (min-width: 768px) {
+  }
+}
+
+.dropdown-options {
+  margin-top: 4px;
+  background: var(--color-soft);
+  border-color: var(--color-bg-light);
+  border: 1px solid;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+
+.option-item {
+  padding: 8px 12px;
+  color: var(--color-filter-text);
+  // font-weight: bold;
+  cursor: pointer;
+}
+
+.option-item.active {
+  color: var(--color-text-light);
+  background-color: var(--color-bg-dark);
+}
+
+.option-item.selected {
+  font-weight: bold;
+}
+
+.dropdown-wrapper.filters {
+  .option-item input[type='checkbox'] {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: var(--color-background);
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .option-item input[type='checkbox']:checked::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 4px;
+    width: 5px;
+    height: 12px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+  }
+  .option-item.genre input[type='checkbox']:checked::after {
+    border-color: pink;
+  }
+
+  .option-item.cost input[type='checkbox']:checked::after {
+    border-color: green;
+  }
+
+  .option-item.age input[type='checkbox']:checked::after {
+    border-color: purple;
+  }
+
+  .dropdown-btn {
+    padding: 3px 12px;
+    font-size: 0.9em;
+  }
+  .dropdown-options {
+    padding: 10px 0px;
+    .genre {
+      // color: pink;
+    }
+    button.option-item,
+    .option-item.parent,
+    .option-item.artists {
+      background-color: var(--color-bg-dark);
+      color: var(--color-text-light);
+      padding: 5px 12px;
+      margin: 5px auto;
+      margin-bottom: 0px;
+      border-radius: 10px;
+      width: calc(100% - 40px);
+    }
+    .option-item.artists {
+      background: none;
+      color: black;
+      width: calc(100% - 35px);
+      padding: 0;
+      margin: 0;
+      margin-left: 10px;
+      margin-bottom: 10px;
+
+      input {
+        width: 100%;
+        border-radius: 5px;
+        background-color: var(--color-search-bar);
+        padding: 3px 5px;
+        color: var(--color-primary);
+      }
+      input:focus-visible {
+        outline: none;
+      }
+    }
+    .option-item.artist-search {
+      border: 1px solid;
+      border-color: var(--color-bg-dark);
+      width: calc(100% - 15px);
+      border-radius: 5px;
+      max-height: 300px;
+      overflow-y: scroll;
+      margin-top: 5px;
+      margin-left: 1px;
+      .option-item {
+        text-align: left;
+        padding: 0;
+        font-size: 0.8em;
+        padding-bottom: 5px;
+      }
+    }
+    button.option-item {
+      display: flex;
+      font-weight: bold;
+      font-size: 0.8em;
+      justify-content: space-between;
+    }
+    .option-item-wrapper {
+      width: calc(100% - 50px);
+      padding: 10px 12px;
+      display: flex;
+      flex-wrap: wrap;
+      column-gap: 10px;
+      row-gap: 5px;
+      .option-item {
+        display: flex;
+        align-items: start;
+        padding: 3px 5px;
+        font-size: 0.75em;
+        width: 125px;
+        white-space: normal;
+        text-align: left;
+        color: var(--color-filter-text);
+        input {
+          margin-right: 4px;
+          margin-top: -0.3px;
+          background-color: var(--color-text-light);
+          border: 1px solid;
+        }
+      }
+    }
+    .small-opt-wrapper {
+      display: flex;
+      width: calc(100% - 20px);
+      flex-wrap: wrap;
+      margin: 0 auto;
+      margin-top: 7px;
+      column-gap: 7px;
+      align-items: center;
+      .parent {
+        width: 50px;
+        margin: 0;
+        font-weight: bold;
+        font-size: 0.8em;
+      }
+      .child {
+        padding: 0;
+        font-size: 0.8em;
+        input {
+          margin-right: 3px;
+          margin-top: -0.3px;
+        }
+      }
+    }
+  }
+}
+
+.active-filters {
+  .filter-reset {
+    border: 1px solid white;
+    font-weight: bold;
+  }
+  .filter-pill,
+  .filter-reset {
+    border-radius: 5px;
+    padding: 3px 5px;
+    font-size: 0.8em;
+    span {
+      font-weight: bold;
+    }
+  }
+  .filter-pill.genre {
+    background-color: pink;
+    color: var(--color-bg-dark);
+  }
+  .filter-pill.cost {
+    background-color: green;
+    color: var(--color-bg-dark);
+  }
+  .filter-pill.age {
+    background-color: purple;
+  }
+  .filter-pill.artist {
+    background-color: orange;
+  }
+}

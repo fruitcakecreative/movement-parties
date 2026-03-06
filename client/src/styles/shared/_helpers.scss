@@ -1,0 +1,40 @@
+@use "./variables" as *;
+@use "./mixins" as *;
+
+.hide {
+  display: none !important;
+}
+
+.m-hide {
+  display: none;
+  @media (min-width: 768px) {
+    display: inline-block;
+  }
+}
+
+.d-hide {
+  @media (min-width: 768px) {
+    display: none;
+  }
+}
+
+.center {
+  text-align: center;
+}
+
+.bold {
+  font-weight: bolder;
+}
+
+.highlight {
+  color: var(--color-primary);
+}
+
+
+.mb-sm {
+  margin-bottom: $space-3;
+}
+
+.full-width {
+  width: 100%;
+}

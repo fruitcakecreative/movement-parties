@@ -1,0 +1,14 @@
+@use "../variables" as *;
+@use "../mixins" as *;
+
+.info-con {
+  font-size: $text-sm;
+  margin-top: -15px;
+  padding-bottom: 10px;
+  ul li {
+    margin-bottom: 5px;
+  }
+  .socials a {
+    column-gap: 5px;
+  }
+}

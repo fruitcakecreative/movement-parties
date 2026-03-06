@@ -1,0 +1,71 @@
+@use "./variables" as *;
+
+@mixin container($max: $container-2xl) {
+  width: calc(100% - #{2 * $space-4});
+  max-width: $max;
+  margin-inline: auto;
+  margin-bottom: $space-6;
+
+  @media (min-width: $bp-md) {
+    width: calc(100% - #{2 * $space-6});
+  }
+
+  @media (min-width: $bp-lg) {
+    width: calc(100% - #{2 * $space-8});
+  }
+}
+
+@mixin section-spacing($mobile: $space-8, $desktop: $space-9) {
+  padding-block: $mobile;
+
+  @media (min-width: $bp-md) {
+    padding-block: $desktop;
+  }
+}
+
+@mixin heading-style($size, $line: $line-tight, $weight: $weight-bold) {
+  font-family: var(--font-heading);
+  font-size: $size;
+  line-height: $line;
+  font-weight: $weight;
+}
+
+@mixin button-reset {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+
+@mixin flex-row($justify: flex-start, $align: center, $gap: 0) {
+  display: flex;
+  flex-direction: row;
+  justify-content: $justify;
+  align-items: $align;
+  gap: $gap;
+}
+
+@mixin flex-column($justify: flex-start, $align: stretch, $gap: 0) {
+  display: flex;
+  flex-direction: column;
+  justify-content: $justify;
+  align-items: $align;
+  gap: $gap;
+}
+
+@mixin flex-center($gap: 0) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: $gap;
+}
+
+@mixin flex-between($align: center, $gap: 0) {
+  display: flex;
+  justify-content: space-between;
+  align-items: $align;
+  gap: $gap;
+}

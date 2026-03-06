@@ -1,0 +1,59 @@
+@use "./variables" as *;
+
+h1 {
+  font-family: var(--font-heading);
+  font-size: $text-4xl;
+  line-height: $line-tight;
+  font-weight: $weight-bold;
+}
+
+h2 {
+  font-family: var(--font-heading);
+  font-size: $text-3xl;
+  line-height: $line-tight;
+  font-weight: $weight-semibold;
+}
+
+h3 {
+  font-family: var(--font-heading);
+  font-size: $text-2xl;
+  line-height: $line-snug;
+  font-weight: $weight-semibold;
+  margin-bottom: 5px;
+}
+
+h4 {
+  font-family: var(--font-heading);
+  font-size: $text-xl;
+  line-height: $line-snug;
+  font-weight: $weight-medium;
+}
+
+p {
+  font-size: $text-sm;
+  line-height: $line-normal;
+}
+
+.text-sm {
+  font-size: $text-sm;
+}
+
+.text-lg {
+  font-size: $text-lg;
+}
+
+.text-xl {
+  font-size: $text-xl;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-bold {
+  font-weight: $weight-bold;
+}
+
+.text-medium {
+  font-weight: $weight-medium;
+}

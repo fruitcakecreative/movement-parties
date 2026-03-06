@@ -5,7 +5,7 @@ const DateDropdown = ({ selectedDate, setSelectedDate, dates }) => {
   return (
     <div className="w-64 dropdown-wrapper">
       <Listbox value={selectedDate} onChange={setSelectedDate}>
-        <Listbox.Button className="dropdown-btn">
+        <Listbox.Button className="bold full-width dropdown-btn">
           {selectedDate === 'all'
             ? 'All Days'
             : new Date(`${selectedDate}T12:00:00`).toLocaleDateString('en-US', {

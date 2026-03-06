@@ -28,7 +28,7 @@ const FiltersDropdown = ({
       <Disclosure>
         {({ open }) => (
           <>
-            <Disclosure.Button className="dropdown-btn">
+            <Disclosure.Button className="bold full-width dropdown-btn">
               <span>Other Filters</span>
               <span className="dropdown-arrow">{open ? '▴' : '▾'}</span>
             </Disclosure.Button>

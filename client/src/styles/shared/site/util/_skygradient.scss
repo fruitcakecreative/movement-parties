@@ -1,0 +1,284 @@
+//timline daylight hours
+
+.timeline-day.hours-15 {
+  .timeline-wrapper {
+    background: none !important;
+    background: linear-gradient(
+      to right,
+      #fef46f 0%,
+      #fef46f 34%,
+      #ffc665 39%,
+      #ffc665 44%,
+      #3a6476 50%,
+      #1c3d4b 52%,
+      #10252f 60%,
+      #10252f 90%,
+      #1c3d4b 92%,
+      #3a6476 100%
+    ) !important;
+    .timeline-time {
+      color: black;
+    }
+    [data-index='0'] {
+      display: none;
+    }
+    [data-index='7'],
+    [data-index='8'],
+    [data-index='9'],
+    [data-index='10'],
+    [data-index='11'],
+    [data-index='12'],
+    [data-index='13'],
+    [data-index='14'] {
+      color: white;
+    }
+  }
+}
+
+.timeline-day.hours-16 {
+  .timeline-wrapper {
+    background: none !important;
+    background: linear-gradient(
+      to right,
+      #fef46f 0%,
+      #fef46f 53%,
+      #ffc665 58%,
+      #ffc665 63%,
+      #3a6476 70%,
+      #1c3d4b 72%,
+      #10252f 75%,
+      #10252f 100%
+    ) !important;
+    .timeline-time {
+      color: black;
+    }
+    [data-index='0'] {
+      display: none;
+    }
+    [data-index='11'],
+    [data-index='12'],
+    [data-index='13'],
+    [data-index='14'],
+    [data-index='15'] {
+      color: white;
+    }
+  }
+}
+
+.timeline-day.hours-21 {
+  .timeline-wrapper {
+    background: none !important;
+    background: linear-gradient(
+      to right,
+      #fef46f 0%,
+      #fef46f 34%,
+      #ffc665 39%,
+      #ffc665 41%,
+      #3a6476 45%,
+      #1c3d4b 47%,
+      #10252f 48%,
+      #10252f 75%,
+      #1c3d4b 80%,
+      #3a6476 82%,
+      #abdfff 85%,
+      #fffcce 87%,
+      #fef46f 89%,
+      #fef46f 100%
+    ) !important;
+    .timeline-time {
+      color: black;
+    }
+    [data-index='0'] {
+      display: none;
+    }
+    [data-index='10'],
+    [data-index='11'],
+    [data-index='12'],
+    [data-index='13'],
+    [data-index='14'],
+    [data-index='15'],
+    [data-index='16'],
+    [data-index='17'] {
+      color: white;
+    }
+  }
+}
+
+.timeline-day.hours-23 {
+  .timeline-wrapper {
+    background: none !important;
+    background: linear-gradient(
+      to right,
+      #fef46f 0%,
+      #fef46f 32%,
+      #ffc665 36%,
+      #ffc665 38%,
+      #3a6476 43%,
+      #1c3d4b 45%,
+      #10252f 48%,
+      #10252f 69%,
+      #1c3d4b 74%,
+      #3a6476 76%,
+      #abdfff 79%,
+      #abdfff 82%,
+      #fffcce 84%,
+      #fef46f 89%,
+      #fef46f 100%
+    ) !important;
+    .timeline-time {
+      color: black;
+    }
+    [data-index='0'] {
+      display: none;
+    }
+    [data-index='10'],
+    [data-index='11'],
+    [data-index='12'],
+    [data-index='13'],
+    [data-index='14'],
+    [data-index='15'],
+    [data-index='16'],
+    [data-index='17'] {
+      color: white;
+    }
+  }
+}
+
+.timeline-day.hours-25 {
+  .timeline-wrapper {
+    background: none !important;
+    background: linear-gradient(
+      to right,
+      #fef46f 0%,
+      #fef46f 34%,
+      #ffc665 39%,
+      #ffc665 41%,
+      #3a6476 45%,
+      #1c3d4b 47%,
+      #10252f 48%,
+      #10252f 68%,
+      #1c3d4b 70%,
+      #3a6476 73%,
+      #abdfff 75%,
+      #fffcce 77%,
+      #fef46f 82%,
+      #fef46f 100%
+    ) !important;
+  }
+}
+
+.timeline-day.hours-26 {
+  .timeline-wrapper {
+    background: none !important;
+    background: linear-gradient(
+      to right,
+      #fef46f 0%,
+      #fef46f 34%,
+      #ffc665 39%,
+      #ffc665 41%,
+      #3a6476 45%,
+      #1c3d4b 47%,
+      #10252f 48%,
+      #10252f 68%,
+      #1c3d4b 70%,
+      #3a6476 73%,
+      #abdfff 75%,
+      #fffcce 77%,
+      #fef46f 82%,
+      #fef46f 100%
+    ) !important;
+    .timeline-time {
+      color: black;
+    }
+    [data-index='0'] {
+      display: none;
+    }
+    [data-index='12'],
+    [data-index='13'],
+    [data-index='14'],
+    [data-index='15'],
+    [data-index='16'],
+    [data-index='17'],
+    [data-index='18'],
+    [data-index='19'] {
+      color: white;
+    }
+  }
+}
+.timeline-day.hours-27 {
+  .timeline-wrapper {
+    background: none !important;
+    background: linear-gradient(
+      to right,
+      #fef46f 0%,
+      #fef46f 50%,
+      #ffc665 53%,
+      #ffc665 56%,
+      #3a6476 59%,
+      #1c3d4b 61%,
+      #10252f 63%,
+      #10252f 80%,
+      #1c3d4b 83%,
+      #3a6476 86%,
+      #abdfff 90%,
+      #fffcce 92%,
+      #fef46f 94%,
+      #fef46f 100%
+    ) !important;
+    .timeline-time {
+      color: black;
+    }
+    [data-index='0'] {
+      display: none;
+    }
+    [data-index='16'],
+    [data-index='17'],
+    [data-index='18'],
+    [data-index='19'],
+    [data-index='20'],
+    [data-index='21'],
+    [data-index='22'],
+    [data-index='23'] {
+      color: white;
+    }
+  }
+}
+
+.timeline-day.hours-28 {
+  .timeline-wrapper {
+    background: none !important;
+    background: linear-gradient(
+      to right,
+      #fef46f 0%,
+      #fef46f 36%,
+      #ffc665 40%,
+      #ffc665 43%,
+      #3a6476 47%,
+      #1c3d4b 49%,
+      #10252f 52%,
+      #10252f 60%,
+      #1c3d4b 65%,
+      #3a6476 69%,
+      #abdfff 72%,
+      #fffcce 77%,
+      #fef46f 82%,
+      #fef46f 100%
+    ) !important;
+    .timeline-time {
+      color: black;
+    }
+    [data-index='0'] {
+      display: none;
+    }
+    [data-index='13'],
+    [data-index='14'],
+    [data-index='15'],
+    [data-index='16'],
+    [data-index='17'],
+    [data-index='18'],
+    [data-index='19'],
+    [data-index='20'] {
+      color: white;
+    }
+  }
+}

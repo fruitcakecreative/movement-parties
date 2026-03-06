@@ -1,0 +1,31 @@
+:root {
+  --font-body: "Lato", sans-serif;
+  --font-heading: "amoria", sans-serif;
+
+  --color-background: #D9CCC5;
+  --color-bg-dark: #262626;
+  --color-text: #262626;
+  --color-text-light: #D9CCC5;
+  --color-link: #59514F;
+  --color-primary: #A6958F;
+  --color-button-text: #ffffff;
+  --color-white: ##F2F2F2;
+
+  --color-title: #262626;
+
+  --color-soft: #A6958F;
+
+  --color-search-bar: #D9CCC5;
+  --color-filter-text: #191919;
+
+  --radius-button: 9999rem;
+  --radius-card: 1.5rem;
+}
+
+.mmw-hide {
+  display: none;
+}
+
+.header-con {
+  background-color: var(--color-background);
+}
