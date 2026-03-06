@@ -20,7 +20,7 @@ const DateDropdown = ({ selectedDate, setSelectedDate, dates }) => {
             <Listbox.Option key={date} value={date}>
               {({ selected, active }) => (
                 <div
-                  className={`option-item ${selected ? 'selected' : ''} ${active ? 'active' : ''}`}
+                  className={`padding-sm option-item ${selected ? 'selected' : ''} ${active ? 'active' : ''}`}
                 >
                   {date === 'all'
                     ? 'All Days'

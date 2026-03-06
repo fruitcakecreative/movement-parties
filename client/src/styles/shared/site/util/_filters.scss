@@ -29,7 +29,6 @@
 }
 
 .option-item {
-  padding: 8px 12px;
   color: var(--color-filter-text);
   // font-weight: bold;
   cursor: pointer;
@@ -54,7 +53,7 @@
     display: inline-block;
     vertical-align: middle;
     margin-right: 8px;
-    border-radius: 5px;
+    border-radius: var(--radius-button);
     cursor: pointer;
     position: relative;
   }
@@ -66,20 +65,21 @@
     left: 4px;
     width: 5px;
     height: 12px;
-    border: solid white;
+    border: solid;
+    border-color: var(--color-text-light);
     border-width: 0 3px 3px 0;
     transform: rotate(45deg);
   }
   .option-item.genre input[type='checkbox']:checked::after {
-    border-color: pink;
+    border-color: #DF6C99;
   }
 
   .option-item.cost input[type='checkbox']:checked::after {
-    border-color: green;
+    border-color: #52C77B;
   }
 
   .option-item.age input[type='checkbox']:checked::after {
-    border-color: purple;
+    border-color: #8C5ECE;
   }
 
   .dropdown-btn {
@@ -87,7 +87,6 @@
     font-size: 0.9em;
   }
   .dropdown-options {
-    padding: 10px 0px;
     .genre {
       // color: pink;
     }
@@ -96,27 +95,17 @@
     .option-item.artists {
       background-color: var(--color-bg-dark);
       color: var(--color-text-light);
-      padding: 5px 12px;
-      margin: 5px auto;
-      margin-bottom: 0px;
-      border-radius: 10px;
-      width: calc(100% - 40px);
+      border-radius: var(--radius-button);
     }
     .option-item.artists {
       background: none;
-      color: black;
-      width: calc(100% - 35px);
-      padding: 0;
-      margin: 0;
-      margin-left: 10px;
-      margin-bottom: 10px;
-
+      color: var(--color-text);
+      margin-bottom: 5px;
       input {
-        width: 100%;
-        border-radius: 5px;
+        border-radius: var(--radius-button);
         background-color: var(--color-search-bar);
-        padding: 3px 5px;
-        color: var(--color-primary);
+        padding: 3px 10px;
+        color: var(--color-text);
       }
       input:focus-visible {
         outline: none;
@@ -126,7 +115,7 @@
       border: 1px solid;
       border-color: var(--color-bg-dark);
       width: calc(100% - 15px);
-      border-radius: 5px;
+      border-radius: var(--radius-card);
       max-height: 300px;
       overflow-y: scroll;
       margin-top: 5px;
@@ -196,12 +185,14 @@
 
 .active-filters {
   .filter-reset {
-    border: 1px solid white;
+    border: 1px solid;
+    background-color: var(--color-soft);
+    border-color: var(--color-background);
     font-weight: bold;
   }
   .filter-pill,
   .filter-reset {
-    border-radius: 5px;
+    border-radius: var(--radius-button);
     padding: 3px 5px;
     font-size: 0.8em;
     span {
@@ -209,17 +200,102 @@
     }
   }
   .filter-pill.genre {
-    background-color: pink;
-    color: var(--color-bg-dark);
+    background-color: #DF6C99;
+    color: var(--color-text);
   }
   .filter-pill.cost {
-    background-color: green;
-    color: var(--color-bg-dark);
+    background-color: #52C77B;
+    color: var(--color-text);
   }
   .filter-pill.age {
-    background-color: purple;
+    background-color: #8C5ECE;
   }
   .filter-pill.artist {
-    background-color: orange;
+    background-color: #EA9B5C;
+  }
+}
+
+
+//party types
+
+.party-wrapper {
+  .party {
+    text-align: left;
+  }
+}
+
+.pill-row {
+  column-gap: 5px;
+  row-gap: 10px;
+  margin-bottom: 10px;
+  margin-top: 5px;
+  @media (min-width: $bp-md) {
+    column-gap: 10px;
+  }
+  button {
+    color: var(--color-text);
+    font-size: .85rem;
+  }
+  button.Boat {
+    background: linear-gradient(
+      135deg,
+      #C8E0F4 0%,
+      #8DBEE4 45%,
+      #4692CF 100%
+    );
+  }
+  button.Pool {
+    background: linear-gradient(
+      135deg,
+      #FFF3C4 0%,
+      #FFE682 45%,
+      #FFD433 100%
+    );
+  }
+  button.Rooftop {
+    background: linear-gradient(
+      135deg,
+      #EEC2D9 0%,
+      #DD9BBF 45%,
+      #DF6C99 100%
+    );
+  }
+  button.Restaurant\/Bar\/Lounge {
+    background: linear-gradient(
+      135deg,
+      #F2C1C3 0%,
+      #EBAEB0 28%,
+      #E18D91 58%,
+      #D87378 100%
+    );
+  }
+
+  button.Small {
+    background: linear-gradient(
+      135deg,
+      #F8D4B8 0%,
+      #F5C79E 30%,
+      #F0AE79 65%,
+      #EA9B5C 100%
+    );
+  }
+  button.Nightclub\/Club {
+    background: linear-gradient(
+      135deg,
+      #E2D4F3 0%,
+      #BB9EE4 40%,
+      #8C5ECE 100%
+    );
+  }
+
+  button.Music {
+    background: linear-gradient(
+      135deg,
+      #E6F7ED 0%,
+      #CFF2D9 25%,
+      #B8EBC8 50%,
+      #95DFAE 75%,
+      #52C77B 100%
+    );
   }
 }

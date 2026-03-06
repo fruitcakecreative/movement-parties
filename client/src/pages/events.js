@@ -32,6 +32,8 @@ function Events({ modalStack, setModalStack }) {
     genre: [],
     cost: [],
     age: [],
+    artist: [],
+    venueType: [],
   });
   const [artistOptions, setArtistOptions] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -255,7 +257,13 @@ setEventsByDate(grouped);
               <button
                 className="filter-reset"
                 onClick={() =>
-                  setFilterSelections({ genre: [], cost: [], age: [] /* add more here */ })
+                  setFilterSelections({
+                    genre: [],
+                    cost: [],
+                    age: [],
+                    artist: [],
+                    venueType: [],
+                  })
                 }
               >
                 Reset All Filters
@@ -293,6 +301,12 @@ setEventsByDate(grouped);
                 ];
                 return allNames.some((name) => filterSelections.artist.includes(name));
               });
+            }
+
+            if (filterSelections.venueType && filterSelections.venueType.length > 0) {
+              dayEvents = dayEvents.filter((event) =>
+                filterSelections.venueType.includes(event.venue?.venue_type)
+              );
             }
 
             const epg = createEpg(dayEvents);
