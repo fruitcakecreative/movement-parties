@@ -27,8 +27,8 @@ const MultiDayTimeline = ({
       setDimensions({
         isMobile,
         hourWidth: isMobile ? 35 : 65,
-        itemHeight: isMobile ? 60 : 90,
-        sidebarWidth: isMobile ? 65 : 120,
+        itemHeight: isMobile ? 75 : 90,
+        sidebarWidth: isMobile ? 75 : 120,
       });
     };
 
