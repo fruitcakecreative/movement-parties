@@ -1,0 +1,114 @@
+.events-page {
+  width: 100%;
+}
+
+.events-page__main {
+  width: 100%;
+}
+
+.events-page.has-selected-event {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.events-page.has-selected-event .events-page__main {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.events-page.has-selected-event .event-details-panel {
+  width: 420px;
+  min-width: 420px;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+
+.event-details-content {
+  padding: 20px;
+}
+
+.event-details-close {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.event-details-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin-bottom: 16px;
+}
+
+.desktop-only {
+  display: block;
+}
+
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .events-page.has-selected-event {
+    display: block;
+    height: auto;
+    overflow: visible;
+  }
+
+  .events-page.has-selected-event .events-page__main {
+    height: auto;
+    overflow: visible;
+  }
+
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-only {
+    display: block;
+  }
+
+  .event-details-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: var(--color-background, #111);
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}
+
+
+.description-preview {
+  display: inline;
+}
+
+.description-inline-toggle {
+  display: inline;
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: var(--color-primary);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.genre-pills {
+  column-gap: 10px;
+}
+
+.event-genres {
+  .genre-pill.Techno {
+    border: 1px solid;
+    border-color: var(--color-text-light);
+  }
+}

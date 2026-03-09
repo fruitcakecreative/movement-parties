@@ -25,15 +25,6 @@
 //genre tags
 .genre-tags {
   padding-bottom: 5px;
-  .genre-pill {
-    border-radius: 3px;
-    padding: 2px 5px;
-    text-align: center;
-    margin: 0;
-    margin-bottom: 3px;
-    margin-right: 3px;
-    margin: 3px 3px 3px 0px;
-  }
 }
 
 .planby {
@@ -95,7 +86,8 @@
               overflow: hidden;
               p {
                 margin: 0;
-                white-space: wrap;
+                word-break: normal;
+                overflow-wrap: normal;
                 font-size: 12px;
                 line-height: 12px;
               }
@@ -110,19 +102,24 @@
               .venue-logo {
                 // border: 1px solid hotpink;
                 max-width: 100%;
-                max-height: calc(100% - 5px);
+                max-height: calc(100% - 10px);
               }
               .venue-subheading {
                 width: 100%;
                 margin: 0;
                 margin-top: 0px;
-                font-size: 11px;
+                font-size: 9px;
                 font-weight: bold;
               }
               .venue-subheading.tba {
                 color: yellow;
               }
             }
+          }
+        }
+        .channel-wrapper.detroittransmission {
+          p {
+            font-size: 9px !important;
           }
         }
       }
@@ -199,8 +196,7 @@
   &:hover {
     .party-content {
       background: none !important;
-      background-color: black !important;
-      color: white !important;
+      background-color: color-mix(in srgb, var(--card-bg) 70%, white 25%) !important;
     }
   }
   .party-content {
@@ -223,6 +219,7 @@
         overflow: hidden;
         text-overflow: ellipsis;
         display: block;
+        margin-top: -5px;
       }
       .tooltip {
         display: none;
@@ -235,11 +232,14 @@
       margin-top: 5px;
       column-gap: 15px;
       font-size: 12px;
-      margin-top: 20px;
+      margin-top: 13px;
       @media (max-width: 768px) {
         column-gap: 0px;
         flex-wrap: wrap;
-        margin-top: 20px;
+        margin-top: 12px;
+        .artist-name, i {
+          font-size: 12px;
+        }
       }
       .left-side {
         border-left: 1px solid white;
@@ -259,17 +259,24 @@
           padding: 0;
         }
         .top-artists {
-          margin-bottom: 5px;
+          margin-bottom: 0px;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
           display: block;
           min-width: 0;
+          margin-top: 3px;
         }
-        p {
-          margin: 0;
-          @media (max-width: 768px) {
-            margin-top: 2px;
+        .genre-tags {
+          margin-top: -2px;
+          display: flex;
+          align-items: baseline;
+          column-gap: 5px;
+        }
+        .time {
+          font-size: 12px;
+          i {
+            padding-right: 2px;
           }
         }
       }

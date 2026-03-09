@@ -111,15 +111,24 @@
         outline: none;
       }
     }
-    .option-item.artist-search {
+    .artist-search-wrapper {
+      margin-top: 2px;
+      border-radius: var(--radius-card);
       border: 1px solid;
       border-color: var(--color-bg-dark);
-      width: calc(100% - 15px);
+    }
+    .option-item.artist-search {
+      box-sizing: border-box;
+      padding: 10px 10px;
+      width: calc(100% - 5px);
+      margin-bottom: 5px;
       border-radius: var(--radius-card);
       max-height: 300px;
       overflow-y: scroll;
       margin-top: 5px;
       margin-left: 1px;
+      scrollbar-color: var(--color-bg-dark) transparent;
+      padding-right: 6px;
       .option-item {
         text-align: left;
         padding: 0;
@@ -127,6 +136,25 @@
         padding-bottom: 5px;
       }
     }
+
+    .option-item.artist-search::-webkit-scrollbar {
+
+    }
+
+    .option-item.artist-search::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .option-item.artist-search::-webkit-scrollbar-thumb {
+      background: var(--color-bg-dark);
+      border-radius: var(--radius-button);
+      background-clip: content-box;
+    }
+
+    .option-item.artist-search::-webkit-scrollbar-thumb:hover {
+      background:var(--color-bg-dark);
+    }
+
     button.option-item {
       display: flex;
       font-weight: bold;
@@ -235,6 +263,7 @@
   button {
     color: var(--color-text);
     font-size: .85rem;
+    border: none;
   }
   button.Boat {
     background: linear-gradient(

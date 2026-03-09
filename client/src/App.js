@@ -1,24 +1,20 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import Events from './pages/events';
 import Layout from './layout';
+
 import Login from "./pages/login";
 import Profile from "./pages/profile";
 import Signup from "./pages/signup";
 import PrivacyPolicy from "./pages/privacy";
 
 function App() {
-  const [modalStack, setModalStack] = useState([]);
-
   return (
     <Router>
       <Routes>
         <Route element={<Layout />}>
-          <Route
-            path="/"
-            element={<Events modalStack={modalStack} setModalStack={setModalStack} />}
-          />
+          <Route path="/" element={<Events />} />
           <Route path="/login" element={<Login />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/signup" element={<Signup />} />

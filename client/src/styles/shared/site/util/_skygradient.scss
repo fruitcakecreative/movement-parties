@@ -41,12 +41,12 @@
     background: linear-gradient(
       to right,
       #fef46f 0%,
-      #fef46f 53%,
-      #ffc665 58%,
-      #ffc665 63%,
-      #3a6476 70%,
-      #1c3d4b 72%,
-      #10252f 75%,
+      #fef46f 30%,
+      #ffc665 40%,
+      #ffc665 43%,
+      #3a6476 50%,
+      #1c3d4b 55%,
+      #10252f 60%,
       #10252f 100%
     ) !important;
     .timeline-time {
@@ -55,6 +55,9 @@
     [data-index='0'] {
       display: none;
     }
+    [data-index='8'],
+    [data-index='9'],
+    [data-index='10'],
     [data-index='11'],
     [data-index='12'],
     [data-index='13'],

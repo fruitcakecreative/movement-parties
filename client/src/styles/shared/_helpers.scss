@@ -21,6 +21,9 @@
 .center {
   text-align: center;
 }
+.right {
+  text-align: right;
+}
 
 .bold {
   font-weight: bolder;
@@ -30,6 +33,9 @@
   color: var(--color-primary);
 }
 
+.mb-xs {
+  margin-bottom: $space-2;
+}
 
 .mb-sm {
   margin-bottom: $space-3;
@@ -45,4 +51,22 @@
 
 .padding {
   padding: $space-3;
+}
+
+
+//bgs
+
+.dark-bg {
+  background-color: var(--color-bg-dark) !important;
+  color: var(--color-text-light) !important;
+}
+
+.light-bg {
+  background-color: var(--color-bg-light) !important;
+  color: var(--color-text-dark) !important;
+}
+
+.alt-bg {
+  background-color: var(--color-bg-alt) !important;
+  color: var(--color-text-alt) !important;
 }

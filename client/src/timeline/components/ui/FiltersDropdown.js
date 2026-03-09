@@ -63,7 +63,7 @@ const FiltersDropdown = ({
             <Disclosure.Panel className="flex flex-column padding dropdown-options">
 
               {/* Artist Search */}
-              <div className="full-width option-item artists">
+              <div className="full-width option-item artists mb-sm">
                 <input
                   type="text"
                   placeholder="Search Artists..."
@@ -81,6 +81,7 @@ const FiltersDropdown = ({
                 />
 
                 {searchQuery && filteredArtists.length > 0 && (
+                  <div className="artist-search-wrapper">
                   <div className="option-item artist-search">
                     {filteredArtists.map((artist) => (
                       <div
@@ -98,6 +99,7 @@ const FiltersDropdown = ({
                         {artist}
                       </div>
                     ))}
+                  </div>
                   </div>
                 )}
               </div>

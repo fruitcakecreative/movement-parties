@@ -9,6 +9,7 @@ export function createChannels(epg) {
 
     const channel = {
       uuid: uuid,
+      id: venue.id,
       name: event.location_tba ? event.short_title || event.title : venue.name,
       title: event.short_title || event.title || venue.name,
       short_name: event.even_shorter_title,
@@ -18,11 +19,10 @@ export function createChannels(epg) {
       location_tba: event.location_tba,
       bg_color: venue.bg_color,
       font_color: venue.font_color,
-      address: venue.adresss,
+      address: venue.address,
       location: venue.location,
+      anchorSince: event.channel_anchor_since || event.since,
     };
-
-
     venues[uuid] = channel;
 
     //for events with "location TBA" make sure the channels are not considered the same
@@ -38,5 +38,7 @@ export function createChannels(epg) {
     }
   });
 
-  return ordered.map((uuid) => venues[uuid]);
+  return Object.values(venues).sort(
+  (a, b) => new Date(a.anchorSince) - new Date(b.anchorSince)
+);
 }

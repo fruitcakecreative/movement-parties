@@ -13,10 +13,13 @@
   line-height: 1;
   background: var(--color-primary);
   color: var(--color-button-text);
+  border: 1px solid;
+  border-color: var(--color-primary);
   transition: background $transition-base, color $transition-base, border-color $transition-base, transform $transition-fast;
 
   &:hover {
-    transform: translateY(-1px);
+    background-color: var(--color-primary-hover);
+    border-color: var(--color-primary-hover-border);
   }
 
   &:focus-visible {
@@ -58,4 +61,17 @@
 
 .icon {
   font-size: 1.5rem;
+}
+
+.genre-pill {
+  border-radius: 3px;
+  padding: 2px 5px;
+  text-align: center;
+  margin: 0;
+  margin-bottom: 3px;
+  margin-right: 3px;
+  margin: 3px 3px 3px 0px;
+  font-size: 11px;
+  font-weight: bold;
+  display: inline-block;
 }

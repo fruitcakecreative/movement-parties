@@ -3,15 +3,23 @@
   --font-heading: "Techno", sans-serif;
 
   --color-background: #ffeeda;
-
   --color-bg-dark: #0c0c0c;
+  --color-bg-light: #ffeeda;
+  --color-bg-alt: #ff6e26;
+
+
   --color-text-light: #ffeeda;
   --color-text: #0c0c0c;
-
   --color-text-dark: #0c0c0c;
+  --color-text-alt: #0c0c0c;
+
+
   --color-link: #737373;
 
   --color-primary: #ff6e26;
+  --color-primary-hover: #0c0c0c;
+  --color-primary-hover-border: #ff6e26;
+
   --color-button-text: #ffffff;
 
   --color-title: #ff6e26;
@@ -23,6 +31,8 @@
 
   --radius-button: .25rem;
   --radius-card: .5rem;
+
+  --list-content-symbol: "■";
 }
 
 .hide-movement {

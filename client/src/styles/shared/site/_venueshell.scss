@@ -1,0 +1,8 @@
+@use "../variables" as *;
+@use "../mixins" as *;
+
+.venue-details-content {
+  .event-details-image {
+    max-width: 60%;
+  }
+}

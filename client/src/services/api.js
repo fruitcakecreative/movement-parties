@@ -20,11 +20,17 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+//get all events
 export const fetchEvents = async () => {
   const response = await api.get('/events');
   return response.data;
 };
 
+//get single event
+export const fetchEventById = async (id) => {
+  const response = await api.get(`/events/${id}`);
+  return response.data;
+};
 
 
 //login/logout

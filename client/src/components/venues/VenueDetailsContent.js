@@ -1,0 +1,166 @@
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import EventCard from '../EventCard';
+
+function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent }) {
+  const contentRef = useRef(null);
+    const [showFullDescription, setShowFullDescription] = useState(false);
+
+  useEffect(() => {
+    contentRef.current?.scrollTo(0, 0);
+  }, [venue?.id]);
+
+  const groupedEvents = useMemo(() => {
+    const sortedEvents = [...venueEvents].sort(
+      (a, b) =>
+        new Date(a.start_time || a.formatted_start_time) -
+        new Date(b.start_time || b.formatted_start_time)
+    );
+
+    return sortedEvents.reduce((acc, event) => {
+      const dayLabel = new Date(
+        event.start_time || event.formatted_start_time
+      ).toLocaleDateString('en-US', {
+        weekday: 'long',
+        month: 'short',
+        day: 'numeric',
+      });
+
+      acc[dayLabel] = acc[dayLabel] || [];
+      acc[dayLabel].push(event);
+      return acc;
+    }, {});
+  }, [venueEvents]);
+
+  if (!venue) {
+    return (
+      <div ref={contentRef} className="event-details-content">
+        <button className="event-details-close" onClick={onClose} aria-label="Close venue details">
+          ×
+        </button>
+        <p>Venue not found.</p>
+      </div>
+    );
+  }
+
+  const {
+    name,
+    logo_url,
+    address,
+    location,
+    venue_type,
+    subheading,
+    description,
+  } = venue;
+
+
+  const plainDescription = description
+    ? description.replace(/<[^>]+>/g, '').trim()
+    : '';
+
+  const isLongDescription = plainDescription.length > 130;
+  const previewDescription = isLongDescription
+    ? `${plainDescription.slice(0, 130).trim()}...`
+    : plainDescription;
+
+  return (
+    <div
+      ref={contentRef}
+      className="event-details-content venue-details-content"
+      style={{ minHeight: '100%' }}
+    >
+      <button className="event-details-close mb-sm" onClick={onClose} aria-label="Close venue details">
+        ×
+      </button>
+
+      {logo_url && venue_type !== 'Pool' && venue_type !== 'Boat' && (
+        <img
+          src={logo_url}
+          alt={name}
+          className="event-details-image"
+        />
+      )}
+
+      {!logo_url && (
+        <h2>{name}</h2>
+      )}
+
+      {subheading && (
+        <h2 className="event-venue mb-xs highlight">
+          {subheading}
+        </h2>
+      )}
+
+      {(location || address) && (
+        <p className="event-venue-address mb-xs">
+          <i className="fa-solid fa-map-pin"></i>&nbsp;
+          {location}
+          {location && address && ' - '}
+          {address}
+        </p>
+      )}
+
+      {venue_type && (
+        <p className="event-age mb-xs">
+          <i className="fa-solid fa-building"></i>&nbsp;
+          {venue_type}
+        </p>
+      )}
+
+      {description && (
+        <div className="event-description mb-xs">
+          {showFullDescription ? (
+            <>
+              <div dangerouslySetInnerHTML={{ __html: description }} />
+              {isLongDescription && (
+                <button
+                  type="button"
+                  className="description-inline-toggle"
+                  onClick={() => setShowFullDescription(false)}
+                >
+                  Show less
+                </button>
+              )}
+            </>
+          ) : (
+            <p className="description-preview">
+              {previewDescription}
+              {isLongDescription && (
+                <>
+                  {' '}
+                  <button
+                    type="button"
+                    className="description-inline-toggle"
+                    onClick={() => setShowFullDescription(true)}
+                  >
+                    See full description
+                  </button>
+                </>
+              )}
+            </p>
+          )}
+        </div>
+      )}
+      {venueEvents.length > 0 && (
+        <div className="venue-events-list mb-xs">
+          {Object.entries(groupedEvents).map(([day, events]) => (
+            <div key={day} className="venue-event-group mb-sm">
+              <h3 className="venue-event-group-title mb-xs">{day}</h3>
+
+              <div className="venue-event-cards">
+                {events.map((event) => (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    onClick={() => openEvent?.(event.id)}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default VenueDetailsContent;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useEpg, Epg, Layout } from '@nessprim/planby-pro';
 import Timeline from './components/Timeline';
 import ChannelItem from './components/ChannelItem';
@@ -11,14 +11,14 @@ const MultiDayTimeline = ({
   startDate,
   endDate,
   allEvents,
-  modalStack,
-  setModalStack,
+  openEvent,
+  openVenue
 }) => {
   const [dimensions, setDimensions] = useState({
     isMobile: window.innerWidth < 768,
     hourWidth: window.innerWidth < 768 ? 35 : 65,
-    itemHeight: window.innerWidth < 768 ? 60 : 90,
-    sidebarWidth: window.innerWidth < 768 ? 65 : 120,
+    itemHeight: window.innerWidth < 768 ? 75 : 90,
+    sidebarWidth: window.innerWidth < 768 ? 75 : 120,
   });
 
   useEffect(() => {
@@ -56,6 +56,8 @@ const MultiDayTimeline = ({
     timelineDividers: 1,
   });
 
+  const hasAutoScrolledRef = useRef(false);
+
   useEffect(() => {
     const timeout = setTimeout(() => {
       const cornerWrapper = document.querySelector(`.corner-wrapper-${date}`);
@@ -82,16 +84,23 @@ const MultiDayTimeline = ({
 
   useEffect(() => {
     if (epg.length === 0) return;
+    if (hasAutoScrolledRef.current) return;
 
     const firstStart = new Date(Math.min(...epg.map((e) => new Date(e.since))));
     const timelineContainer = document.querySelector('#planby-layout-scrollbox');
 
     if (timelineContainer) {
       const hoursFromStart = (firstStart - new Date(startDate)) / (1000 * 60 * 60);
-      const scrollX = hoursFromStart * hourWidth;
-      timelineContainer.scrollTo({ left: scrollX, behavior: 'smooth' });
+      const nextScrollX = hoursFromStart * hourWidth;
+      timelineContainer.scrollTo({ left: nextScrollX, behavior: 'auto' });
+      hasAutoScrolledRef.current = true;
     }
   }, [epg, startDate, hourWidth]);
+
+  useEffect(() => {
+    hasAutoScrolledRef.current = false;
+  }, [date, startDate, endDate]);
+
 
   return (
     <div
@@ -106,9 +115,7 @@ const MultiDayTimeline = ({
             <ChannelItem
               key={channel.uuid || channel.name}
               channel={channel}
-              allEvents={allEvents}
-              modalStack={modalStack}
-              setModalStack={setModalStack}
+              openVenue={openVenue}
             />
           )}
           renderProgram={({ program, ...rest }) => (
@@ -120,6 +127,7 @@ const MultiDayTimeline = ({
                 timelineStart: startDate,
               }}
               scrollLeft={scrollX}
+              openEvent={openEvent}
               {...rest}
             />
           )}

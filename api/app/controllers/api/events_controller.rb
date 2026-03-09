@@ -33,7 +33,7 @@ class Api::EventsController < ApplicationController
   end
 
   def show
-    render json: @event.to_json(include: [:venue, :artists, :genres])
+    render json: @event.as_json(include: [:venue, :artists, :genres])
   end
 
   def create

@@ -29,7 +29,14 @@ h4 {
   font-weight: $weight-medium;
 }
 
-p {
+h5 {
+  font-family: var(--body-heading);
+  font-size: $text-md;
+  line-height: $line-snug;
+  font-weight: 900;
+}
+
+p, .event-description {
   font-size: $text-sm;
   line-height: $line-normal;
 }

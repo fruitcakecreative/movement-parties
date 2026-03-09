@@ -34,9 +34,10 @@ RailsAdmin.config do |config|
     field :venue do
       associated_collection_cache_all true
       associated_collection_scope do
+        current_event = bindings[:object]
         Proc.new do |scope|
-          key = (defined?(Current) && Current.city_key.present?) ? Current.city_key : "movement"
-          scope.where(city_key: key).order(:name)
+          key = current_event&.city_key.presence || "movement"
+          scope.where(city_key: key)
         end
       end
     end

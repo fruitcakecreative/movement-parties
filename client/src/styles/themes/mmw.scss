@@ -4,10 +4,22 @@
 
   --color-background: #D9CCC5;
   --color-bg-dark: #262626;
+  --color-bg-light: #D9CCC5;
+  --color-bg-alt: #A6958F;
+
+
   --color-text: #262626;
   --color-text-light: #D9CCC5;
+  --color-text-dark: #262626;
+  --color-text-bg-alt: #262626;
+
+
   --color-link: #59514F;
   --color-primary: #A6958F;
+  --color-primary-hover: #D9CCC5;
+  --color-primary-hover-border: #D9CCC5;
+
+
   --color-button-text: #ffffff;
   --color-white: ##F2F2F2;
 
@@ -20,6 +32,8 @@
 
   --radius-button: 9999rem;
   --radius-card: 1.5rem;
+
+  --list-content-symbol: "★";
 }
 
 .mmw-hide {

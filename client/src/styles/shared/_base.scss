@@ -61,6 +61,24 @@ ol {
   margin-left: $space-4;
 }
 
+ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+ul li {
+  position: relative;
+  padding-left: .85rem;
+}
+
+ul li::before {
+  content: var(--list-content-symbol);
+  position: absolute;
+  left: 0;
+  top: 0.5em;
+  font-size: 0.6em;
+}
+
 a {
   color: inherit;
   text-decoration: none;
