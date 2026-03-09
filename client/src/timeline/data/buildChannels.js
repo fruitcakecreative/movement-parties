@@ -22,6 +22,7 @@ export function createChannels(epg) {
       address: venue.address,
       location: venue.location,
       anchorSince: event.channel_anchor_since || event.since,
+      venue_type: venue.venue_type,
     };
     venues[uuid] = channel;
 

@@ -12,6 +12,7 @@ const ChannelItem = ({ channel, openVenue }) => {
     tba_class,
     location_tba,
     bg_color,
+    venue_type,
   } = channel;
 
   const isMobile = useIsMobile();
@@ -29,12 +30,12 @@ const ChannelItem = ({ channel, openVenue }) => {
         className="channel-box"
         onClick={handleClick}
       >
-        <div className="channel-box-inner" style={{ borderColor: bg_color }}>
+        <div className={`channel-box-inner ${venue_type}`} style={{ borderColor: bg_color }}>
           {logo ? (
             <ChannelLogo
               src={logo}
               alt={name}
-              className="venue-logo"
+              className={`venue-logo ${venue_type}`}
               style={subheading ? { height: 'auto' } : {}}
             />
           ) : (

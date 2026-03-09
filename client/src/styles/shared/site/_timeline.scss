@@ -116,6 +116,14 @@
                 color: yellow;
               }
             }
+            .channel-box-inner.Pool {
+              .venue-logo {
+                max-height: calc(100% - 20px);
+              }
+              .venue-subheading {
+                line-height: .5rem;
+              }
+            }
           }
         }
         .channel-wrapper.detroittransmission {
