@@ -1,4 +1,4 @@
-//timline daylight hours
+//timline daylight hours DETROIT
 
 .timeline-day.hours-15 {
   .timeline-wrapper {
@@ -281,6 +281,136 @@
     [data-index='18'],
     [data-index='19'],
     [data-index='20'] {
+      color: white;
+    }
+  }
+}
+
+
+
+//timline daylight hours MiAMIII
+
+.timeline-day.corner-wrapper-2026-03-24 {
+  .timeline-wrapper {
+    background: none !important;
+    background: linear-gradient(
+      to right,
+      #fef46f 0%,
+      #fef46f 10%,
+      #ffc665 16%,
+      #3a6476 20%,
+      #1c3d4b 24%,
+      #10252f 26%,
+      #10252f 75%,
+      #1c3d4b 77%,
+      #3a6476 80%,
+      #abdfff 83%,
+      #fffcce 85%,
+      #fef46f 90%,
+      #fef46f 100%
+    ) !important;
+    .timeline-time {
+      color: white;
+    }
+    [data-index='0'] {
+      display: none;
+    }
+    [data-index='0'],
+    [data-index='1'],
+    [data-index='2'],
+    [data-index='3'],
+    [data-index='14'],
+    [data-index='15'],
+    [data-index='16'],
+    [data-index=''] {
+      color: black;
+    }
+  }
+}
+
+.timeline-day.corner-wrapper-2026-03-25,
+.timeline-day.corner-wrapper-2026-03-27,
+.timeline-day.corner-wrapper-2026-03-28,
+.timeline-day.corner-wrapper-2026-03-29
+{
+  .timeline-wrapper {
+    background: none !important;
+    background: linear-gradient(
+      to right,
+      #fef46f 0%,
+      #fef46f 38%,
+      #ffc665 40%,
+      #3a6476 43%,
+      #1c3d4b 45%,
+      #10252f 47%,
+      #10252f 83%,
+      #1c3d4b 85%,
+      #3a6476 87%,
+      #abdfff 89%,
+      #fffcce 95%,
+      #fef46f 99%,
+      #fef46f 100%
+    ) !important;
+    .timeline-time {
+      color: black;
+    }
+    [data-index='0'] {
+      display: none;
+    }
+    [data-index='11'],
+    [data-index='12'],
+    [data-index='13'],
+    [data-index='14'],
+    [data-index='15'],
+    [data-index='16'],
+    [data-index='17'],
+    [data-index='18'],
+    [data-index='19'],
+    [data-index='20'],
+    [data-index='21']
+     {
+      color: white;
+    }
+  }
+}
+
+
+.timeline-day.corner-wrapper-2026-03-26 {
+  .timeline-wrapper {
+    background: none !important;
+    background: linear-gradient(
+      to right,
+      #fef46f 0%,
+      #fef46f 32%,
+      #ffc665 35%,
+      #3a6476 38%,
+      #1c3d4b 40%,
+      #10252f 42%,
+      #10252f 81%,
+      #1c3d4b 83%,
+      #3a6476 85%,
+      #abdfff 87%,
+      #fffcce 89%,
+      #fef46f 95%,
+      #fef46f 100%
+    ) !important;
+    .timeline-time {
+      color: black;
+    }
+    [data-index='0'] {
+      display: none;
+    }
+    [data-index='9'],
+    [data-index='10'],
+    [data-index='11'],
+    [data-index='12'],
+    [data-index='13'],
+    [data-index='14'],
+    [data-index='15'],
+    [data-index='16'],
+    [data-index='17'],
+    [data-index='18'],
+     {
       color: white;
     }
   }
