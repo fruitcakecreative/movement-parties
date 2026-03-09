@@ -82,17 +82,31 @@ function EventDetailsContent({ event, onClose, openVenue }) {
         <h1 className="title mb-xs">{displayTitle}</h1>
 
           <div className="event-venue-location flex">
-            {venueName && (
-              <button
-                type="button"
-                className="event-venue button mb-xs"
-                onClick={() => event?.venue?.id && openVenue?.(event.venue.id)}
-              >
-                <i className="fa-solid fa-map-pin"></i>&nbsp;
-                {venueName}
-                {location && <span>&nbsp;({location})</span>}
-              </button>
-            )}
+            {venueName &&
+              (venueName === "TBA" ? (
+                <div className="highlight event-venue mb-xs">
+                  Location To Be Announced
+                  {location && <span>&nbsp;({location})</span>}
+                </div>
+              ) : venueName === "TBA - (313) 513 RAVE" ? (
+                <div className="highlight event-venue mb-xs">
+                  Call Party hotline (313) 513 RAVE for location on the night of the event
+                </div>
+              ) : venueName === "TBA - Secret Location" ? (
+                <div className="highlight event-venue mb-xs">
+                  Secret location to be announced
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className="event-venue button mb-xs"
+                  onClick={() => event?.venue?.id && openVenue?.(event.venue.id)}
+                >
+                  <i className="fa-solid fa-map-pin"></i>&nbsp;
+                  {venueName}
+                  {location && <span>&nbsp;({location})</span>}
+                </button>
+              ))}
           </div>
 
         {address && (

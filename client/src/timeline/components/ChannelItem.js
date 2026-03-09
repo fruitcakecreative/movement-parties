@@ -48,6 +48,9 @@ const ChannelItem = ({ channel, openVenue }) => {
               {subheading}
             </p>
           )}
+          {tba_class && (
+            <p className="venue-subheading tba">Location TBA</p>
+          )}
         </div>
       </ChannelBox>
     </div>
