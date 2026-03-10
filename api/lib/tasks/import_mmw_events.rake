@@ -42,7 +42,8 @@ namespace :import do
         "https://ra.co/events/2358160",
         "https://ra.co/events/2385322",
         "https://ra.co/events/2347797",
-        "https://ra.co/events/2347782"
+        "https://ra.co/events/2347782",
+        "https://ra.co/events/2359823"
       ]
 
       events.each_with_index do |event_data, index|
