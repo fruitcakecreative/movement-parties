@@ -5,7 +5,7 @@ Rails.application.configure do
 
   config.ssl_options = { redirect: false }
 
-  config.session_store :cookie_store, key: "_movement_parties_session"
+  # config.session_store :cookie_store, key: "_movement_parties_session"
 
   config.enable_reloading = true
   config.hosts.clear
