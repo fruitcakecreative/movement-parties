@@ -31,7 +31,18 @@ namespace :import do
       skip_urls = [
         "https://ra.co/events/2370518",
         "https://ra.co/events/2353591",
-        "https://ra.co/events/2362100"
+        "https://ra.co/events/2362100",
+        "https://ra.co/events/2386966",
+        "https://ra.co/events/2386842",
+        "https://ra.co/events/2387406",
+        "https://ra.co/events/2388414",
+        "https://ra.co/events/2377327",
+        "https://ra.co/events/2352453",
+        "https://ra.co/events/2356992",
+        "https://ra.co/events/2358160",
+        "https://ra.co/events/2385322",
+        "https://ra.co/events/2347797",
+        "https://ra.co/events/2347782"
       ]
 
       events.each_with_index do |event_data, index|
