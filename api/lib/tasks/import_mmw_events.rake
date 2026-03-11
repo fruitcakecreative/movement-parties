@@ -2,6 +2,7 @@
 require "aws-sdk-s3"
 require "json"
 require "honeybadger"
+require "bigdecimal"
 
 namespace :import do
   desc "Import MMW events from latest S3 JSON file"
@@ -10,6 +11,26 @@ namespace :import do
       city   = "mmw"
       bucket = "mmw-parties-events-data"
       prefix = "events/"
+
+      normalize_text = lambda do |value|
+        value.to_s
+             .downcase
+             .gsub("&", " and ")
+             .gsub(/[^a-z0-9\s]/, " ")
+             .gsub(/\s+/, " ")
+             .strip
+      end
+
+      normalize_venue_name = lambda do |name|
+        normalize_text.call(name)
+                      .gsub(/\bthe\b/, "")
+                      .gsub(/\bclub\b/, "")
+                      .gsub(/\bmiami\b/, "")
+                      .gsub(/\bsound\b/, "")
+                      .gsub(/\broom\b/, "")
+                      .gsub(/\s+/, " ")
+                      .strip
+      end
 
       s3 = Aws::S3::Client.new(region: "us-east-1")
 
@@ -59,10 +80,14 @@ namespace :import do
             venue_name = (event_info.dig("venue", "name") || "Unknown Venue")
                           .to_s.strip.gsub(/\s+/, " ")
 
-            venue = Venue.where(city_key: city)
-                         .where("lower(name) = ?", venue_name.downcase)
-                         .order(Arel.sql("(bg_color IS NOT NULL)::int + (font_color IS NOT NULL)::int + (address IS NOT NULL)::int + (location IS NOT NULL)::int + (image_filename IS NOT NULL)::int DESC"))
-                         .first
+            normalized_incoming_venue = normalize_venue_name.call(venue_name)
+
+            venue = Venue.where(city_key: city).find do |v|
+              existing = normalize_venue_name.call(v.name)
+              existing == normalized_incoming_venue ||
+                existing.include?(normalized_incoming_venue) ||
+                normalized_incoming_venue.include?(existing)
+            end
 
             venue ||= Venue.create!(city_key: city, name: venue_name)
 
@@ -74,25 +99,31 @@ namespace :import do
               end
 
             event = Event.find_or_initialize_by(city_key: city, event_url: event_url)
+            dice_backed = event.dice_url.present?
 
             images = event_info["images"] || []
             flyer_front = images.find { |img| img["type"] == "FLYERFRONT" }
             event_image_url = flyer_front&.dig("filename") || images.first&.dig("filename")
 
-
             attrs = {
               source: "RA",
               attending_count: event_info["attending"] || 0,
-              event_image_url: event_image_url,
               city_key: city
             }
-            attrs[:title]      = event_info["title"]     unless event.manual_override_title
+
+            attrs[:title] = event_info["title"] unless event.manual_override_title
             attrs[:start_time] = event_info["startTime"] unless event.manual_override_times
-            attrs[:end_time]   = event_info["endTime"]   unless event.manual_override_times
-            attrs[:venue]      = venue                   unless event.manual_override_location
+            attrs[:end_time] = event_info["endTime"] unless event.manual_override_times
+            attrs[:venue] = venue unless event.manual_override_location
+
+            # Only let RA own image if the event is not DICE-backed
+            if !dice_backed && event_image_url.present?
+              attrs[:event_image_url] = event_image_url
+            end
 
             event.assign_attributes(attrs)
             event.save!
+
             ticket_info = event_data["ticket_info"] || {}
 
             raw_price = ticket_info["price"]&.to_s&.split("+")&.first&.strip
@@ -129,19 +160,18 @@ namespace :import do
               ra_is_free_ticketing: ra_is_free_ticketing
             }
 
-            unless event.manual_override_ticket
-              update_attrs.merge!(
-                ticket_tier: ticket_info["tier"],
-                ticket_price: ra_ticket_price,
-                ticket_wave: ticket_info["current_tier"]
-              )
+            # Only let RA own ticket fields if the event is not DICE-backed
+            unless event.manual_override_ticket || dice_backed
+              update_attrs[:ticket_tier] = ticket_info["tier"] if ticket_info["tier"].present?
+              update_attrs[:ticket_wave] = ticket_info["current_tier"] if ticket_info["current_tier"].present?
+              update_attrs[:ticket_price] = ra_ticket_price unless ra_ticket_price.nil?
             end
 
             event.update!(update_attrs)
 
             event.genres = genres unless event.manual_override_genres
 
-            if event_info["artists"]
+            if event_info["artists"] && !event.manual_override_artists
               event_info["artists"].each do |artist_data|
                 artist = Artist.find_or_create_by!(name: artist_data["name"])
                 event.artists << artist unless event.artists.include?(artist)
