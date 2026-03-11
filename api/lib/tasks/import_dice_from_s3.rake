@@ -224,11 +224,14 @@ namespace :import do
             is_new_record = event.new_record?
             ra_backed = event.event_url.present?
 
+            normalized_age =
+              (event.age.presence || event_data["age"]).to_s[/\b(18\+|21\+)\b/, 1]
+
             attrs = {
               city_key: city,
               source: "DICE",
               promoter: event.promoter.presence || event_data["promoter"],
-              age: event.age.presence || event_data["age"],
+              age: normalized_age,
               dice_url: event_url
             }
 
