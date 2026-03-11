@@ -224,8 +224,16 @@ namespace :import do
             is_new_record = event.new_record?
             ra_backed = event.event_url.present?
 
+            raw_age = event.age.presence || event_data["age"]
+
             normalized_age =
-              (event.age.presence || event_data["age"]).to_s[/\b(18\+|21\+)\b/, 1]
+              if raw_age.to_s.include?("21+")
+                "21+"
+              elsif raw_age.to_s.include?("18+")
+                "18+"
+              else
+                nil
+              end
 
             attrs = {
               city_key: city,
