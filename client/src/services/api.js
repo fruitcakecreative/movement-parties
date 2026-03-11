@@ -5,7 +5,6 @@ const city = process.env.REACT_APP_CITY_KEY;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
