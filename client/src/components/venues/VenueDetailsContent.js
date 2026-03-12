@@ -62,6 +62,11 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent }) {
     ? `${plainDescription.slice(0, 130).trim()}...`
     : plainDescription;
 
+  const displayVenueType =
+    name === 'Joia Beach' || name === 'National Hotel'
+      ? 'Beachclub'
+      : venue_type;
+
   return (
     <div
       ref={contentRef}
@@ -80,7 +85,7 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent }) {
         />
       )}
 
-      {name == 'Joia Beach' || name == 'National Hotel' && (
+      {(name === 'Joia Beach' || name === 'National Hotel') && (
         <img
           src={logo_url}
           alt={name}
@@ -107,15 +112,10 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent }) {
         </p>
       )}
 
-      {venue_type && name !== 'Joia Beach' || venue_type && name !== 'National Hotel' ? (
+      {displayVenueType && (
         <p className="event-age mb-xs">
           <i className="fa-solid fa-building"></i>&nbsp;
-          {venue_type}
-        </p>
-      ) : (
-        <p className="event-age mb-xs">
-          <i className="fa-solid fa-building"></i>&nbsp;
-          Beachclub
+          {displayVenueType}
         </p>
       )}
 
