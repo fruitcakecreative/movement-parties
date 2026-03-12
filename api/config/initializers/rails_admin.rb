@@ -98,7 +98,8 @@ end
           [
             '21+',
             '18+',
-            'All Ages'
+            'All Ages',
+            '24+'
           ]
         end
       end
