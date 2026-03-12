@@ -77,6 +77,7 @@ export function createEpg(events) {
           location_tba: isTBA,
           since: event.formatted_start_time,
           till: event.formatted_end_time,
+          age: event.age || event.venue?.age,
           duration: durationHours,
           channel_anchor_since: anchorEvent.formatted_start_time,
           ...(isTBA

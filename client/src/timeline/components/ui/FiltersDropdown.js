@@ -3,7 +3,7 @@ import { Disclosure } from '@headlessui/react';
 const costOptions = ['Free', 'Under $20', 'Under $50'];
 const ageOptions = ['All Ages', '18+', '21+'];
 const partyOptions = [
-  { label: 'Pool party', value: 'Pool' },
+  { label: 'Pool or Beach party', value: 'Pool' },
     { label: 'Restaurant/Bar/Lounge', value: 'Restaurant/Bar/Lounge' },
     { label: 'Small Intimate Venue', value: 'Small Intimate Venue' },
   { label: 'Boat party', value: 'Boat' },

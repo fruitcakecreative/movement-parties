@@ -18,7 +18,7 @@ class Api::EventsController < ApplicationController
                venue: {
                  methods: [:logo_url],
                  only: [
-                   :id, :name, :image_filename, :address, :location,
+                   :id, :name, :age, :image_filename, :address, :location,
                    :venue_url, :description, :distance, :serves_alcohol,
                    :venue_type, :additional_images, :bg_color, :font_color, :subheading
                  ]

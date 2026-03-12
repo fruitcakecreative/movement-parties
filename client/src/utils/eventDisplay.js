@@ -65,6 +65,7 @@ export const getEventDisplayData = (
   } = event;
 
   let resolvedTicketTier = ticket_tier ? `– ${ticket_tier}` : '';
+  const resolvedAge = age || venue?.age;
 
   if (ticket_wave) {
     const [current, total] = ticket_wave.split(' of ').map(Number);
@@ -185,7 +186,7 @@ export const getEventDisplayData = (
     imageSrc: event_image_url,
     attendingCount: attending_count,
     description,
-    age,
+    age: resolvedAge,
     cardBg: venue?.bg_color || bg_color ||  '#fff',
     cardFont: venue?.font_color || font_color ||  '#000',
     actionButtons,

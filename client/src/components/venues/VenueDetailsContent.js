@@ -80,6 +80,14 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent }) {
         />
       )}
 
+      {name == 'Joia Beach' || name == 'National Hotel' && (
+        <img
+          src={logo_url}
+          alt={name}
+          className="event-details-image"
+        />
+      )}
+
       {!logo_url && (
         <h2>{name}</h2>
       )}
@@ -99,10 +107,15 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent }) {
         </p>
       )}
 
-      {venue_type && (
+      {venue_type && name !== 'Joia Beach' || venue_type && name !== 'National Hotel' ? (
         <p className="event-age mb-xs">
           <i className="fa-solid fa-building"></i>&nbsp;
           {venue_type}
+        </p>
+      ) : (
+        <p className="event-age mb-xs">
+          <i className="fa-solid fa-building"></i>&nbsp;
+          Beachclub
         </p>
       )}
 

@@ -66,7 +66,10 @@ function useEventFilters({ eventsByDate }) {
 
     if (filterSelections.age.length > 0) {
       dayEvents = dayEvents.filter((event) => {
-        const rawAge = event.age?.toString().trim().toLowerCase() || '';
+        const rawAge = (event.age || event.venue?.age || '')
+          .toString()
+          .trim()
+          .toLowerCase();
 
         const normalizedAge =
           rawAge === 'all ages' || rawAge === 'allages'

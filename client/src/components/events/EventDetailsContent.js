@@ -19,6 +19,7 @@ function EventDetailsContent({ event, onClose, openVenue }) {
     setShowFullDescription(false);
   }, [event?.id]);
 
+
   if (!event) {
     return (
       <div ref={contentRef} className="event-details-content">

@@ -91,6 +91,15 @@ end
     edit do
       field :name
       field :location
+      field :age, :enum do
+        enum do
+          [
+            '21+',
+            '18+',
+            'All Ages'
+          ]
+        end
+      end
       field :image_filename
       field :logo, :active_storage
       field :venue_url
