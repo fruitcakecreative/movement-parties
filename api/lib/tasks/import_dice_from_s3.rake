@@ -227,9 +227,9 @@ namespace :import do
             raw_age = event.age.presence || event_data["age"]
 
             normalized_age =
-              if raw_age.to_s.include?("21+")
+              if raw_age.to_s.match?(/21\s*\+/)
                 "21+"
-              elsif raw_age.to_s.include?("18+")
+              elsif raw_age.to_s.match?(/18\s*\+/)
                 "18+"
               else
                 nil
@@ -239,7 +239,7 @@ namespace :import do
               city_key: city,
               source: "DICE",
               promoter: event.promoter.presence || event_data["promoter"],
-              age: normalized_age,
+              age: normalized_age if normalized_age.present?
               dice_url: event_url
             }
 
