@@ -61,6 +61,7 @@ export const getEventDisplayData = (
     font_color,
     location,
     address,
+    source,
     ticket_label,
   } = event;
 
@@ -81,60 +82,79 @@ export const getEventDisplayData = (
       ? `${displayStartTime}-${displayEndTime}`
       : displayStartTime || '';
 
-  const resolvedTicketLabel =
+
+      const resolvedTicketLabel =
     ticket_label ||
     (ticket_price === '0.0' || ticket_price === 0 || ticket_price === '0'
       ? 'FREE'
       : ticket_price
         ? `$${Number(ticket_price).toFixed(2)}`
         : '');
-        let actionButtons = [];
 
-        if (event.ra_is_free_ticketing) {
-          actionButtons.push({
-            label: "RSVP / RA Event",
-            url: event.event_url
-          });
+  let actionButtons = [];
 
-        } else if (event.ra_has_ticketing) {
-          actionButtons.push({
-            label: "Tickets / RA Event",
-            url: event.event_url
-          });
+  const isFreeTicket =
+    event.ticket_price === 0 ||
+    event.ticket_price === '0' ||
+    event.ticket_price === '0.0' ||
+    event.free_event === true;
 
-        } else {
+  const ticketUrl = event.ticket_url || '';
+  const eventUrl = event.event_url || '';
 
-          if (event.event_url) {
-            actionButtons.push({
-              label: "RA Event",
-              url: event.event_url
-            });
-          }
+  const getLinkType = (url) => {
+    const lowerUrl = url.toLowerCase();
 
-          if (event.ticket_url) {
+    if (lowerUrl.includes('ra.co')) return 'RA';
+    if (lowerUrl.includes('dice.fm') || lowerUrl.includes('dice.com')) return 'DICE';
+    return 'OTHER';
+  };
 
-            if (event.ticket_price === 0 || event.free_event === true) {
-              actionButtons.push({
-                label: "RSVP",
-                url: event.ticket_url
-              });
+  if (event.ra_is_free_ticketing) {
+    actionButtons.push({
+      label: "RSVP / RA Event",
+      url: event.event_url
+    });
+  } else if (event.ra_has_ticketing) {
+    actionButtons.push({
+      label: "Tickets / RA Event",
+      url: event.event_url
+    });
+  } else {
+    if (event.ticket_url) {
+      const ticketLinkType = getLinkType(ticketUrl);
 
-            } else if (event.ticket_price) {
-              actionButtons.push({
-                label: "Tickets",
-                url: event.ticket_url
-              });
+      let ticketLabel;
 
-            } else {
-              actionButtons.push({
-                label: "Tickets",
-                url: event.ticket_url
-              });
-            }
+      if (ticketLinkType === 'RA') {
+        ticketLabel = isFreeTicket ? 'RA / RSVP' : 'RA / Tickets';
+      } else if (ticketLinkType === 'DICE') {
+        ticketLabel = isFreeTicket ? 'DICE / RSVP' : 'DICE / Tickets';
+      } else {
+        ticketLabel = isFreeTicket ? 'RSVP / Event Page' : 'Tickets / Event Page';
+      }
 
-          }
+      actionButtons.push({
+        label: ticketLabel,
+        url: event.ticket_url
+      });
+    }
 
-        }
+    if (event.event_url) {
+      const eventLinkType = getLinkType(eventUrl);
+
+      actionButtons.push({
+        label:
+          eventLinkType === 'RA'
+            ? 'RA Event'
+            : eventLinkType === 'DICE'
+            ? 'DICE Event'
+            : 'Event Page',
+        url: event.event_url
+      });
+    }
+  }
+
 
   const displayArtists = top_artists.length > 0 ? top_artists : artists;
 
@@ -186,6 +206,7 @@ export const getEventDisplayData = (
     imageSrc: event_image_url,
     attendingCount: attending_count,
     description,
+    source,
     age: resolvedAge,
     cardBg: venue?.bg_color || bg_color ||  '#fff',
     cardFont: venue?.font_color || font_color ||  '#000',

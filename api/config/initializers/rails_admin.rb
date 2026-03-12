@@ -79,6 +79,8 @@ RailsAdmin.config do |config|
     field :notes
     field :event_url
     field :ticket_url
+    field :dice_url
+    field :source
     field :ticket_price
     field :ticket_tier
     field :ticket_wave

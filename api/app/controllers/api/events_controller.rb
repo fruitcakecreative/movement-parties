@@ -20,7 +20,7 @@ class Api::EventsController < ApplicationController
                  only: [
                    :id, :name, :age, :image_filename, :address, :location,
                    :venue_url, :description, :distance, :serves_alcohol,
-                   :venue_type, :additional_images, :bg_color, :font_color, :subheading
+                   :venue_type, :additional_images, :bg_color, :font_color, :subheading, :source
                  ]
                }
              },
