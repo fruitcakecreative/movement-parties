@@ -63,7 +63,7 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent }) {
     : plainDescription;
 
   const displayVenueType =
-    name === 'Joia Beach' || name === 'National Hotel'
+    name === 'Joia Beach' || name === 'National Hotel' || name === 'Tala Beach'
       ? 'Beachclub'
       : venue_type;
 
