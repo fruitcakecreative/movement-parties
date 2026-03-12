@@ -18,7 +18,7 @@ class Venue < ApplicationRecord
   ].freeze
 
   YELLOW_SHADES = %w[
-    #FFF3C4 #FFE682 #FFD433  #B88F00
+    #FFF3C4 #FFE682 #FFD433 #E6B300 #B88F00
   ].freeze
 
   GREEN_SHADES = %w[

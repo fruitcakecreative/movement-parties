@@ -1,12 +1,12 @@
-require "aws-sdk-s3"
+# lib/tasks/import_dice_json.rake
 require "json"
 require "honeybadger"
 require "bigdecimal"
 require "set"
 
 namespace :import do
-  desc "Import DICE events from latest S3 JSON file"
-  task dice_from_s3: :environment do
+  desc "Import DICE events from local JSON file"
+  task :dice_json, [:file_path] => :environment do |_t, args|
     normalize_text = lambda do |value|
       value.to_s
            .downcase
@@ -76,6 +76,22 @@ namespace :import do
       false
     end
 
+    loose_title_overlap = lambda do |title1, title2|
+      stop_words = %w[
+        the a an and or of for at in on with by from to
+        party event official presents presented showcase
+        miami music week mmw wmc
+        tickets ticket 2026
+      ]
+
+      words1 = normalize_text.call(title1).split.reject { |w| stop_words.include?(w) }.uniq
+      words2 = normalize_text.call(title2).split.reject { |w| stop_words.include?(w) }.uniq
+
+      next false if words1.empty? || words2.empty?
+
+      (words1 & words2).any?
+    end
+
     find_matching_event = lambda do |city:, event_url:, incoming_title:, incoming_start_time:, incoming_venue_name:, incoming_artists:|
       exact_match =
         Event.find_by(city_key: city, event_url: event_url) ||
@@ -138,35 +154,16 @@ namespace :import do
     end
 
     begin
-      city   = "mmw"
-      bucket = "mmw-parties-events-data"
-      prefix = "dice/"
+      city = "mmw"
+      file_path = args[:file_path].presence || Rails.root.join("tmp", "dice_events.json").to_s
 
-      s3 = Aws::S3::Client.new(region: "us-east-1")
-
-      files = s3.list_objects_v2(bucket: bucket, prefix: prefix).contents
-      if files.empty?
-        puts "No S3 JSON files found in #{bucket}/#{prefix}"
+      unless File.exist?(file_path)
+        puts "File not found: #{file_path}"
         exit
       end
 
-      latest_file = files
-        .reject { |f| f.key.end_with?("/") }
-        .max_by(&:last_modified)
-
-      if latest_file.blank?
-        puts "No valid DICE JSON files found in #{bucket}/#{prefix}"
-        exit
-      end
-
-      filename = latest_file.key
-      puts "Downloading latest DICE file: #{filename}"
-
-      temp_path = "/tmp/#{filename.split('/').last}"
-      s3.get_object(bucket: bucket, key: filename, response_target: temp_path)
-
-      events = JSON.parse(File.read(temp_path))
-      puts "Found #{events.size} DICE events in #{filename}"
+      events = JSON.parse(File.read(file_path))
+      puts "Found #{events.size} DICE events in #{file_path}"
 
       created_count = 0
       updated_count = 0
@@ -202,12 +199,13 @@ namespace :import do
 
             normalized_incoming_venue = normalize_venue_name.call(venue_name)
 
-            venue = Venue.where(city_key: city).find do |v|
-              existing = normalize_venue_name.call(v.name)
-              existing == normalized_incoming_venue ||
-                existing.include?(normalized_incoming_venue) ||
-                normalized_incoming_venue.include?(existing)
-            end
+            venue = Venue.where(city_key: city)
+                         .find do |v|
+                           existing = normalize_venue_name.call(v.name)
+                           existing == normalized_incoming_venue ||
+                             existing.include?(normalized_incoming_venue) ||
+                             normalized_incoming_venue.include?(existing)
+                         end
 
             venue ||= Venue.create!(city_key: city, name: venue_name)
 
@@ -222,28 +220,14 @@ namespace :import do
 
             event = matched_event || Event.new(city_key: city, venue: venue)
             is_new_record = event.new_record?
-            ra_backed = event.event_url.present?
-
-            raw_age = event.age.presence || event_data["age"]
-
-            normalized_age =
-              if raw_age.to_s.match?(/21\s*\+/)
-                "21+"
-              elsif raw_age.to_s.match?(/18\s*\+/)
-                "18+"
-              else
-                nil
-              end
 
             attrs = {
               city_key: city,
               source: "DICE",
               promoter: event.promoter.presence || event_data["promoter"],
+              age: event.age.presence || event_data["age"],
               dice_url: event_url
             }
-
-            attrs[:age] = normalized_age if normalized_age.present?
-
             attrs[:event_url] = event_url if is_new_record && event.event_url.blank?
 
             unless event.manual_override_title
@@ -262,32 +246,17 @@ namespace :import do
             end
 
             attrs[:description] = best_description.call(event.description, event_data["description"])
+            attrs[:event_image_url] = best_image.call(event.event_image_url, event_data["event_image_url"])
 
-            # Let DICE own image only if event is not RA-backed
-            if !ra_backed && event_data["event_image_url"].present?
-              attrs[:event_image_url] = best_image.call(event.event_image_url, event_data["event_image_url"])
+            unless event.manual_override_ticket
+              attrs[:ticket_price] = best_ticket_price.call(event.ticket_price, safe_bigdecimal.call(event_data["ticket_price"]))
             end
 
             event.assign_attributes(attrs)
             event.save!
 
-            unless event.manual_override_ticket
-              dice_ticket_price = safe_bigdecimal.call(event_data["ticket_price"])
-
-              update_attrs = {
-                ticket_price: best_ticket_price.call(event.ticket_price, dice_ticket_price),
-                # ticket_currency: event.currency.presence || event_data["currency"],
-                # dice_ticket_status: event_data["ticket_status"]
-              }.compact
-
-              event.update!(update_attrs)
-            end
-
             unless event.manual_override_artists
-              incoming_artist_names = Array(event_data["artists"])
-                .map { |name| name.to_s.strip }
-                .reject(&:blank?)
-                .uniq
+              incoming_artist_names = Array(event_data["artists"]).map { |name| name.to_s.strip }.reject(&:blank?).uniq
 
               incoming_artist_names.each do |artist_name|
                 artist = Artist.find_or_create_by!(name: artist_name)
@@ -311,13 +280,13 @@ namespace :import do
 
       Rails.cache.delete("events-v1:mmw") rescue nil
 
-      puts "Finished importing DICE events from #{filename}"
+      puts "Finished importing DICE events from #{file_path}"
       puts "Created: #{created_count}"
       puts "Updated: #{updated_count}"
       puts "Skipped: #{skipped_count}"
 
       Honeybadger.notify(
-        "DICE import succeeded: created=#{created_count}, updated=#{updated_count}, skipped=#{skipped_count}, file=#{filename}"
+        "DICE import succeeded: created=#{created_count}, updated=#{updated_count}, skipped=#{skipped_count}, file=#{file_path}"
       )
     rescue => e
       Honeybadger.notify(e)

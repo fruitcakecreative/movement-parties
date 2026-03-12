@@ -15,6 +15,10 @@ function EventDetailsContent({ event, onClose, openVenue }) {
     contentRef.current?.scrollTo(0, 0);
   }, [event?.id]);
 
+  useEffect(() => {
+    setShowFullDescription(false);
+  }, [event?.id]);
+
   if (!event) {
     return (
       <div ref={contentRef} className="event-details-content">
