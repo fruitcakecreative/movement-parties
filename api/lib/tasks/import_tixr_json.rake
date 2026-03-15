@@ -201,14 +201,29 @@ namespace :import do
         end
       end
 
-      title_match = candidates.find do |event|
-        within_two_hours.call(event.start_time, incoming_start_time) &&
-          title_overlap_count.call(event.title, incoming_title) >= 2
+      if source_key == "1878"
+        exact_title_time_match = candidates.find do |event|
+          within_two_hours.call(event.start_time, incoming_start_time) &&
+            normalize_text.call(event.title) == normalize_text.call(incoming_title) &&
+            venue_match.call(event.venue&.name, incoming_venue_name)
+        end
+
+        if exact_title_time_match
+          puts "EXACT TITLE/TIME MATCH: #{incoming_title} -> #{exact_title_time_match.title}"
+          next [exact_title_time_match, :exact_title_time_match]
+        end
       end
 
-      if title_match
-        puts "TITLE/TIME MATCH: #{incoming_title} -> #{title_match.title}"
-        next [title_match, :title_time_match]
+      if source_key != "1878"
+        title_match = candidates.find do |event|
+          within_two_hours.call(event.start_time, incoming_start_time) &&
+            title_overlap_count.call(event.title, incoming_title) >= 2
+        end
+
+        if title_match
+          puts "TITLE/TIME MATCH: #{incoming_title} -> #{title_match.title}"
+          next [title_match, :title_time_match]
+        end
       end
 
       puts "NO MATCH: #{incoming_title}"
