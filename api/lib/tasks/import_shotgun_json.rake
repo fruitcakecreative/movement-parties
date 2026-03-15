@@ -167,7 +167,7 @@ namespace :import do
 
     begin
       city = "mmw"
-      file_path = Rails.root.join("db", "shotgun_raw.json")
+      file_path = Rails.root.join("db", "shotgun.json")
 
       unless File.exist?(file_path)
         puts "File not found: #{file_path}"
