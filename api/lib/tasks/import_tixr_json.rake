@@ -319,9 +319,9 @@ namespace :import do
 
             if source_key == "1878"
               if title.downcase.include?("rooftop")
-                venue = Venue.find_or_create_by!(city_key: city, name: "C-Level Rooftop")
+                venue = Venue.find_or_create_by!(city_key: city, name: "C-Level Rooftop Terrace")
               else
-                venue = Venue.find_or_create_by!(city_key: city, name: "Clevelander")
+                venue = Venue.find_or_create_by!(city_key: city, name: "Clevelander South Beach")
               end
             end
 
