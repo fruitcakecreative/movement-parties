@@ -76,9 +76,7 @@ namespace :import do
     parse_tixr_local_time = lambda do |value|
       next nil if value.blank?
 
-      cleaned = value.to_s.strip
-                      .gsub(/\s+[A-Z]{3,4}\z/, "") # remove EDT / EST / CDT etc
-
+      cleaned = value.to_s.strip.gsub(/\s+[A-Z]{3,4}\z/, "")
       Time.zone.parse(cleaned)
     rescue
       nil
@@ -172,10 +170,8 @@ namespace :import do
       (existing_names & incoming_names).size
     end
 
-    find_matching_event = lambda do |city:, event_url:, incoming_title:, incoming_start_time:, incoming_venue_name:, incoming_artists:|
-      exact_match =
-        Event.find_by(city_key: city, event_url: event_url)
-
+    find_matching_event = lambda do |city:, event_url:, incoming_title:, incoming_start_time:, incoming_venue_name:, incoming_artists:, source_key:|
+      exact_match = Event.find_by(city_key: city, event_url: event_url)
       next [exact_match, :exact_url] if exact_match
 
       candidates = Event.includes(:venue, :artists)
@@ -193,14 +189,16 @@ namespace :import do
         next [confirmed_match, :venue_time_artist_match]
       end
 
-      venue_time_match = candidates.find do |event|
-        venue_match.call(event.venue&.name, incoming_venue_name) &&
-          within_two_hours.call(event.start_time, incoming_start_time)
-      end
+      if source_key != "1878"
+        venue_time_match = candidates.find do |event|
+          venue_match.call(event.venue&.name, incoming_venue_name) &&
+            within_two_hours.call(event.start_time, incoming_start_time)
+        end
 
-      if venue_time_match
-        puts "VENUE/TIME MATCH: #{incoming_title} -> #{venue_time_match.title}"
-        next [venue_time_match, :venue_time_match]
+        if venue_time_match
+          puts "VENUE/TIME MATCH: #{incoming_title} -> #{venue_time_match.title}"
+          next [venue_time_match, :venue_time_match]
+        end
       end
 
       title_match = candidates.find do |event|
@@ -265,6 +263,7 @@ namespace :import do
 
             venue_city = address_data["city"].to_s.strip
             allowed_cities = ["miami", "miami beach"]
+
             unless allowed_cities.include?(venue_city.downcase)
               skipped_count += 1
               puts "Skipping #{index + 1}/#{events.size}: non-Miami city #{venue_city}"
@@ -279,8 +278,6 @@ namespace :import do
 
             start_time = parse_tixr_local_time.call(event_data["formattedStartDate"])
             end_time   = parse_tixr_local_time.call(event_data["formattedEndDate"])
-
-            puts "DEBUG: #{event_data["name"]} | city=#{venue_city} | status=#{event_data["status"]}"
 
             if event_url.blank? || title.blank? || start_time.blank?
               skipped_count += 1
@@ -305,13 +302,22 @@ namespace :import do
 
             venue ||= Venue.create!(city_key: city, name: venue_name)
 
+            if source_key == "1878"
+              if title.downcase.include?("rooftop")
+                venue = Venue.find_or_create_by!(city_key: city, name: "C-Level Rooftop")
+              else
+                venue = Venue.find_or_create_by!(city_key: city, name: "Clevelander")
+              end
+            end
+
             matched_event, match_type = find_matching_event.call(
               city: city,
               event_url: event_url,
               incoming_title: title,
               incoming_start_time: start_time,
-              incoming_venue_name: venue_name,
-              incoming_artists: []
+              incoming_venue_name: venue.name,
+              incoming_artists: [],
+              source_key: source_key
             )
 
             event = matched_event || Event.new(city_key: city, venue: venue)
