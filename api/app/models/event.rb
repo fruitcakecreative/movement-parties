@@ -39,8 +39,8 @@ class Event < ApplicationRecord
   def process_manual_artist_names
     names = manual_artist_names.split(",").map(&:strip).reject(&:blank?)
     names.each do |name|
-      artist = Artist.find_or_create_by!(name: name)
-      self.artists << artist unless self.artist_ids.include?(artist.id)
+      artist = Artist.find_or_create_by_canonical_name!(name)
+      self.artists << artist if artist && !self.artist_ids.include?(artist.id)
     end
     update_column(:manual_artist_names, nil)
   end

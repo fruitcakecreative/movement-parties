@@ -1,3 +1,5 @@
+import { formatDescription } from '../../../utils/formatDescription';
+
 const EventModalStandalone = ({ event, venueHex, fontHex }) => {
   const {
     event_url,
@@ -125,7 +127,7 @@ const EventModalStandalone = ({ event, venueHex, fontHex }) => {
         <p
           className="event-desc"
           dangerouslySetInnerHTML={{
-            __html: description.replace(/\n/g, '<br/>'),
+            __html: formatDescription(description),
           }}
         />
       )}

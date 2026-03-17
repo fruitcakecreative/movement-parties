@@ -9,6 +9,8 @@ function useEventsData({ dates, customDateRanges }) {
   const [allEvents, setAllEvents] = useState([]);
   const [genreOptions, setGenreOptions] = useState([]);
   const [artistOptions, setArtistOptions] = useState([]);
+  const [venueOptions, setVenueOptions] = useState([]);
+  const [locationOptions, setLocationOptions] = useState([]);
 
   useEffect(() => {
     Sentry.startSpan({ name: '/api/events', op: 'fetch' }, async (span) => {
@@ -34,6 +36,27 @@ function useEventsData({ dates, customDateRanges }) {
             )
           ).sort()
         );
+
+        const venueMap = new Map();
+        eventList.forEach((event) => {
+          const v = event.venue;
+          if (v?.name && !venueMap.has(v.name)) {
+            venueMap.set(v.name, { name: v.name, subheading: v.subheading || '' });
+          }
+        });
+        setVenueOptions(
+          Array.from(venueMap.values()).sort((a, b) => a.name.localeCompare(b.name))
+        );
+
+        setLocationOptions(
+          Array.from(
+            new Set(
+              eventList
+                .filter((event) => event.venue?.location)
+                .map((event) => event.venue.location)
+            )
+          ).sort()
+        );
       } catch (error) {
         console.error('Error fetching events:', error);
       } finally {
@@ -49,6 +72,8 @@ function useEventsData({ dates, customDateRanges }) {
     eventsByDate,
     genreOptions,
     artistOptions,
+    venueOptions,
+    locationOptions,
   };
 }
 

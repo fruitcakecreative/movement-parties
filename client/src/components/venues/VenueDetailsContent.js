@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import EventCard from '../EventCard';
+import { formatDescription } from '../../utils/formatDescription';
 
-function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent }) {
+function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent, fromEventId, onBackToEvent }) {
   const contentRef = useRef(null);
     const [showFullDescription, setShowFullDescription] = useState(false);
 
@@ -73,9 +74,22 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent }) {
       className="event-details-content venue-details-content"
       style={{ minHeight: '100%' }}
     >
-      <button className="event-details-close mb-sm" onClick={onClose} aria-label="Close venue details">
-        ×
-      </button>
+      <div className="event-details-header flex mb-sm">
+        {fromEventId && onBackToEvent && (
+          <button
+            type="button"
+            className="event-details-back"
+            onClick={onBackToEvent}
+            aria-label="Back to event"
+          >
+            <i className="fa-solid fa-arrow-left" aria-hidden />
+            Back to event
+          </button>
+        )}
+        <button className="event-details-close" onClick={onClose} aria-label="Close venue details">
+          ×
+        </button>
+      </div>
 
       {logo_url && venue_type !== 'Pool' && venue_type !== 'Boat' && (
         <img
@@ -123,7 +137,7 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent }) {
         <div className="event-description mb-xs">
           {showFullDescription ? (
             <>
-              <div dangerouslySetInnerHTML={{ __html: description }} />
+              <div dangerouslySetInnerHTML={{ __html: formatDescription(description) }} />
               {isLongDescription && (
                 <button
                   type="button"
@@ -164,7 +178,7 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent }) {
                   <EventCard
                     key={event.id}
                     event={event}
-                    onClick={() => openEvent?.(event.id)}
+                    onClick={() => openEvent?.(event.id, venue?.id)}
                   />
                 ))}
               </div>

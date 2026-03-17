@@ -31,6 +31,13 @@
   padding: 20px;
 }
 
+.event-details-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .event-details-close {
   appearance: none;
   border: 0;
@@ -38,6 +45,25 @@
   color: inherit;
   font-size: 28px;
   cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.event-details-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--color-primary);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .event-details-image {

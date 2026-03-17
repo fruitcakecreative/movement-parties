@@ -277,8 +277,8 @@ namespace :import do
                 .uniq
 
               incoming_artist_names.each do |artist_name|
-                artist = Artist.find_or_create_by!(name: artist_name)
-                event.artists << artist unless event.artists.include?(artist)
+                artist = Artist.find_or_create_by_canonical_name!(artist_name)
+                event.artists << artist if artist && !event.artists.include?(artist)
               end
             end
 

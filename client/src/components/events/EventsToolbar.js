@@ -11,10 +11,16 @@ function EventsToolbar({
   setFilterSelections,
   genreOptions,
   artistOptions,
+  venueOptions,
+  locationOptions,
   searchQuery,
   setSearchQuery,
   filteredArtists,
   setFilteredArtists,
+  venueSearchQuery,
+  setVenueSearchQuery,
+  filteredVenues,
+  setFilteredVenues,
 }) {
   return (
     <>
@@ -30,10 +36,16 @@ function EventsToolbar({
           setSelected={setFilterSelections}
           genreOptions={genreOptions}
           artistOptions={artistOptions}
+          venueOptions={venueOptions}
+          locationOptions={locationOptions}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           filteredArtists={filteredArtists}
           setFilteredArtists={setFilteredArtists}
+          venueSearchQuery={venueSearchQuery}
+          setVenueSearchQuery={setVenueSearchQuery}
+          filteredVenues={filteredVenues}
+          setFilteredVenues={setFilteredVenues}
         />
       )}
     </>

@@ -30,10 +30,12 @@ function Events() {
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedEventId = searchParams.get('eventId');
   const selectedVenueId = searchParams.get('venueId');
+  const fromEventId = searchParams.get('fromEvent');
+  const fromVenueId = searchParams.get('fromVenue');
   const mainScrollRef = useRef(null);
   const desktopScrollRef = useRef(0);
 
-  const openEvent = (eventId) => {
+  const openEvent = (eventId, fromVenue) => {
     const isMobile = window.innerWidth < 768;
 
     if (!isMobile) {
@@ -46,7 +48,9 @@ function Events() {
 
     const next = new URLSearchParams(searchParams);
     next.delete('venueId');
+    next.delete('fromEvent');
     next.set('eventId', eventId);
+    if (fromVenue) next.set('fromVenue', fromVenue);
     setSearchParams(next, { preventScrollReset: true });
   };
 
@@ -59,10 +63,29 @@ function Events() {
 
     const next = new URLSearchParams(searchParams);
     next.delete('eventId');
+    next.delete('fromVenue');
     setSearchParams(next, { preventScrollReset: true });
   };
 
-  const openVenue = (venueId) => {
+  const goBackToEvent = () => {
+    if (!fromEventId) return;
+    const next = new URLSearchParams(searchParams);
+    next.delete('venueId');
+    next.delete('fromEvent');
+    next.set('eventId', fromEventId);
+    setSearchParams(next, { preventScrollReset: true });
+  };
+
+  const goBackToVenue = () => {
+    if (!fromVenueId) return;
+    const next = new URLSearchParams(searchParams);
+    next.delete('eventId');
+    next.delete('fromVenue');
+    next.set('venueId', fromVenueId);
+    setSearchParams(next, { preventScrollReset: true });
+  };
+
+  const openVenue = (venueId, fromEvent) => {
     const isMobile = window.innerWidth < 768;
 
     if (!isMobile) {
@@ -75,7 +98,9 @@ function Events() {
 
     const next = new URLSearchParams(searchParams);
     next.delete('eventId');
+    next.delete('fromVenue');
     next.set('venueId', venueId);
+    if (fromEvent) next.set('fromEvent', fromEvent);
     setSearchParams(next, { preventScrollReset: true });
   };
 
@@ -88,6 +113,7 @@ function Events() {
 
     const next = new URLSearchParams(searchParams);
     next.delete('venueId');
+    next.delete('fromEvent');
     setSearchParams(next, { preventScrollReset: true });
   };
 
@@ -97,6 +123,8 @@ function Events() {
     eventsByDate,
     genreOptions,
     artistOptions,
+    venueOptions,
+    locationOptions,
   } = useEventsData({ dates, customDateRanges });
 
   const {
@@ -108,6 +136,10 @@ function Events() {
     setSearchQuery,
     filteredArtists,
     setFilteredArtists,
+    venueSearchQuery,
+    setVenueSearchQuery,
+    filteredVenues,
+    setFilteredVenues,
     getFilteredEventsForDate,
     hasActiveFilters,
     resetFilters,
@@ -130,10 +162,16 @@ function Events() {
               setFilterSelections={setFilterSelections}
               genreOptions={genreOptions}
               artistOptions={artistOptions}
+              venueOptions={venueOptions}
+              locationOptions={locationOptions}
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
               filteredArtists={filteredArtists}
               setFilteredArtists={setFilteredArtists}
+              venueSearchQuery={venueSearchQuery}
+              setVenueSearchQuery={setVenueSearchQuery}
+              filteredVenues={filteredVenues}
+              setFilteredVenues={setFilteredVenues}
             />
 
             {!isLoaded ? (
@@ -197,6 +235,8 @@ function Events() {
         mainScrollRef={mainScrollRef}
         desktopScrollRef={desktopScrollRef}
         openVenue={openVenue}
+        fromVenueId={fromVenueId}
+        onBackToVenue={goBackToVenue}
       />
       <VenueDetailsShell
         venueId={selectedVenueId}
@@ -205,6 +245,8 @@ function Events() {
         mainScrollRef={mainScrollRef}
         desktopScrollRef={desktopScrollRef}
         openEvent={openEvent}
+        fromEventId={fromEventId}
+        onBackToEvent={goBackToEvent}
       />
     </div>
   );

@@ -17,10 +17,16 @@ const FiltersDropdown = ({
   setSelected,
   genreOptions,
   artistOptions,
+  venueOptions,
+  locationOptions,
   searchQuery,
   setSearchQuery,
   filteredArtists,
   setFilteredArtists,
+  venueSearchQuery,
+  setVenueSearchQuery,
+  filteredVenues,
+  setFilteredVenues,
 }) => {
   const toggle = (category, value) => {
     const exists = selected[category]?.includes(value);
@@ -104,11 +110,61 @@ const FiltersDropdown = ({
                 )}
               </div>
 
+              {/* Venue Search */}
+              <div className="full-width option-item venues mb-sm">
+                <input
+                  type="text"
+                  placeholder="Search Venues..."
+                  className="full-width"
+                  value={venueSearchQuery}
+                  onChange={(e) => {
+                    const q = e.target.value.toLowerCase();
+                    setVenueSearchQuery(e.target.value);
+                    setFilteredVenues(
+                      venueOptions
+                        .filter((v) => {
+                          const searchStr = [v.name, v.subheading]
+                            .filter(Boolean)
+                            .join(' ')
+                            .toLowerCase();
+                          return searchStr.includes(q);
+                        })
+                        .filter((v) => !selected.venue?.includes(v.name))
+                    );
+                  }}
+                />
+
+                {venueSearchQuery && filteredVenues.length > 0 && (
+                  <div className="venue-search-wrapper">
+                    <div className="option-item venue-search">
+                      {filteredVenues.map((v) => (
+                        <div
+                          key={v.name}
+                          className="option-item"
+                          onClick={() => {
+                            setSelected((prev) => ({
+                              ...prev,
+                              venue: [...(prev.venue || []), v.name],
+                            }));
+                            setVenueSearchQuery('');
+                            setFilteredVenues([]);
+                          }}
+                        >
+                          {v.subheading && v.subheading.toLowerCase() !== v.name.toLowerCase()
+  ? `${v.name} (${v.subheading})`
+  : v.name}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Genre Section */}
               <Disclosure>
                 {({ open }) => (
                   <>
-                    <Disclosure.Button className="full-width option-item">
+                    <Disclosure.Button className="mb-xs full-width option-item">
                       <span className="genre">Genre</span>
                       <span className="arrow">{open ? '▴' : '▾'}</span>
                     </Disclosure.Button>
@@ -126,6 +182,35 @@ const FiltersDropdown = ({
                             checked={selected.genre?.includes(g)}
                           />
                           {g}
+                        </div>
+                      ))}
+                    </Disclosure.Panel>
+                  </>
+                )}
+              </Disclosure>
+
+              {/* Location Section */}
+              <Disclosure>
+                {({ open }) => (
+                  <>
+                    <Disclosure.Button className="full-width option-item">
+                      <span className="location">Location</span>
+                      <span className="arrow">{open ? '▴' : '▾'}</span>
+                    </Disclosure.Button>
+
+                    <Disclosure.Panel className="option-item-wrapper">
+                      {locationOptions.map((loc) => (
+                        <div
+                          key={loc}
+                          className="option-item location"
+                          onClick={() => toggle('location', loc)}
+                        >
+                          <input
+                            type="checkbox"
+                            readOnly
+                            checked={selected.location?.includes(loc)}
+                          />
+                          {loc}
                         </div>
                       ))}
                     </Disclosure.Panel>

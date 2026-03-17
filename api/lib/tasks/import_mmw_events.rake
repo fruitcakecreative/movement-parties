@@ -96,7 +96,7 @@ namespace :import do
 
             genres =
               if event_info["genres"].is_a?(Array) && event_info["genres"].any?
-                event_info["genres"].map { |g| Genre.find_or_create_by!(name: g["name"]) }
+                event_info["genres"].map { |g| Genre.find_or_create_by_canonical_name!(g["name"]) }
               else
                 []
               end
@@ -176,8 +176,8 @@ namespace :import do
 
             if event_info["artists"] && !event.manual_override_artists
               event_info["artists"].each do |artist_data|
-                artist = Artist.find_or_create_by!(name: artist_data["name"])
-                event.artists << artist unless event.artists.include?(artist)
+                artist = Artist.find_or_create_by_canonical_name!(artist_data["name"])
+                event.artists << artist if artist && !event.artists.include?(artist)
               end
             end
           end

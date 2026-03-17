@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { getEventDisplayData } from '../../utils/eventDisplay';
+import { formatDescription } from '../../utils/formatDescription';
 
-function EventDetailsContent({ event, onClose, openVenue }) {
+function EventDetailsContent({ event, onClose, openVenue, fromVenueId, onBackToVenue }) {
   const contentRef = useRef(null);
   const [showFullDescription, setShowFullDescription] = useState(false);
 
@@ -63,9 +64,24 @@ function EventDetailsContent({ event, onClose, openVenue }) {
       className="event-details-content"
       style={{ minHeight: '100%' }}
     >
-      <button className="event-details-close mb-sm" onClick={onClose} aria-label="Close event details">
-        ×
-      </button>
+      <div className="event-details-header flex mb-sm">
+        <div>
+        {fromVenueId && onBackToVenue && (
+          <button
+            type="button"
+            className="event-details-back"
+            onClick={onBackToVenue}
+            aria-label="Back to venue"
+          >
+            <i className="fa-solid fa-arrow-left" aria-hidden />
+            Back to venue
+          </button>
+        )}
+        </div>
+        <button className="event-details-close" onClick={onClose} aria-label="Close event details">
+          ×
+        </button>
+      </div>
 
       <div className="party-content event-details-card">
         <div className="event-date-time flex mb-xs">
@@ -105,7 +121,7 @@ function EventDetailsContent({ event, onClose, openVenue }) {
                 <button
                   type="button"
                   className="event-venue button mb-xs"
-                  onClick={() => event?.venue?.id && openVenue?.(event.venue.id)}
+                  onClick={() => event?.venue?.id && openVenue?.(event.venue.id, event.id)}
                 >
                   <i className="fa-solid fa-map-pin"></i>&nbsp;
                   {venueName}
@@ -173,7 +189,7 @@ function EventDetailsContent({ event, onClose, openVenue }) {
           <div className="event-description mb-xs">
             {showFullDescription ? (
               <>
-                <div dangerouslySetInnerHTML={{ __html: description }} />
+                <div dangerouslySetInnerHTML={{ __html: formatDescription(description) }} />
                 {isLongDescription && (
                   <button
                     type="button"

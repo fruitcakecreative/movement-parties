@@ -5,6 +5,8 @@ const defaultFilters = {
   cost: [],
   age: [],
   artist: [],
+  venue: [],
+  location: [],
   venueType: [],
 };
 
@@ -13,6 +15,8 @@ function useEventFilters({ eventsByDate }) {
   const [filterSelections, setFilterSelections] = useState(defaultFilters);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredArtists, setFilteredArtists] = useState([]);
+  const [venueSearchQuery, setVenueSearchQuery] = useState('');
+  const [filteredVenues, setFilteredVenues] = useState([]);
 
   const hasActiveFilters = useMemo(
     () => Object.values(filterSelections).some((values) => values.length > 0),
@@ -58,6 +62,18 @@ function useEventFilters({ eventsByDate }) {
       });
     }
 
+    if (filterSelections.venue.length > 0) {
+      dayEvents = dayEvents.filter((event) =>
+        filterSelections.venue.includes(event.venue?.name)
+      );
+    }
+
+    if (filterSelections.location.length > 0) {
+      dayEvents = dayEvents.filter((event) =>
+        filterSelections.location.includes(event.venue?.location)
+      );
+    }
+
     if (filterSelections.venueType.length > 0) {
       dayEvents = dayEvents.filter((event) =>
         filterSelections.venueType.includes(event.venue?.venue_type)
@@ -96,6 +112,10 @@ function useEventFilters({ eventsByDate }) {
     setSearchQuery,
     filteredArtists,
     setFilteredArtists,
+    venueSearchQuery,
+    setVenueSearchQuery,
+    filteredVenues,
+    setFilteredVenues,
     getFilteredEventsForDate,
     hasActiveFilters,
     resetFilters,

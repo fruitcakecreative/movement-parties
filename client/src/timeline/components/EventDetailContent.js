@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { getEventDisplayData } from '../../utils/eventDisplay';
+import { formatDescription } from '../../utils/formatDescription';
 
 function EventDetailsContent({ event, onClose }) {
   const contentRef = useRef(null);
@@ -100,7 +101,7 @@ function EventDetailsContent({ event, onClose }) {
         {description && (
           <div
             className="event-description mb-xs"
-            dangerouslySetInnerHTML={{ __html: description }}
+            dangerouslySetInnerHTML={{ __html: formatDescription(description) }}
           />
         )}
 

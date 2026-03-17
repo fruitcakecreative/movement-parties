@@ -73,10 +73,17 @@ class Venue < ApplicationRecord
   end
 
   before_validation :default_city_key, on: :create
+  before_validation :normalize_location
   # before_validation :apply_type_colors
 
   def default_city_key
     self.city_key ||= (Current.city_key.presence || "movement")
+  end
+
+  def normalize_location
+    return if location.blank?
+
+    self.location = location.to_s.strip.titleize
   end
 
   def palette_for_type

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { fetchEventById } from '../../services/api';
 import { getEventDisplayData } from '../../utils/eventDisplay';
+import { formatDescription } from '../../utils/formatDescription';
 
 const EventPage = () => {
   const { id } = useParams();
@@ -130,7 +131,7 @@ const EventPage = () => {
           <div
             className="event-desc"
             dangerouslySetInnerHTML={{
-              __html: eventDisplay.description.replace(/\n/g, '<br />'),
+              __html: formatDescription(eventDisplay.description),
             }}
           />
         )}

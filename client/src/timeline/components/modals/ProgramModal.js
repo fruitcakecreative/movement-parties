@@ -1,5 +1,6 @@
 import ModalLayout from './ModalLayout';
 import formatVenueName from '../../../utils/formatVenueName';
+import { formatDescription } from '../../../utils/formatDescription';
 
 const EventModal = ({ isOpen, onClose, data }) => {
   const {
@@ -124,7 +125,7 @@ const EventModal = ({ isOpen, onClose, data }) => {
         <p
           className="event-desc"
           dangerouslySetInnerHTML={{
-            __html: description.replace(/\n/g, '<br/>'),
+            __html: formatDescription(description),
           }}
         />
       )}

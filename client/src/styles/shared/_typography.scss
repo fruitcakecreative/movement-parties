@@ -41,6 +41,11 @@ p, .event-description {
   line-height: $line-normal;
 }
 
+.event-description {
+  word-wrap: break-word;
+  line-height: 1.5;
+}
+
 .text-sm {
   font-size: $text-sm;
 }

@@ -82,7 +82,9 @@ namespace :import do
 
     skip_titles = [
       "ezample",
-      "Shift Miami 2026"
+      "Shift Miami 2026",
+      "BREAKING THE LIMITED MINDSET",
+      "Body Beats By Jessi"
     ]
 
     skip_event = lambda do |event_data, start_time|

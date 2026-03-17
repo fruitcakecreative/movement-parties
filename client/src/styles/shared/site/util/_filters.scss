@@ -97,7 +97,8 @@
       color: var(--color-text-light);
       border-radius: var(--radius-button);
     }
-    .option-item.artists {
+    .option-item.artists,
+    .option-item.venues {
       background: none;
       color: var(--color-text);
       margin-bottom: 5px;
@@ -111,13 +112,15 @@
         outline: none;
       }
     }
-    .artist-search-wrapper {
+    .artist-search-wrapper,
+    .venue-search-wrapper {
       margin-top: 2px;
       border-radius: var(--radius-card);
       border: 1px solid;
       border-color: var(--color-bg-dark);
     }
-    .option-item.artist-search {
+    .option-item.artist-search,
+    .option-item.venue-search {
       box-sizing: border-box;
       padding: 10px 10px;
       width: calc(100% - 5px);
@@ -137,21 +140,25 @@
       }
     }
 
-    .option-item.artist-search::-webkit-scrollbar {
+    .option-item.artist-search::-webkit-scrollbar,
+    .option-item.venue-search::-webkit-scrollbar {
 
     }
 
-    .option-item.artist-search::-webkit-scrollbar-track {
+    .option-item.artist-search::-webkit-scrollbar-track,
+    .option-item.venue-search::-webkit-scrollbar-track {
       background: transparent;
     }
 
-    .option-item.artist-search::-webkit-scrollbar-thumb {
+    .option-item.artist-search::-webkit-scrollbar-thumb,
+    .option-item.venue-search::-webkit-scrollbar-thumb {
       background: var(--color-bg-dark);
       border-radius: var(--radius-button);
       background-clip: content-box;
     }
 
-    .option-item.artist-search::-webkit-scrollbar-thumb:hover {
+    .option-item.artist-search::-webkit-scrollbar-thumb:hover,
+    .option-item.venue-search::-webkit-scrollbar-thumb:hover {
       background:var(--color-bg-dark);
     }
 
@@ -164,10 +171,9 @@
     .option-item-wrapper {
       width: calc(100% - 50px);
       padding: 10px 12px;
-      display: flex;
-      flex-wrap: wrap;
-      column-gap: 10px;
-      row-gap: 5px;
+      column-count: 3;
+      column-gap: 12px;
+      column-fill: balance;
       .option-item {
         display: flex;
         align-items: start;
@@ -177,6 +183,8 @@
         white-space: normal;
         text-align: left;
         color: var(--color-filter-text);
+        break-inside: avoid;
+        margin-bottom: 5px;
         input {
           margin-right: 4px;
           margin-top: -0.3px;
@@ -240,6 +248,12 @@
   }
   .filter-pill.artist {
     background-color: #EA9B5C;
+  }
+  .filter-pill.venue {
+    background-color: #5CB8EA;
+  }
+  .filter-pill.location {
+    background-color: #5CEA9B;
   }
 }
 

@@ -9,6 +9,8 @@ function EventDetailsShell({
   mainScrollRef,
   desktopScrollRef,
   openVenue,
+  fromVenueId,
+  onBackToVenue,
 }) {
   const selectedEvent = useMemo(() => {
     return (allEvents || []).find(
@@ -26,6 +28,8 @@ function EventDetailsShell({
       event={selectedEvent}
       onClose={onClose}
       openVenue={openVenue}
+      fromVenueId={fromVenueId}
+      onBackToVenue={onBackToVenue}
       />
     </DetailsShell>
   );
