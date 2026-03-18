@@ -33,8 +33,8 @@ const MiniProgramBox = ({ event, onClick }) => {
   const displayTitle = short_title || title;
   const ticketLabel = ticket_price === '0.0' ? 'FREE' : `$${ticket_price}`;
   const allArtists = artists.length ? artists : top_artists;
-  const bgColor = venue?.bg_color || '#ccc';
-  const fontColor = venue?.font_color || '#000';
+  const bgColor = event.bg_color || venue?.bg_color || '#ccc';
+  const fontColor = event.font_color || venue?.font_color || '#000';
 
   let ticketTier = ticket_tier ? `– ${ticket_tier}` : '';
   if (ticket_wave) {

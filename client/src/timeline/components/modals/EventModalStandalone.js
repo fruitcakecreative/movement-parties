@@ -38,7 +38,9 @@ const EventModalStandalone = ({ event, venueHex, fontHex }) => {
     const [current, total] = ticket_wave.split(' of ').map(Number);
     if (current === total) ticketTier = '– Final release';
   }
-  const venueName = typeof venue === 'string' ? venue : venue?.name || '';
+  const venueName = typeof venue === 'string'
+    ? venue
+    : (venue?.parent_venue_id && venue?.subheading) ? venue.subheading : (venue?.name || '');
 
   const allArtists = artists.length ? artists : top_artists;
 

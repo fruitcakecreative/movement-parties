@@ -32,7 +32,7 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent, from
 
       const venueId = event.venue?.id;
       const subLabel = childVenues.length
-        ? (childVenues.find((c) => c.id === venueId)?.subheading || childVenues.find((c) => c.id === venueId)?.name || 'Events')
+        ? (childVenues.find((c) => c.id === venueId)?.subheading || childVenues.find((c) => c.id === venueId)?.name || '')
         : '_';
 
       if (!acc[dayLabel][subLabel]) acc[dayLabel][subLabel] = [];
@@ -120,7 +120,7 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent, from
         <h2>{name}</h2>
       )}
 
-      {subheading && (
+      {subheading && (venue?.child_venues?.length > 0) && (
         <h2 className="event-venue mb-xs highlight">
           {subheading}
         </h2>
@@ -190,7 +190,7 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent, from
                 {sections.map(([subLabel, events]) => (
                   <div key={subLabel} className="venue-event-subgroup mb-sm">
                     {subLabel !== '_' && (
-                      <h4 className="venue-event-subvenue-title mb-xs">{subLabel}</h4>
+                      <h5 className="venue-event-subvenue-title mb-xs">{subLabel}</h5>
                     )}
                     <div className="venue-event-cards">
                       {events.map((event) => (
