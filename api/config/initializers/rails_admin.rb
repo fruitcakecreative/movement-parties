@@ -126,7 +126,16 @@ end
         end
       end
       field :subheading
-      field :parent_venue
+      field :parent_venue do
+        associated_collection_cache_all false
+        associated_collection_scope do
+          current_venue = bindings[:object]
+          Proc.new do |scope|
+            key = current_venue&.city_key.presence || "mmw"
+            scope.where(city_key: key).where.not(id: current_venue&.id)
+          end
+        end
+      end
       field :bg_color do
         partial 'color_picker'
       end
