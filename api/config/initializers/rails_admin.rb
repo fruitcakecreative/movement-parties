@@ -79,7 +79,11 @@ RailsAdmin.config do |config|
     field :notes
     field :event_url
     field :ticket_url
+    field :ra_url
     field :dice_url
+    field :shotgun_url
+    field :posh_url
+    field :tixr_url
     field :source
     field :ticket_price
     field :ticket_tier
