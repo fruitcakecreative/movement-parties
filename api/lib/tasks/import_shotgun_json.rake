@@ -131,16 +131,6 @@ namespace :import do
         next [artist_match, :artist_time_match]
       end
 
-      title_match = candidates.find do |event|
-        within_two_hours.call(event.start_time, incoming_start_time) &&
-          title_overlap_count.call(event.title, incoming_title) >= 2
-      end
-
-      if title_match
-        puts "TITLE/TIME MATCH: #{incoming_title} -> #{title_match.title}"
-        next [title_match, :title_time_match]
-      end
-
       puts "NO MATCH: #{incoming_title}"
       [nil, nil]
     end

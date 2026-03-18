@@ -12,15 +12,27 @@ function VenueDetailsShell({
   fromEventId,
   onBackToEvent,
 }) {
-  const venueEvents = useMemo(() => {
-    return (allEvents || []).filter(
-      (event) => String(event.venue?.id) === String(venueId)
+  const { venueEvents, selectedVenue } = useMemo(() => {
+    const events = allEvents || [];
+    const initialEvents = events.filter(
+      (e) => String(e.venue?.id) === String(venueId)
     );
-  }, [allEvents, venueId]);
+    const venue = initialEvents[0]?.venue || null;
 
-  const selectedVenue = useMemo(() => {
-    return venueEvents[0]?.venue || null;
-  }, [venueEvents]);
+    // Parent venues: include events from all child venues. Child venues: include events from parent + siblings.
+    const venueIds = venue?.venue_ids_for_events;
+    const filteredEvents = Array.isArray(venueIds) && venueIds.length > 1
+      ? events.filter((e) => venueIds.includes(e.venue?.id))
+      : initialEvents;
+
+    // Use display venue (parent) when available for name/description
+    const displayVenue = venue?.display_venue_for_json;
+    const venueToShow = displayVenue
+      ? { ...venue, ...displayVenue, logo_url: venue.logo_url }
+      : venue;
+
+    return { venueEvents: filteredEvents, selectedVenue: venueToShow };
+  }, [allEvents, venueId]);
 
   return (
     <DetailsShell

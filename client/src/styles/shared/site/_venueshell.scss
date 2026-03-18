@@ -5,4 +5,15 @@
   .event-details-image {
     max-width: 60%;
   }
+
+  .venue-event-subgroup {
+    margin-left: 0;
+  }
+
+  .venue-event-subvenue-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-primary, #333);
+    margin-bottom: 0.5rem;
+  }
 }

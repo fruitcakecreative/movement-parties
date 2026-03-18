@@ -10,17 +10,18 @@ class Api::EventsController < ApplicationController
 
     events = Rails.cache.fetch(cache_key, expires_in: 5.minutes) do
       Event.where(city_key: city)
-           .includes(:genres, :venue, :artists)
+           .includes(:genres, :artists, venue: [:parent_venue, :child_venues])
            .order(start_time: :asc, end_time: :asc)
            .as_json(
              include: {
                genres: { only: [:id, :name, :short_name, :hex_color, :font_color] },
                venue: {
-                 methods: [:logo_url],
+                 methods: [:logo_url, :venue_ids_for_events, :display_venue_for_json],
                  only: [
                    :id, :name, :age, :image_filename, :address, :location,
                    :venue_url, :description, :distance, :serves_alcohol,
-                   :venue_type, :additional_images, :bg_color, :font_color, :subheading, :source
+                   :venue_type, :additional_images, :bg_color, :font_color, :subheading, :source,
+                   :parent_venue_id
                  ]
                }
              },

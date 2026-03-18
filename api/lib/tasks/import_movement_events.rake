@@ -31,6 +31,11 @@ namespace :import do
       updated_count = 0
       matched_events = []
 
+      skip_title = lambda do |title|
+        t = title.to_s.downcase
+        t.include?("pass") || t.include?("multi-day") || t.include?("week pass") || t.include?("festival pass")
+      end
+
       skip_urls = [
         "https://ra.co/events/2370518",
         "https://ra.co/events/2353591"
@@ -42,6 +47,9 @@ namespace :import do
 
         event_url = "https://ra.co#{event_info['contentUrl']}"
         next if skip_urls.include?(event_url)
+
+        title = event_info["title"].to_s.strip
+        next if skip_title.call(title)
 
         begin
           ActiveRecord::Base.transaction do

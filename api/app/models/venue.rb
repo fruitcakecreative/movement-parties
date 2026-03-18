@@ -2,6 +2,9 @@
 class Venue < ApplicationRecord
   require "zlib"
 
+  belongs_to :parent_venue, class_name: "Venue", optional: true
+  has_many :child_venues, class_name: "Venue", foreign_key: :parent_venue_id, dependent: :nullify
+
   has_many :events
   has_one_attached :logo
 
@@ -119,5 +122,39 @@ class Venue < ApplicationRecord
       key: logo.blob.key,
       client: Aws::S3::Client.new
     ).public_url
+  end
+
+  # For parent venues: the venue to display (name, description). For child venues: the parent.
+  def display_venue
+    parent_venue || self
+  end
+
+  # Venue IDs whose events should be shown when viewing this venue (self + siblings, or self + children)
+  def venue_ids_for_events
+    if parent_venue_id.present?
+      [parent_venue_id] + parent_venue.child_venues.pluck(:id)
+    elsif child_venues.any?
+      [id] + child_venues.pluck(:id)
+    else
+      [id]
+    end
+  end
+
+  # For API: when this venue has parent or children, include display venue (parent or self) with child venues for grouping
+  def display_venue_for_json
+    return nil unless parent_venue_id.present? || child_venues.any?
+
+    dv = display_venue
+    {
+      id: dv.id,
+      name: dv.name,
+      description: dv.description,
+      subheading: dv.subheading,
+      address: dv.address,
+      location: dv.location,
+      venue_type: dv.venue_type,
+      logo_url: dv.logo_url,
+      child_venues: (dv.child_venues.any? ? dv.child_venues.map { |c| { id: c.id, name: c.name, subheading: c.subheading } } : [])
+    }
   end
 end

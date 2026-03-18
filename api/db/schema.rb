@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_03_18_000000) do
+ActiveRecord::Schema[7.2].define(version: 2026_03_19_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -228,7 +228,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_18_000000) do
     t.string "hex_color"
     t.string "city_key"
     t.string "age"
+    t.bigint "parent_venue_id"
     t.index ["city_key", "venue_url"], name: "index_venues_on_city_key_and_venue_url"
+    t.index ["parent_venue_id"], name: "index_venues_on_parent_venue_id"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
@@ -244,4 +246,5 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_18_000000) do
   add_foreign_key "ticket_posts", "events"
   add_foreign_key "user_events", "events", on_delete: :cascade
   add_foreign_key "user_events", "users", on_delete: :cascade
+  add_foreign_key "venues", "venues", column: "parent_venue_id"
 end

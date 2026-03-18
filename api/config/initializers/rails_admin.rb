@@ -126,6 +126,7 @@ end
         end
       end
       field :subheading
+      field :parent_venue
       field :bg_color do
         partial 'color_picker'
       end

@@ -17,6 +17,8 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent, from
         new Date(b.start_time || b.formatted_start_time)
     );
 
+    const childVenues = venue?.child_venues || [];
+
     return sortedEvents.reduce((acc, event) => {
       const dayLabel = new Date(
         event.start_time || event.formatted_start_time
@@ -26,11 +28,18 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent, from
         day: 'numeric',
       });
 
-      acc[dayLabel] = acc[dayLabel] || [];
-      acc[dayLabel].push(event);
+      if (!acc[dayLabel]) acc[dayLabel] = {};
+
+      const venueId = event.venue?.id;
+      const subLabel = childVenues.length
+        ? (childVenues.find((c) => c.id === venueId)?.subheading || childVenues.find((c) => c.id === venueId)?.name || 'Events')
+        : '_';
+
+      if (!acc[dayLabel][subLabel]) acc[dayLabel][subLabel] = [];
+      acc[dayLabel][subLabel].push(event);
       return acc;
     }, {});
-  }, [venueEvents]);
+  }, [venueEvents, venue?.child_venues]);
 
   if (!venue) {
     return (
@@ -169,21 +178,34 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent, from
       )}
       {venueEvents.length > 0 && (
         <div className="venue-events-list mb-xs">
-          {Object.entries(groupedEvents).map(([day, events]) => (
-            <div key={day} className="venue-event-group mb-sm">
-              <h3 className="venue-event-group-title mb-xs">{day}</h3>
+          {Object.entries(groupedEvents).map(([day, dayGroups]) => {
+            const isGroupedBySubVenue = typeof dayGroups === 'object' && !Array.isArray(dayGroups);
+            const sections = isGroupedBySubVenue
+              ? Object.entries(dayGroups)
+              : [['_', dayGroups]];
 
-              <div className="venue-event-cards">
-                {events.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    onClick={() => openEvent?.(event.id, venue?.id)}
-                  />
+            return (
+              <div key={day} className="venue-event-group mb-sm">
+                <h3 className="venue-event-group-title mb-xs">{day}</h3>
+                {sections.map(([subLabel, events]) => (
+                  <div key={subLabel} className="venue-event-subgroup mb-sm">
+                    {subLabel !== '_' && (
+                      <h4 className="venue-event-subvenue-title mb-xs">{subLabel}</h4>
+                    )}
+                    <div className="venue-event-cards">
+                      {events.map((event) => (
+                        <EventCard
+                          key={event.id}
+                          event={event}
+                          onClick={() => openEvent?.(event.id, venue?.id)}
+                        />
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
