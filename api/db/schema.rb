@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_03_11_234752) do
+ActiveRecord::Schema[7.2].define(version: 2026_03_18_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -122,8 +122,16 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_11_234752) do
     t.boolean "ra_has_ticketing", default: false, null: false
     t.boolean "ra_is_free_ticketing", default: false, null: false
     t.string "dice_url"
+    t.string "ra_url"
+    t.string "shotgun_url"
+    t.string "posh_url"
+    t.string "tixr_url"
     t.index ["city_key", "event_url"], name: "index_events_on_city_key_and_event_url"
     t.index ["dice_url"], name: "index_events_on_dice_url"
+    t.index ["posh_url"], name: "index_events_on_posh_url"
+    t.index ["ra_url"], name: "index_events_on_ra_url"
+    t.index ["shotgun_url"], name: "index_events_on_shotgun_url"
+    t.index ["tixr_url"], name: "index_events_on_tixr_url"
     t.index ["venue_id"], name: "index_events_on_venue_id"
   end
 

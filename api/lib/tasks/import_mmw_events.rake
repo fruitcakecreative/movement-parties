@@ -49,6 +49,10 @@ namespace :import do
 
       events = JSON.parse(File.read(temp_path))
 
+      created_count = 0
+      updated_count = 0
+      matched_events = []
+
       skip_urls = [
         "https://ra.co/events/2370518",
         "https://ra.co/events/2353591",
@@ -101,7 +105,9 @@ namespace :import do
                 []
               end
 
-            event = Event.find_or_initialize_by(city_key: city, event_url: event_url)
+            event = Event.find_by_any_source_url(city, event_url) ||
+                    Event.find_or_initialize_by(city_key: city, event_url: event_url)
+            is_new = event.new_record?
             dice_backed = event.dice_url.present?
 
             images = event_info["images"] || []
@@ -111,7 +117,9 @@ namespace :import do
             attrs = {
               source: "RA",
               attending_count: event_info["attending"] || 0,
-              city_key: city
+              city_key: city,
+              event_url: event_url,
+              ra_url: event_url
             }
 
             attrs[:title] = event_info["title"] unless event.manual_override_title
@@ -180,6 +188,13 @@ namespace :import do
                 event.artists << artist if artist && !event.artists.include?(artist)
               end
             end
+
+            if is_new
+              created_count += 1
+            else
+              updated_count += 1
+              matched_events << { title: event.title, id: event.id, match_type: "url" }
+            end
           end
         rescue => e
           puts "Error importing event at index #{index}: #{e.message}"
@@ -188,8 +203,14 @@ namespace :import do
       end
 
       Rails.cache.delete("events-v1:mmw") rescue nil
-      puts "Finished importing #{events.size} events from #{filename}"
-      Honeybadger.notify("MMW import succeeded: #{events.size} events from #{filename}")
+      puts "Finished importing MMW events from #{filename}"
+      puts "Created: #{created_count}"
+      puts "Updated: #{updated_count}"
+      if matched_events.any?
+        puts "\nMatched (duplicates - updated existing):"
+        matched_events.each { |m| puts "  #{m[:title]} (#{m[:id]}) [#{m[:match_type]}]" }
+      end
+      Honeybadger.notify("MMW import succeeded: created=#{created_count}, updated=#{updated_count} from #{filename}")
     rescue => e
       Honeybadger.notify(e)
       raise e

@@ -77,10 +77,7 @@ namespace :import do
     end
 
     find_matching_event = lambda do |city:, event_url:, incoming_title:, incoming_start_time:, incoming_venue_name:, incoming_artists:|
-      exact_match =
-        Event.find_by(city_key: city, event_url: event_url) ||
-        Event.find_by(city_key: city, dice_url: event_url)
-
+      exact_match = Event.find_by_any_source_url(city, event_url)
       next [exact_match, :exact_url] if exact_match
 
       candidates = Event.includes(:venue, :artists)
@@ -171,6 +168,7 @@ namespace :import do
       created_count = 0
       updated_count = 0
       skipped_count = 0
+      matched_events = []
 
       skip_urls = [
         "https://dice.fm/event/your-url-here",
@@ -241,10 +239,9 @@ namespace :import do
               promoter: event.promoter.presence || event_data["promoter"],
               dice_url: event_url
             }
-
+            attrs[:event_url] = event_url if is_new_record && event.event_url.blank?
             attrs[:age] = normalized_age if normalized_age.present?
 
-            attrs[:event_url] = event_url if is_new_record && event.event_url.blank?
 
             unless event.manual_override_title
               attrs[:title] = title
@@ -300,6 +297,7 @@ namespace :import do
               puts "Created #{index + 1}/#{events.size}: #{event.title}"
             else
               updated_count += 1
+              matched_events << { title: event.title, id: event.id, match_type: match_type }
               puts "Updated #{index + 1}/#{events.size}: #{event.title} (#{match_type})"
             end
           end
@@ -315,6 +313,10 @@ namespace :import do
       puts "Created: #{created_count}"
       puts "Updated: #{updated_count}"
       puts "Skipped: #{skipped_count}"
+      if matched_events.any?
+        puts "\nMatched (duplicates - updated existing):"
+        matched_events.each { |m| puts "  #{m[:title]} (#{m[:id]}) [#{m[:match_type]}]" }
+      end
 
       Honeybadger.notify(
         "DICE import succeeded: created=#{created_count}, updated=#{updated_count}, skipped=#{skipped_count}, file=#{filename}"
