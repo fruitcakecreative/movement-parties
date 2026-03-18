@@ -1,5 +1,5 @@
 class Event < ApplicationRecord
-  SOURCE_URL_COLUMNS = %w[event_url ra_url dice_url shotgun_url posh_url tixr_url].freeze
+  SOURCE_URL_COLUMNS = %w[event_url ticket_url ra_url dice_url shotgun_url posh_url tixr_url].freeze
 
   belongs_to :venue
   has_and_belongs_to_many :genres

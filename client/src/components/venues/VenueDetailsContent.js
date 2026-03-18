@@ -18,6 +18,7 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent, from
     );
 
     const childVenues = venue?.child_venues || [];
+    const parentId = venue?.id;
 
     return sortedEvents.reduce((acc, event) => {
       const dayLabel = new Date(
@@ -31,15 +32,21 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent, from
       if (!acc[dayLabel]) acc[dayLabel] = {};
 
       const venueId = event.venue?.id;
-      const subLabel = childVenues.length
-        ? (childVenues.find((c) => c.id === venueId)?.subheading || childVenues.find((c) => c.id === venueId)?.name || '')
-        : '_';
+      let subLabel = '_';
+      if (childVenues.length) {
+        const child = childVenues.find((c) => c.id === venueId);
+        if (child) {
+          subLabel = child.subheading || child.name;
+        } else {
+          subLabel = venue?.parent_section_label || venue?.name || 'Events';
+        }
+      }
 
       if (!acc[dayLabel][subLabel]) acc[dayLabel][subLabel] = [];
       acc[dayLabel][subLabel].push(event);
       return acc;
     }, {});
-  }, [venueEvents, venue?.child_venues]);
+  }, [venueEvents, venue?.child_venues, venue?.id, venue?.parent_section_label, venue?.name]);
 
   if (!venue) {
     return (
@@ -187,10 +194,24 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent, from
             return (
               <div key={day} className="venue-event-group mb-sm">
                 <h3 className="venue-event-group-title mb-xs">{day}</h3>
-                {sections.map(([subLabel, events]) => (
+                {sections.map(([subLabel, events]) => {
+                  const childVenue = venue?.child_venues?.find(
+                    (c) => (c.subheading || c.name) === subLabel
+                  );
+                  const sectionLogo = childVenue?.logo_url;
+                  return (
                   <div key={subLabel} className="venue-event-subgroup mb-sm">
                     {subLabel !== '_' && (
-                      <h5 className="venue-event-subvenue-title mb-xs">{subLabel}</h5>
+                      <div className="venue-event-subgroup-header mb-xs">
+                        {sectionLogo && (
+                          <img
+                            src={sectionLogo}
+                            alt={subLabel}
+                            className="venue-event-subvenue-logo"
+                          />
+                        )}
+                        <h5 className="venue-event-subvenue-title mb-xs">{subLabel}</h5>
+                      </div>
                     )}
                     <div className="venue-event-cards">
                       {events.map((event) => (
@@ -202,7 +223,8 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent, from
                       ))}
                     </div>
                   </div>
-                ))}
+                );
+                })}
               </div>
             );
           })}

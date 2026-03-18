@@ -10,10 +10,23 @@
     margin-left: 0;
   }
 
+  .venue-event-subgroup-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 0.5rem;
+  }
+
+  .venue-event-subvenue-logo {
+    max-height: 36px;
+    width: auto;
+    object-fit: contain;
+  }
+
   .venue-event-subvenue-title {
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--color-primary, #333);
-    margin-bottom: 0.5rem;
+    margin: 0;
   }
 }

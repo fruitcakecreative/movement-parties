@@ -24,11 +24,20 @@ namespace :db do
       ],
     }
 
+    parent_section_labels = {
+      "Mode" => "Both Floors",
+    }
+
     groups.each do |parent_name, children|
       parent = Venue.find_by(city_key: city, name: parent_name)
       unless parent
         parent = Venue.create!(city_key: city, name: parent_name)
         puts "Created parent: #{parent_name}"
+      end
+
+      if (label = parent_section_labels[parent_name])
+        parent.update_column(:parent_section_label, label)
+        puts "  Set parent_section_label: #{label}"
       end
 
       children.each do |child_name, subheading|

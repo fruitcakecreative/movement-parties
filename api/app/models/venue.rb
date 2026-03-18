@@ -156,7 +156,8 @@ class Venue < ApplicationRecord
       logo_url: dv.logo_url,
       bg_color: dv.bg_color,
       font_color: dv.font_color,
-      child_venues: (dv.child_venues.any? ? dv.child_venues.map { |c| { id: c.id, name: c.name, subheading: c.subheading } } : [])
+      parent_section_label: dv.parent_section_label,
+      child_venues: (dv.child_venues.any? ? dv.child_venues.map { |c| { id: c.id, name: c.name, subheading: c.subheading, logo_url: c.logo_url } } : [])
     }
   end
 end

@@ -130,6 +130,9 @@ end
         end
       end
       field :subheading
+      field :parent_section_label do
+        help "Label for events at this parent venue (e.g. 'Both Floors' for Mode)"
+      end
       field :parent_venue do
         associated_collection_cache_all true
       end
