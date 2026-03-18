@@ -132,7 +132,9 @@ end
           current_venue = bindings[:object]
           Proc.new do |scope|
             key = current_venue&.city_key.presence || "mmw"
-            scope.where(city_key: key).where.not(id: current_venue&.id)
+            scope = scope.where(city_key: key)
+            scope = scope.where.not(id: current_venue.id) if current_venue&.id.present?
+            scope
           end
         end
       end
