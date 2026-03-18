@@ -51,6 +51,7 @@ function EventDetailsContent({ event, onClose, openVenue, fromVenueId, onBackToV
     ticketSaleMessage,
   } = getEventDisplayData(event);
 
+
   const plainDescription = stripHtml(description || '');
   const previewLength = 145;
   const isLongDescription = plainDescription.length > previewLength;

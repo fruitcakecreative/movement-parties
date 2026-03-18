@@ -10,7 +10,7 @@ export function createChannels(epg) {
     const isChildVenue = displayVenue && venue?.parent_venue_id;
 
     // Use parent venue's logo, colors, name when this is a child venue; subheading = child name/subheading
-    const logo = isChildVenue ? (displayVenue.logo_url || venue.logo_url) : (venue.logo_url || null);
+    const logo = isChildVenue ? (venue.logo_url || displayVenue.logo_url) : (venue.logo_url || null);
     const bgColor = isChildVenue ? (displayVenue.bg_color || venue.bg_color) : venue.bg_color;
     const fontColor = isChildVenue ? (displayVenue.font_color || venue.font_color) : venue.font_color;
     const channelName = isChildVenue ? displayVenue.name : venue.name;
