@@ -42,7 +42,7 @@ class Api::EventsController < ApplicationController
     event.city_key = current_city_key
 
     if event.save
-      Rails.cache.delete("events-v1:#{event.city_key}")
+      Rails.cache.delete("events-v2:#{event.city_key}")
       render json: event, status: :created
     else
       render json: { errors: event.errors.full_messages }, status: :unprocessable_entity
@@ -51,7 +51,7 @@ class Api::EventsController < ApplicationController
 
   def update
     if @event.update(event_params)
-      Rails.cache.delete("events-v1:#{@event.city_key}")
+      Rails.cache.delete("events-v2:#{@event.city_key}")
       render json: @event
     else
       render json: { errors: @event.errors.full_messages }, status: :unprocessable_entity
@@ -61,7 +61,7 @@ class Api::EventsController < ApplicationController
   def destroy
     city = @event.city_key
     @event.destroy
-    Rails.cache.delete("events-v1:#{city}")
+      Rails.cache.delete("events-v2:#{city}")
     head :no_content
   end
 

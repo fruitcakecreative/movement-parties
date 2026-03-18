@@ -18,7 +18,7 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent, from
     );
 
     const childVenues = venue?.child_venues || [];
-    const parentId = venue?.id;
+    const parentSectionLabel = venue?.parent_section_label ?? venue?.display_venue_for_json?.parent_section_label;
 
     return sortedEvents.reduce((acc, event) => {
       const dayLabel = new Date(
@@ -38,7 +38,7 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent, from
         if (child) {
           subLabel = child.subheading || child.name;
         } else {
-          subLabel = venue?.parent_section_label || venue?.name || 'Events';
+          subLabel = parentSectionLabel || venue?.name || '';
         }
       }
 
@@ -46,7 +46,7 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent, from
       acc[dayLabel][subLabel].push(event);
       return acc;
     }, {});
-  }, [venueEvents, venue?.child_venues, venue?.id, venue?.parent_section_label, venue?.name]);
+  }, [venueEvents, venue?.child_venues, venue?.id, venue?.parent_section_label, venue?.display_venue_for_json?.parent_section_label, venue?.name]);
 
   if (!venue) {
     return (
