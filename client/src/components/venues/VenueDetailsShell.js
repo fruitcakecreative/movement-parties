@@ -28,7 +28,13 @@ function VenueDetailsShell({
     // Use display venue (parent) when available for name/description
     const displayVenue = venue?.display_venue_for_json;
     const venueToShow = displayVenue
-      ? { ...venue, ...displayVenue, logo_url: venue.logo_url || displayVenue.logo_url }
+      ? {
+          ...venue,
+          ...displayVenue,
+          logo_url: venue.logo_url || displayVenue.logo_url,
+          parent_section_label: displayVenue.parent_section_label ?? venue.parent_section_label,
+          child_venues: displayVenue.child_venues ?? venue.child_venues,
+        }
       : venue;
 
     return { venueEvents: filteredEvents, selectedVenue: venueToShow };

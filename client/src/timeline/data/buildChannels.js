@@ -33,7 +33,7 @@ export function createChannels(epg) {
       anchorSince: event.channel_anchor_since || event.since,
       venue_type: venue.venue_type,
       age: venue.age,
-      groupKey: isChildVenue ? displayVenue.id : venue.id,
+      groupKey: isChildVenue ? displayVenue.id : uuid,
     };
     venues[uuid] = channel;
 

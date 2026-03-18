@@ -6,7 +6,7 @@ class Api::EventsController < ApplicationController
     request.env["action_dispatch.request_start_time"] = Time.now
 
     city = current_city_key
-    cache_key = "events-v1:#{city}"
+    cache_key = "events-v2:#{city}"
 
     events = Rails.cache.fetch(cache_key, expires_in: 5.minutes) do
       Event.where(city_key: city)

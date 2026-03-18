@@ -46,8 +46,7 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent, from
       acc[dayLabel][subLabel].push(event);
       return acc;
     }, {});
-  }, [venueEvents, venue?.child_venues, venue?.id, venue?.parent_section_label, venue?.display_venue_for_json?.parent_section_label, venue?.name]);
-
+  }, [venueEvents, venue?.child_venues, venue?.parent_section_label, venue?.display_venue_for_json?.parent_section_label, venue?.name]);
   if (!venue) {
     return (
       <div ref={contentRef} className="event-details-content">
