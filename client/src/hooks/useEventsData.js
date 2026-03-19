@@ -7,6 +7,8 @@ function useEventsData({ dates, customDateRanges }) {
   const [eventsByDate, setEventsByDate] = useState({});
   const [isLoaded, setIsLoaded] = useState(false);
   const [allEvents, setAllEvents] = useState([]);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [totalCount, setTotalCount] = useState(0);
   const [genreOptions, setGenreOptions] = useState([]);
   const [artistOptions, setArtistOptions] = useState([]);
   const [venueOptions, setVenueOptions] = useState([]);
@@ -20,6 +22,8 @@ function useEventsData({ dates, customDateRanges }) {
 
         setEventsByDate(groupEventsByTimelineDate(eventList, dates, customDateRanges));
         setAllEvents(eventList);
+        setLastUpdated(data.meta?.last_updated || null);
+        setTotalCount(data.meta?.total_count ?? eventList.length);
 
         setGenreOptions(
           Array.from(
@@ -74,6 +78,8 @@ function useEventsData({ dates, customDateRanges }) {
     artistOptions,
     venueOptions,
     locationOptions,
+    lastUpdated,
+    totalCount,
   };
 }
 

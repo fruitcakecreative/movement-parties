@@ -1,9 +1,23 @@
 import React from 'react';
 
-function EventsIntro() {
+function EventsIntro({ lastUpdated, totalCount, isLoaded }) {
   return (
     <div className="section info-con">
       <div className="container">
+        {isLoaded && (lastUpdated != null || totalCount != null) && (
+          <div className="events-meta mb-sm" style={{ opacity: 0.9, fontSize: '0.9rem' }}>
+            {lastUpdated && (
+              <p><span>Last update:</span> {new Date(lastUpdated).toLocaleString('en-US', {
+                dateStyle: 'medium',
+                timeStyle: 'short'
+              })}</p>
+            )}
+            {lastUpdated && totalCount != null && ' '}
+            {totalCount != null && (
+              <p><span>Total events:</span> {totalCount}</p>
+            )}
+          </div>
+        )}
         <h3 className="mini-heading">
           Relevant Info <i className="fa-solid fa-circle-info"></i>
         </h3>

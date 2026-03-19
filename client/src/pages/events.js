@@ -125,6 +125,8 @@ function Events() {
     artistOptions,
     venueOptions,
     locationOptions,
+    lastUpdated,
+    totalCount,
   } = useEventsData({ dates, customDateRanges });
 
   const {
@@ -149,7 +151,7 @@ function Events() {
     <div className={`events-page ${(selectedEventId || selectedVenueId) ? 'has-selected-event' : ''}`}>
       <div ref={mainScrollRef} className="events-page__main">
         <MainHeader />
-        <EventsIntro />
+        <EventsIntro lastUpdated={lastUpdated} totalCount={totalCount} isLoaded={isLoaded} />
 
         <div className="section timeline-con">
           <div className="container">

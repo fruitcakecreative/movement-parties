@@ -3,7 +3,7 @@
 
 .info-con {
   font-size: $text-sm;
-  margin-top: -15px;
+  margin-top: -45px !important;
   padding-bottom: 10px;
   ul li {
     margin-bottom: 5px;
@@ -13,4 +13,22 @@
   }
   max-width: 1200px;
   margin: 0 auto;
+}
+
+.events-meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 30px;
+  p {
+    background-color: var(--color-bg-dark);
+    color: var(--color-text-light);
+    border-radius: var(--radius-button);
+    padding: 5px 15px;
+  }
+  span {
+    font-weight: 800;
+  }
 }
