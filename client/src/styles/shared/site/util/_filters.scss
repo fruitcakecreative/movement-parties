@@ -66,7 +66,7 @@
     width: 5px;
     height: 12px;
     border: solid;
-    border-color: var(--color-text-light);
+    border-color: var(--color-text-dark);
     border-width: 0 3px 3px 0;
     transform: rotate(45deg);
   }
@@ -225,6 +225,7 @@
     background-color: var(--color-soft);
     border-color: var(--color-background);
     font-weight: bold;
+    color: var(--color-text-light);
   }
   .filter-pill,
   .filter-reset {
@@ -253,7 +254,7 @@
     background-color: #5CB8EA;
   }
   .filter-pill.location {
-    background-color: #5CEA9B;
+    background-color: var(--color-text-primary);
   }
 }
 

@@ -6,6 +6,19 @@
     max-width: 60%;
   }
 
+  .venue-child-logos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .venue-child-logo {
+    max-height: 48px;
+    width: auto;
+    object-fit: contain;
+  }
+
   .venue-event-subgroup {
     margin-left: 0;
   }

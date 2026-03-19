@@ -25,13 +25,13 @@ function VenueDetailsShell({
       ? events.filter((e) => venueIds.includes(e.venue?.id))
       : initialEvents;
 
-    // Use display venue (parent) when available for name/description
+    // Use display venue (parent) when available - always show parent for child venues
     const displayVenue = venue?.display_venue_for_json;
     const venueToShow = displayVenue
       ? {
           ...venue,
           ...displayVenue,
-          logo_url: venue.logo_url || displayVenue.logo_url,
+          logo_url: displayVenue.logo_url || venue.logo_url,
           parent_section_label: displayVenue.parent_section_label ?? venue.parent_section_label,
           child_venues: displayVenue.child_venues ?? venue.child_venues,
         }

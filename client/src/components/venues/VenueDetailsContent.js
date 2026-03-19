@@ -10,7 +10,7 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent, from
     contentRef.current?.scrollTo(0, 0);
   }, [venue?.id]);
 
-  const groupedEvents = useMemo(() => {
+  const { groupedEvents, sectionOrder } = useMemo(() => {
     const sortedEvents = [...venueEvents].sort(
       (a, b) =>
         new Date(a.start_time || a.formatted_start_time) -
@@ -20,7 +20,7 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent, from
     const childVenues = venue?.child_venues || [];
     const parentSectionLabel = venue?.parent_section_label ?? venue?.display_venue_for_json?.parent_section_label;
 
-    return sortedEvents.reduce((acc, event) => {
+    const groups = sortedEvents.reduce((acc, event) => {
       const dayLabel = new Date(
         event.start_time || event.formatted_start_time
       ).toLocaleDateString('en-US', {
@@ -46,6 +46,16 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent, from
       acc[dayLabel][subLabel].push(event);
       return acc;
     }, {});
+
+    // Fixed order: main venue first, then child venues in array order (only sections that exist)
+    const order =
+      childVenues.length > 0
+        ? [parentSectionLabel || venue?.name || ''].concat(
+            childVenues.map((c) => c.subheading || c.name)
+          )
+        : null;
+
+    return { groupedEvents: groups, sectionOrder: order };
   }, [venueEvents, venue?.child_venues, venue?.parent_section_label, venue?.display_venue_for_json?.parent_section_label, venue?.name]);
   if (!venue) {
     return (
@@ -115,11 +125,10 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent, from
       )}
 
       {(
-        name === 'Joia Beach' || 
-        name === 'National Hotel' || 
-        name === 'Tala Beach' 
-      ) 
-      && (
+        name === 'Joia Beach' ||
+        name === 'National Hotel' ||
+        name === 'Tala Beach'
+      ) && (
         <img
           src={logo_url}
           alt={name}
@@ -131,7 +140,22 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent, from
         <h2>{name}</h2>
       )}
 
-      {subheading && (venue?.child_venues?.length > 0) && (
+      {venue?.child_venues?.length > 0 && (
+        <div className="venue-child-logos mb-sm">
+          {venue.child_venues
+            .filter((c) => c.logo_url)
+            .map((child) => (
+              <img
+                key={child.id}
+                src={child.logo_url}
+                alt={child.subheading || child.name}
+                className="venue-child-logo"
+              />
+            ))}
+        </div>
+      )}
+
+      {subheading && (
         <h2 className="event-venue mb-xs highlight">
           {subheading}
         </h2>
@@ -192,28 +216,20 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent, from
           {Object.entries(groupedEvents).map(([day, dayGroups]) => {
             const isGroupedBySubVenue = typeof dayGroups === 'object' && !Array.isArray(dayGroups);
             const sections = isGroupedBySubVenue
-              ? Object.entries(dayGroups)
+              ? (sectionOrder
+                  ? sectionOrder
+                      .filter((label) => dayGroups[label]?.length)
+                      .map((label) => [label, dayGroups[label]])
+                  : Object.entries(dayGroups))
               : [['_', dayGroups]];
 
             return (
-              <div key={day} className="venue-event-group mb-sm">
+              <div key={day} className="mb-xl mt-xl venue-event-group mb-sm">
                 <h3 className="venue-event-group-title mb-xs">{day}</h3>
-                {sections.map(([subLabel, events]) => {
-                  const childVenue = venue?.child_venues?.find(
-                    (c) => (c.subheading || c.name) === subLabel
-                  );
-                  const sectionLogo = childVenue?.logo_url;
-                  return (
-                  <div key={subLabel} className="venue-event-subgroup mb-sm">
+                {sections.map(([subLabel, events]) => (
+                  <div key={subLabel || 'main'} className="venue-event-subgroup mb-sm">
                     {subLabel !== '_' && (
                       <div className="venue-event-subgroup-header mb-xs">
-                        {sectionLogo && (
-                          <img
-                            src={sectionLogo}
-                            alt={subLabel}
-                            className="venue-event-subvenue-logo"
-                          />
-                        )}
                         <h5 className="venue-event-subvenue-title mb-xs">{subLabel}</h5>
                       </div>
                     )}
@@ -227,8 +243,7 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent, from
                       ))}
                     </div>
                   </div>
-                );
-                })}
+                ))}
               </div>
             );
           })}
