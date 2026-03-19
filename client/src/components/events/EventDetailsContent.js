@@ -119,16 +119,23 @@ function EventDetailsContent({ event, onClose, openVenue, fromVenueId, onBackToV
                   Secret location to be announced
                 </div>
               ) : (
+                <>
                 <button
                   type="button"
                   className="event-venue button mb-xs"
                   onClick={() => event?.venue?.id && openVenue?.(event.venue.id, event.id)}
                 >
-                  <i className="fa-solid fa-map-pin"></i>&nbsp;
-                  {venueName}
-                  {location && <span>&nbsp;({location})</span>}
+                  <p>
+                    <i className="fa-solid fa-map-pin"></i>&nbsp;
+                    {venueName}
+                  </p>
                 </button>
+              </>
               ))}
+          </div>
+
+          <div>
+            {location && <p><i class="fa-regular fa-map"></i> {location}</p>}
           </div>
 
         {address && (

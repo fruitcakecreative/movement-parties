@@ -3,6 +3,7 @@ require "json"
 require "honeybadger"
 require "bigdecimal"
 require "set"
+require_relative "../import_helpers"
 
 namespace :import do
   desc "Import TIXR events from local JSON file in db/, e.g. rails \"import:tixr_json[502]\""
@@ -38,28 +39,6 @@ namespace :import do
 
     title_overlap_count = lambda do |title1, title2|
       (title_words.call(title1) & title_words.call(title2)).size
-    end
-
-    normalize_venue_name = lambda do |name|
-      normalize_text.call(name)
-                    .gsub(/\bthe\b/, "")
-                    .gsub(/\bclub\b/, "")
-                    .gsub(/\bmiami\b/, "")
-                    .gsub(/\bsound\b/, "")
-                    .gsub(/\broom\b/, "")
-                    .gsub(/\s+/, " ")
-                    .strip
-    end
-
-    venue_match = lambda do |existing_venue_name, incoming_venue_name|
-      existing = normalize_venue_name.call(existing_venue_name)
-      incoming = normalize_venue_name.call(incoming_venue_name)
-
-      next false if existing.blank? || incoming.blank?
-
-      existing == incoming ||
-        existing.include?(incoming) ||
-        incoming.include?(existing)
     end
 
     within_two_hours = lambda do |time1, time2|
@@ -170,7 +149,7 @@ namespace :import do
       (existing_names & incoming_names).size
     end
 
-    find_matching_event = lambda do |city:, event_url:, incoming_title:, incoming_start_time:, incoming_venue_name:, incoming_artists:, source_key:|
+    find_matching_event = lambda do |city:, event_url:, incoming_title:, incoming_start_time:, incoming_venue_name:, incoming_venue:, incoming_artists:, source_key:|
       exact_match = Event.find_by_any_source_url(city, event_url)
       next [exact_match, :exact_url] if exact_match
 
@@ -178,10 +157,17 @@ namespace :import do
                         .where(city_key: city)
                         .where(start_time: incoming_start_time.to_date.beginning_of_day..incoming_start_time.to_date.end_of_day)
 
+      strict_title = ImportHelpers.venue_requires_strict_title?(incoming_venue)
+
       confirmed_match = candidates.find do |event|
-        venue_match.call(event.venue&.name, incoming_venue_name) &&
-          within_two_hours.call(event.start_time, incoming_start_time) &&
-          artist_overlap_count.call(event, incoming_artists) >= 1
+        next false unless ImportHelpers.venue_match?(event.venue&.name, incoming_venue_name)
+        next false unless within_two_hours.call(event.start_time, incoming_start_time)
+        next false unless artist_overlap_count.call(event, incoming_artists) >= 1
+        if strict_title
+          event.title.to_s.strip.downcase == incoming_title.to_s.strip.downcase
+        else
+          true
+        end
       end
 
       if confirmed_match
@@ -191,8 +177,13 @@ namespace :import do
 
       if source_key != "1878"
         venue_time_match = candidates.find do |event|
-          venue_match.call(event.venue&.name, incoming_venue_name) &&
-            within_two_hours.call(event.start_time, incoming_start_time)
+          next false unless ImportHelpers.venue_match?(event.venue&.name, incoming_venue_name)
+          next false unless within_two_hours.call(event.start_time, incoming_start_time)
+          if strict_title
+            event.title.to_s.strip.downcase == incoming_title.to_s.strip.downcase
+          else
+            true
+          end
         end
 
         if venue_time_match
@@ -201,11 +192,11 @@ namespace :import do
         end
       end
 
-      if source_key == "1878"
+      if source_key == "1878" || strict_title
         exact_title_time_match = candidates.find do |event|
           within_two_hours.call(event.start_time, incoming_start_time) &&
-            normalize_text.call(event.title) == normalize_text.call(incoming_title) &&
-            venue_match.call(event.venue&.name, incoming_venue_name)
+            event.title.to_s.strip.downcase == incoming_title.to_s.strip.downcase &&
+            ImportHelpers.venue_match?(event.venue&.name, incoming_venue_name)
         end
 
         if exact_title_time_match
@@ -294,15 +285,7 @@ namespace :import do
               next
             end
 
-            normalized_incoming_venue = normalize_venue_name.call(venue_name)
-
-            venue = Venue.where(city_key: city).find do |v|
-              existing = normalize_venue_name.call(v.name)
-              existing == normalized_incoming_venue ||
-                existing.include?(normalized_incoming_venue) ||
-                normalized_incoming_venue.include?(existing)
-            end
-
+            venue = ImportHelpers.find_venue(city: city, venue_name: venue_name)
             venue ||= Venue.create!(city_key: city, name: venue_name)
 
             if source_key == "1878"
@@ -319,6 +302,7 @@ namespace :import do
               incoming_title: title,
               incoming_start_time: start_time,
               incoming_venue_name: venue.name,
+              incoming_venue: venue,
               incoming_artists: [],
               source_key: source_key
             )
@@ -382,6 +366,7 @@ namespace :import do
 
             attrs[:description] = best_description.call(event.description, nil)
 
+            attrs.delete(:short_title) # never overwrite from imports
             event.assign_attributes(attrs.compact)
             event.save!
 

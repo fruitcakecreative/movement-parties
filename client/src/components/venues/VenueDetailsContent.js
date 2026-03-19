@@ -114,7 +114,12 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent, from
         />
       )}
 
-      {(name === 'Joia Beach' || name === 'National Hotel' || name === 'Tala Beach') && (
+      {(
+        name === 'Joia Beach' || 
+        name === 'National Hotel' || 
+        name === 'Tala Beach' 
+      ) 
+      && (
         <img
           src={logo_url}
           alt={name}

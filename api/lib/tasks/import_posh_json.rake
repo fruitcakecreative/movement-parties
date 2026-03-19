@@ -3,6 +3,7 @@ require "json"
 require "honeybadger"
 require "bigdecimal"
 require "set"
+require_relative "../import_helpers"
 
 namespace :import do
   desc 'Import Posh events from local JSON file in db/posh.json'
@@ -35,28 +36,6 @@ namespace :import do
       (title_words.call(title1) & title_words.call(title2)).size
     end
 
-    normalize_venue_name = lambda do |name|
-      normalize_text.call(name)
-                    .gsub(/\bthe\b/, "")
-                    .gsub(/\bclub\b/, "")
-                    .gsub(/\bmiami\b/, "")
-                    .gsub(/\bsound\b/, "")
-                    .gsub(/\broom\b/, "")
-                    .gsub(/\s+/, " ")
-                    .strip
-    end
-
-    venue_match = lambda do |existing_venue_name, incoming_venue_name|
-      existing = normalize_venue_name.call(existing_venue_name)
-      incoming = normalize_venue_name.call(incoming_venue_name)
-
-      next false if existing.blank? || incoming.blank?
-
-      existing == incoming ||
-        existing.include?(incoming) ||
-        incoming.include?(existing)
-    end
-
     within_two_hours = lambda do |time1, time2|
       next false if time1.blank? || time2.blank?
 
@@ -80,6 +59,12 @@ namespace :import do
       nil
     end
 
+    # Support both Posh API format (name, url, startUtc) and scraped/export format (eventTitle, eventUrl, startDateTime)
+    pick = lambda do |data, *keys|
+      keys.each { |k| v = data[k.to_s]; return v if v.present? }
+      nil
+    end
+
     skip_titles = [
       "ezample",
       "Shift Miami 2026",
@@ -88,10 +73,11 @@ namespace :import do
     ]
 
     skip_event = lambda do |event_data, start_time|
-      next true if skip_titles.include?(event_data["name"].to_s.strip)
-      title = event_data["name"].to_s.downcase
-      url = event_data["url"].to_s.downcase
-      group_name = event_data["groupName"].to_s.downcase
+      title_val = pick.call(event_data, "name", "eventTitle").to_s.strip
+      next true if skip_titles.include?(title_val)
+      title = title_val.downcase
+      url = pick.call(event_data, "url", "eventUrl").to_s.downcase
+      group_name = pick.call(event_data, "groupName", "organizerName").to_s.downcase
 
       text_to_check = "#{title} #{url} #{group_name}"
 
@@ -158,7 +144,7 @@ namespace :import do
       nil
     end
 
-    find_matching_event = lambda do |city:, event_url:, incoming_title:, incoming_start_time:, incoming_venue_name:|
+    find_matching_event = lambda do |city:, event_url:, incoming_title:, incoming_start_time:, incoming_venue_name:, incoming_venue:|
       exact_match = Event.find_by_any_source_url(city, event_url)
       next [exact_match, :exact_url] if exact_match
 
@@ -166,9 +152,16 @@ namespace :import do
                         .where(city_key: city)
                         .where(start_time: incoming_start_time.to_date.beginning_of_day..incoming_start_time.to_date.end_of_day)
 
+      strict_title = ImportHelpers.venue_requires_strict_title?(incoming_venue)
+
       venue_time_match = candidates.find do |event|
-        venue_match.call(event.venue&.name, incoming_venue_name) &&
-          within_two_hours.call(event.start_time, incoming_start_time)
+        next false unless ImportHelpers.venue_match?(event.venue&.name, incoming_venue_name)
+        next false unless within_two_hours.call(event.start_time, incoming_start_time)
+        if strict_title
+          event.title.to_s.strip.downcase == incoming_title.to_s.strip.downcase
+        else
+          true
+        end
       end
 
       if venue_time_match
@@ -229,26 +222,25 @@ namespace :import do
       events.each_with_index do |event_data, index|
         begin
           ActiveRecord::Base.transaction do
-            title = event_data["name"].to_s.strip
-            event_slug = event_data["url"].to_s.strip
-            group_url = event_data["groupUrl"].to_s.strip
-            event_url =
-              if group_url.present? && event_slug.present?
-                "https://posh.vip/e/#{event_slug}"
-              elsif event_slug.present?
-                "https://posh.vip/e/#{event_slug}"
-              else
-                ""
-              end
+            title = pick.call(event_data, "name", "eventTitle").to_s.strip
+            event_url = pick.call(event_data, "eventUrl", "url").to_s.strip
+            if event_url.blank?
+              event_slug = event_data["url"].to_s.strip
+              group_url = event_data["groupUrl"].to_s.strip
+              event_url = "https://posh.vip/e/#{event_slug}" if event_slug.present?
+            end
 
             venue_data = event_data["venue"] || {}
-            venue_name = venue_data["name"].to_s.strip.gsub(/\s+/, " ")
+            venue_name = (venue_data["name"].presence || event_data["venueName"]).to_s.strip.gsub(/\s+/, " ")
             venue_name = "Unknown Venue" if venue_name.blank?
             venue_address = venue_data["address"].to_s.strip
+            venue_city = venue_data["city"].to_s.strip
             timezone = event_data["timezone"].presence || "America/New_York"
 
-            start_time = parse_posh_time.call(event_data["startUtc"], timezone)
-            end_time   = parse_posh_time.call(event_data["endUtc"], timezone)
+            start_raw = pick.call(event_data, "startUtc", "startDateTime")
+            end_raw = pick.call(event_data, "endUtc", "endDateTime")
+            start_time = parse_posh_time.call(start_raw, timezone)
+            end_time   = parse_posh_time.call(end_raw, timezone)
 
             if event_url.blank? || title.blank? || start_time.blank?
               skipped_count += 1
@@ -262,21 +254,14 @@ namespace :import do
               next
             end
 
-            unless venue_address.downcase.include?("miami")
+            miami_text = "#{venue_address} #{venue_city}".downcase
+            unless miami_text.include?("miami")
               skipped_count += 1
               puts "Skipping #{index + 1}/#{events.size}: non-Miami venue #{venue_name}"
               next
             end
 
-            normalized_incoming_venue = normalize_venue_name.call(venue_name)
-
-            venue = Venue.where(city_key: city).find do |v|
-              existing = normalize_venue_name.call(v.name)
-              existing == normalized_incoming_venue ||
-                existing.include?(normalized_incoming_venue) ||
-                normalized_incoming_venue.include?(existing)
-            end
-
+            venue = ImportHelpers.find_venue(city: city, venue_name: venue_name)
             venue ||= Venue.create!(city_key: city, name: venue_name)
 
             matched_event, match_type = find_matching_event.call(
@@ -284,7 +269,8 @@ namespace :import do
               event_url: event_url,
               incoming_title: title,
               incoming_start_time: start_time,
-              incoming_venue_name: venue.name
+              incoming_venue_name: venue.name,
+              incoming_venue: venue
             )
 
             event = matched_event || Event.new(city_key: city, venue: venue)
@@ -293,7 +279,7 @@ namespace :import do
 
             promoter_value =
               if event.respond_to?(:promoter)
-                event.promoter.presence || event_data["groupName"]
+                event.promoter.presence || pick.call(event_data, "groupName", "organizerName")
               end
 
             attrs = {
@@ -325,11 +311,12 @@ namespace :import do
             end
 
             if event.respond_to?(:event_image_url) && !ra_backed
-              attrs[:event_image_url] = best_image.call(event.event_image_url, event_data["flyer"])
+              attrs[:event_image_url] = best_image.call(event.event_image_url, pick.call(event_data, "flyer", "coverUrl"))
             end
 
             attrs[:description] = best_description.call(event.description, nil)
 
+            attrs.delete(:short_title) # never overwrite from imports
             event.assign_attributes(attrs.compact)
             event.save!
 

@@ -3,6 +3,7 @@ require "json"
 require "honeybadger"
 require "bigdecimal"
 require "set"
+require_relative "../import_helpers"
 
 namespace :import do
   desc "Import Shotgun events from local JSON file"
@@ -45,28 +46,6 @@ namespace :import do
       (existing_names & incoming_names).size
     end
 
-    normalize_venue_name = lambda do |name|
-      normalize_text.call(name)
-                    .gsub(/\bthe\b/, "")
-                    .gsub(/\bclub\b/, "")
-                    .gsub(/\bmiami\b/, "")
-                    .gsub(/\bsound\b/, "")
-                    .gsub(/\broom\b/, "")
-                    .gsub(/\s+/, " ")
-                    .strip
-    end
-
-    venue_match = lambda do |existing_venue_name, incoming_venue_name|
-      existing = normalize_venue_name.call(existing_venue_name)
-      incoming = normalize_venue_name.call(incoming_venue_name)
-
-      next false if existing.blank? || incoming.blank?
-
-      existing == incoming ||
-        existing.include?(incoming) ||
-        incoming.include?(existing)
-    end
-
     within_two_hours = lambda do |time1, time2|
       next false if time1.blank? || time2.blank?
 
@@ -88,6 +67,42 @@ namespace :import do
       nil
     end
 
+    skip_event = lambda do |event_data, start_time|
+      title = event_data["title"].to_s.downcase
+      url = event_data["eventUrl"].to_s.downcase
+      text_to_check = "#{title} #{url}"
+
+      skip_phrases = [
+        "pass",
+        "multi-day",
+        "multi day",
+        "two-day",
+        "two day",
+        "2-day",
+        "2 day",
+        "3-day",
+        "3 day",
+        "combo",
+        "both-events",
+        "both events",
+        "all-access",
+        "all access",
+        "full week",
+        "week pass",
+        "festival pass"
+      ]
+
+      next true if skip_phrases.any? { |phrase| text_to_check.include?(phrase) }
+
+      if start_time.present?
+        event_date = start_time.to_date
+        next true if event_date < Date.new(2026, 3, 23)
+        next true if event_date > Date.new(2026, 3, 30)
+      end
+
+      false
+    end
+
     parse_shotgun_price = lambda do |value|
       next nil if value.blank?
 
@@ -102,7 +117,8 @@ namespace :import do
       nil
     end
 
-    find_matching_event = lambda do |city:, event_url:, incoming_title:, incoming_start_time:, incoming_venue_name:, incoming_artists:|
+    # Shotgun "venue" is often the promoter, not the actual venue - prioritize artist+time over venue
+    find_matching_event = lambda do |city:, event_url:, incoming_title:, incoming_start_time:, incoming_venue_name:, incoming_venue:, incoming_artists:|
       exact_match = Event.find_by_any_source_url(city, event_url)
       next [exact_match, :exact_url] if exact_match
 
@@ -110,25 +126,33 @@ namespace :import do
                         .where(city_key: city)
                         .where(start_time: incoming_start_time.to_date.beginning_of_day..incoming_start_time.to_date.end_of_day)
 
-      confirmed_match = candidates.find do |event|
-        venue_match.call(event.venue&.name, incoming_venue_name) &&
-          within_two_hours.call(event.start_time, incoming_start_time) &&
-          artist_overlap_count.call(event, incoming_artists) >= 1
-      end
-
-      if confirmed_match
-        puts "CONFIRMED MATCH: #{incoming_title} -> #{confirmed_match.title}"
-        next [confirmed_match, :venue_time_artist_match]
-      end
-
+      # Artist+time first (venue unreliable on Shotgun - often promoter name)
       artist_match = candidates.find do |event|
         within_two_hours.call(event.start_time, incoming_start_time) &&
-          artist_overlap_count.call(event, incoming_artists) >= 2
+          artist_overlap_count.call(event, incoming_artists) >= 1
       end
 
       if artist_match
         puts "ARTIST/TIME MATCH: #{incoming_title} -> #{artist_match.title}"
         next [artist_match, :artist_time_match]
+      end
+
+      # Venue+time+artist only as fallback when venue matches
+      strict_title = ImportHelpers.venue_requires_strict_title?(incoming_venue)
+      venue_match = candidates.find do |event|
+        next false unless ImportHelpers.venue_match?(event.venue&.name, incoming_venue_name)
+        next false unless within_two_hours.call(event.start_time, incoming_start_time)
+        next false unless artist_overlap_count.call(event, incoming_artists) >= 1
+        if strict_title
+          event.title.to_s.strip.downcase == incoming_title.to_s.strip.downcase
+        else
+          true
+        end
+      end
+
+      if venue_match
+        puts "VENUE/TIME/ARTIST MATCH: #{incoming_title} -> #{venue_match.title}"
+        next [venue_match, :venue_time_artist_match]
       end
 
       puts "NO MATCH: #{incoming_title}"
@@ -191,23 +215,23 @@ namespace :import do
               next
             end
 
-            normalized_incoming_venue = normalize_venue_name.call(venue_name)
-
-            venue = Venue.where(city_key: city).find do |v|
-              existing = normalize_venue_name.call(v.name)
-              existing == normalized_incoming_venue ||
-                existing.include?(normalized_incoming_venue) ||
-                normalized_incoming_venue.include?(existing)
+            if skip_event.call(event_data, start_time)
+              skipped_count += 1
+              puts "Skipping #{index + 1}/#{events.size}: filtered #{title}"
+              next
             end
 
-            venue ||= Venue.create!(city_key: city, name: venue_name)
+            # Shotgun "venue" is often promoter - only use if we find a match; otherwise TBA
+            venue = ImportHelpers.find_venue(city: city, venue_name: venue_name)
+            venue ||= Venue.find_or_create_by!(city_key: city, name: "TBA")
 
             matched_event, match_type = find_matching_event.call(
               city: city,
               event_url: event_url,
               incoming_title: title,
               incoming_start_time: start_time,
-              incoming_venue_name: venue_name,
+              incoming_venue_name: venue.name,
+              incoming_venue: venue,
               incoming_artists: event_data["lineup"]
             )
 
@@ -247,6 +271,7 @@ namespace :import do
                 best_image.call(event.event_image_url, event_data["imageUrl"])
             end
 
+            attrs.delete(:short_title) # never overwrite from imports
             event.assign_attributes(attrs)
             event.save!
 

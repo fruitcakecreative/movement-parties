@@ -89,8 +89,8 @@ export function createEpg(events) {
                 const dv = event.venue?.display_venue_for_json;
                 const isChild = dv && event.venue?.parent_venue_id;
                 return {
-                  bg_color: (isChild ? dv.bg_color : event.venue.bg_color) || '#fff',
-                  font_color: (isChild ? dv.font_color : event.venue.font_color) || '#000',
+                  bg_color: (isChild ? (event.venue.bg_color || dv.bg_color) : event.venue.bg_color) || '#fff',
+                  font_color: (isChild ? (event.venue.font_color || dv.font_color) : event.venue.font_color) || '#000',
                 };
               })()),
         });

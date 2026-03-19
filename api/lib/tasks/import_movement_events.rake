@@ -92,6 +92,7 @@ namespace :import do
             attrs[:end_time]   = event_info["endTime"]   unless event.manual_override_times
             attrs[:venue]      = venue                   unless event.manual_override_location
 
+            attrs.delete(:short_title) # never overwrite from imports
             event.assign_attributes(attrs)
             event.save!
             ticket_info = event_data["ticket_info"] || {}

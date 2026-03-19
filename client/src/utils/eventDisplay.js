@@ -208,13 +208,11 @@ export const getEventDisplayData = (
     description,
     source,
     age: resolvedAge,
-    cardBg: (venue?.parent_venue_id && venue?.display_venue_for_json?.bg_color)
+    cardBg: (venue?.parent_venue_id ? (venue?.bg_color || venue?.display_venue_for_json?.bg_color) : venue?.bg_color)
       || bg_color
-      || venue?.bg_color
       || '#fff',
-    cardFont: (venue?.parent_venue_id && venue?.display_venue_for_json?.font_color)
+    cardFont: (venue?.parent_venue_id ? (venue?.font_color || venue?.display_venue_for_json?.font_color) : venue?.font_color)
       || font_color
-      || venue?.font_color
       || '#000',
     actionButtons,
     ticketSaleMessage,

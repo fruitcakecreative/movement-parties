@@ -3,6 +3,7 @@ require "aws-sdk-s3"
 require "json"
 require "honeybadger"
 require "bigdecimal"
+require_relative "../import_helpers"
 
 namespace :import do
   desc "Import MMW events from latest S3 JSON file"
@@ -11,26 +12,6 @@ namespace :import do
       city   = "mmw"
       bucket = "mmw-parties-events-data"
       prefix = "events/"
-
-      normalize_text = lambda do |value|
-        value.to_s
-             .downcase
-             .gsub("&", " and ")
-             .gsub(/[^a-z0-9\s]/, " ")
-             .gsub(/\s+/, " ")
-             .strip
-      end
-
-      normalize_venue_name = lambda do |name|
-        normalize_text.call(name)
-                      .gsub(/\bthe\b/, "")
-                      .gsub(/\bclub\b/, "")
-                      .gsub(/\bmiami\b/, "")
-                      .gsub(/\bsound\b/, "")
-                      .gsub(/\broom\b/, "")
-                      .gsub(/\s+/, " ")
-                      .strip
-      end
 
       s3 = Aws::S3::Client.new(region: "us-east-1")
 
@@ -51,6 +32,7 @@ namespace :import do
 
       created_count = 0
       updated_count = 0
+      created_events = []
       matched_events = []
 
       skip_title = lambda do |title|
@@ -95,15 +77,7 @@ namespace :import do
             venue_name = (event_info.dig("venue", "name") || "Unknown Venue")
                           .to_s.strip.gsub(/\s+/, " ")
 
-            normalized_incoming_venue = normalize_venue_name.call(venue_name)
-
-            venue = Venue.where(city_key: city).find do |v|
-              existing = normalize_venue_name.call(v.name)
-              existing == normalized_incoming_venue ||
-                existing.include?(normalized_incoming_venue) ||
-                normalized_incoming_venue.include?(existing)
-            end
-
+            venue = ImportHelpers.find_venue(city: city, venue_name: venue_name)
             venue ||= Venue.create!(city_key: city, name: venue_name)
 
             genres =
@@ -113,8 +87,24 @@ namespace :import do
                 []
               end
 
-            event = Event.find_by_any_source_url(city, event_url) ||
-                    Event.find_or_initialize_by(city_key: city, event_url: event_url)
+            event = Event.find_by_any_source_url(city, event_url)
+            match_type = "url" if event.present?
+
+            if event.nil?
+              start_time = event_info["startTime"].present? ? Time.zone.parse(event_info["startTime"]) : nil
+              incoming_title = event_info["title"].to_s.strip
+              if venue && start_time.present? && incoming_title.present?
+                candidates = Event.where(city_key: city, venue_id: venue.id)
+                  .where("start_time >= ? AND start_time < ?", start_time - 1.minute, start_time + 1.minute)
+                strict_title = ImportHelpers.venue_requires_strict_title?(venue)
+                event = candidates.find do |c|
+                  strict_title ? (incoming_title.to_s.strip.downcase == c.title.to_s.strip.downcase) : ImportHelpers.title_words_match?(incoming_title, c.title)
+                end
+                match_type = "venue_time_title" if event.present?
+              end
+              event ||= Event.new(city_key: city, event_url: event_url)
+            end
+
             is_new = event.new_record?
             dice_backed = event.dice_url.present?
 
@@ -140,6 +130,7 @@ namespace :import do
               attrs[:event_image_url] = event_image_url
             end
 
+            attrs.delete(:short_title) # never overwrite from imports
             event.assign_attributes(attrs)
             event.save!
 
@@ -199,9 +190,10 @@ namespace :import do
 
             if is_new
               created_count += 1
+              created_events << { title: event.title, id: event.id, venue: venue&.name }
             else
               updated_count += 1
-              matched_events << { title: event.title, id: event.id, match_type: "url" }
+              matched_events << { title: event.title, id: event.id, match_type: match_type || "url" }
             end
           end
         rescue => e
@@ -214,6 +206,10 @@ namespace :import do
       puts "Finished importing MMW events from #{filename}"
       puts "Created: #{created_count}"
       puts "Updated: #{updated_count}"
+      if created_events.any?
+        puts "\nCreated (new):"
+        created_events.each { |e| puts "  #{e[:title]} (#{e[:id]}) @ #{e[:venue]}" }
+      end
       if matched_events.any?
         puts "\nMatched (duplicates - updated existing):"
         matched_events.each { |m| puts "  #{m[:title]} (#{m[:id]}) [#{m[:match_type]}]" }
