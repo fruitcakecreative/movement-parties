@@ -1,38 +1,66 @@
 # frozen_string_literal: true
 
+require "aws-sdk-s3"
+
+def fetch_backup_from_s3
+  s3_key = ENV["BACKUP_S3_KEY"]
+  s3_latest = ENV["BACKUP_S3_LATEST"] == "1"
+  return nil unless s3_key.present? || s3_latest
+
+  bucket = ENV["BACKUP_S3_BUCKET"] || "movement-parties-prod-api-storage"
+  prefix = "db_backups/"
+  s3 = Aws::S3::Client.new(region: "us-east-1")
+
+  key = if s3_latest
+    resp = s3.list_objects_v2(bucket: bucket, prefix: prefix, max_keys: 1000)
+    objs = resp.contents.sort_by(&:last_modified).reverse
+    objs.first&.key
+  else
+    s3_key.start_with?(prefix) ? s3_key : "#{prefix}#{s3_key}"
+  end
+
+  return nil unless key
+
+  local = Rails.root.join("tmp", "backup-from-s3.sql").to_s
+  FileUtils.mkdir_p(File.dirname(local))
+  s3.get_object(bucket: bucket, key: key, response_target: local)
+  puts "  Downloaded from S3: #{bucket}/#{key}"
+  local
+end
+
 namespace :db do
-  desc "Restore Movement venues from backup. BACKUP_FILE=tmp/backup-mar8.sql"
+  desc "Restore Movement venues from backup. BACKUP_FILE=tmp/backup-mar8.sql or BACKUP_S3_LATEST=1"
   task restore_venues: :environment do
-    path = ENV["BACKUP_FILE"]
-    if path.blank?
-      puts "Usage: BACKUP_FILE=/path/to/backup.sql rails db:restore_venues"
-      puts "   or: BACKUP_FILE=/path/to/venues.json rails db:restore_venues"
-      puts ""
-      puts "Options: CITY=movement (default), DRY_RUN=1 to preview"
-      puts ""
-      puts "To export venues from a SQL backup to JSON first:"
-      puts "  pg_restore -t venues backup.dump 2>/dev/null | psql $DATABASE_URL -t -A -c \"\\copy (SELECT * FROM venues WHERE city_key='movement') TO 'venues.json'\""
-      puts "  Or use a backup.sql and run: BACKUP_FILE=backup.sql rails db:restore_venues"
-      exit 1
-    end
-
-    resolved = File.exist?(path) ? path : nil
+    resolved = fetch_backup_from_s3
     unless resolved
-      candidates = [path]
-      unless path.start_with?("/")
-        candidates += [
-          Rails.root.join(path).to_s,
-          Rails.root.join("tmp", path).to_s,
-          Rails.root.join("tmp", File.basename(path)).to_s,
-        ]
+      path = ENV["BACKUP_FILE"]
+      if path.blank?
+        puts "Usage: BACKUP_FILE=/path/to/backup.sql rails db:restore_venues"
+        puts "   or: BACKUP_S3_LATEST=1 rails db:restore_venues  (fetch most recent from S3)"
+        puts "   or: BACKUP_S3_KEY=db_backups/backup-2026-03-17.sql rails db:restore_venues"
+        puts ""
+        puts "Options: CITY=movement (default), DRY_RUN=1 to preview"
+        exit 1
       end
-      resolved = candidates.uniq.find { |c| File.exist?(c) }
-    end
 
-    unless resolved
-      puts "File not found: #{path}"
-      puts "Tried: #{candidates.uniq.join(', ')}"
-      exit 1
+      resolved = File.exist?(path) ? path : nil
+      unless resolved
+        candidates = [path]
+        unless path.start_with?("/")
+          candidates += [
+            Rails.root.join(path).to_s,
+            Rails.root.join("tmp", path).to_s,
+            Rails.root.join("tmp", File.basename(path)).to_s,
+          ]
+        end
+        resolved = candidates.uniq.find { |c| File.exist?(c) }
+      end
+
+      unless resolved
+        puts "File not found: #{path}"
+        puts "Tried: #{candidates.uniq.join(', ')}"
+        exit 1
+      end
     end
 
     path = resolved
@@ -50,30 +78,35 @@ namespace :db do
 
   end
 
-  desc "Restore Active Storage (logos) from backup. BACKUP_FILE=tmp/backup.sql"
+  desc "Restore Active Storage (logos) from backup. BACKUP_FILE=tmp/backup.sql or BACKUP_S3_LATEST=1"
   task restore_active_storage: :environment do
-    path = ENV["BACKUP_FILE"]
-    if path.blank?
-      puts "Usage: BACKUP_FILE=/path/to/backup.sql rails db:restore_active_storage"
-      exit 1
-    end
-
-    resolved = File.exist?(path) ? path : nil
+    resolved = fetch_backup_from_s3
     unless resolved
-      candidates = [path]
-      unless path.start_with?("/")
-        candidates += [
-          Rails.root.join(path).to_s,
-          Rails.root.join("tmp", path).to_s,
-          Rails.root.join("tmp", File.basename(path)).to_s,
-        ]
+      path = ENV["BACKUP_FILE"]
+      if path.blank?
+        puts "Usage: BACKUP_FILE=/path/to/backup.sql rails db:restore_active_storage"
+        puts "   or: BACKUP_S3_LATEST=1 rails db:restore_active_storage  (fetch most recent from S3)"
+        puts "   or: BACKUP_S3_KEY=db_backups/backup-2026-03-17.sql rails db:restore_active_storage"
+        exit 1
       end
-      resolved = candidates.uniq.find { |c| File.exist?(c) }
-    end
 
-    unless resolved
-      puts "File not found: #{path}"
-      exit 1
+      resolved = File.exist?(path) ? path : nil
+      unless resolved
+        candidates = [path]
+        unless path.start_with?("/")
+          candidates += [
+            Rails.root.join(path).to_s,
+            Rails.root.join("tmp", path).to_s,
+            Rails.root.join("tmp", File.basename(path)).to_s,
+          ]
+        end
+        resolved = candidates.uniq.find { |c| File.exist?(c) }
+      end
+
+      unless resolved
+        puts "File not found: #{path}"
+        exit 1
+      end
     end
 
     dry_run = ENV["DRY_RUN"] == "1"
@@ -133,20 +166,24 @@ namespace :db do
 
   desc "Remap Venue attachment record_ids to match current venue IDs (run after restore_active_storage if venue IDs changed)"
   task remap_venue_logos: :environment do
-    path = ENV["BACKUP_FILE"]
-    if path.blank?
-      puts "Usage: BACKUP_FILE=/path/to/backup.sql rails db:remap_venue_logos"
-      exit 1
-    end
-    resolved = File.exist?(path) ? path : nil
+    resolved = fetch_backup_from_s3
     unless resolved
-      candidates = [path]
-      candidates += [Rails.root.join(path).to_s, Rails.root.join("tmp", path).to_s, Rails.root.join("tmp", File.basename(path)).to_s] unless path.start_with?("/")
-      resolved = candidates.uniq.find { |c| File.exist?(c) }
-    end
-    unless resolved
-      puts "File not found: #{path}"
-      exit 1
+      path = ENV["BACKUP_FILE"]
+      if path.blank?
+        puts "Usage: BACKUP_FILE=/path/to/backup.sql rails db:remap_venue_logos"
+        puts "   or: BACKUP_S3_LATEST=1 rails db:remap_venue_logos"
+        exit 1
+      end
+      resolved = File.exist?(path) ? path : nil
+      unless resolved
+        candidates = [path]
+        candidates += [Rails.root.join(path).to_s, Rails.root.join("tmp", path).to_s, Rails.root.join("tmp", File.basename(path)).to_s] unless path.start_with?("/")
+        resolved = candidates.uniq.find { |c| File.exist?(c) }
+      end
+      unless resolved
+        puts "File not found: #{path}"
+        exit 1
+      end
     end
     abs_path = File.absolute_path(resolved, Rails.root)
     content = File.read(abs_path)
@@ -331,6 +368,23 @@ def restore_venue_rows(rows, city:, dry_run:)
 end
 
 def remap_venue_attachment_record_ids(content:, abs_path: nil)
+  # When running locally with RAILS_ENV=production, .env.production may not be loaded.
+  # Force DATABASE_URL so we connect to the right DB (not default "carlymarsh").
+  env_file = Rails.root.join(".env.production")
+  if Rails.env.production? && File.exist?(env_file)
+    File.foreach(env_file) do |line|
+      line = line.strip
+      next if line.blank? || line.start_with?("#")
+      key, val = line.split("=", 2)
+      next unless key && val
+      val = val.gsub(/\A["']|["']\z/, "")
+      ENV[key] ||= val
+    end
+  end
+  if ENV["DATABASE_URL"].present?
+    ActiveRecord::Base.establish_connection(ENV["DATABASE_URL"])
+  end
+
   # Parse venues COPY block: backup venue id -> [name, city_key]
   terminator = Regexp.escape("\\.")
   venues_match = content.match(Regexp.new("COPY\\s+(?:public\\.)?venues\\s+\\(([^)]+)\\)\\s+FROM\\s+stdin;\\n(.*?)^#{terminator}\\n", Regexp::MULTILINE))
@@ -349,6 +403,7 @@ def remap_venue_attachment_record_ids(content:, abs_path: nil)
   end
 
   backup_venue = {} # backup_id -> { name:, city_key: }
+  backup_ids_by_name_city = Hash.new { |h, k| h[k] = [] } # [name, city] -> [backup_ids in order]
   venues_match[2].each_line do |line|
     next if line.strip == "\\."
     vals = line.chomp.split("\t")
@@ -358,7 +413,10 @@ def remap_venue_attachment_record_ids(content:, abs_path: nil)
     city = (vals[city_idx] || "").to_s.strip.presence || "movement"
     next if bid.blank? || name.blank?
     backup_venue[bid] = { name: name, city_key: city }
+    key = [name.downcase, city]
+    backup_ids_by_name_city[key] << bid
   end
+  backup_ids_by_name_city.each_value(&:sort!)
 
   remapped = 0
   ActiveStorage::Attachment.where(record_type: "Venue", name: "logo").find_each do |att|
@@ -366,8 +424,18 @@ def remap_venue_attachment_record_ids(content:, abs_path: nil)
     info = backup_venue[backup_id]
     next unless info
 
-    current = Venue.find_by(name: info[:name], city_key: info[:city_key]) ||
-              Venue.where(city_key: info[:city_key]).find { |v| v.name.to_s.strip.casecmp(info[:name].to_s.strip).zero? }
+    key = [info[:name].downcase, info[:city_key]]
+    backup_ids = backup_ids_by_name_city[key]
+    idx = backup_ids&.index(backup_id)
+    current_venues = Venue.where(city_key: info[:city_key])
+                          .select { |v| v.name.to_s.strip.casecmp(info[:name].to_s.strip).zero? }
+                          .sort_by(&:id)
+    current = if idx && current_venues.size > idx
+                current_venues[idx]
+              else
+                Venue.find_by(name: info[:name], city_key: info[:city_key]) ||
+                  current_venues.first
+              end
     next unless current
     next if current.id == backup_id
 

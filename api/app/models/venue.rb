@@ -77,10 +77,16 @@ class Venue < ApplicationRecord
 
   before_validation :default_city_key, on: :create
   before_validation :normalize_location
+  after_commit :invalidate_events_cache, on: [:create, :update, :destroy]
   # before_validation :apply_type_colors
 
   def default_city_key
     self.city_key ||= (Current.city_key.presence || "movement")
+  end
+
+  def invalidate_events_cache
+    return unless city_key.present?
+    Rails.cache.delete("events-v2:#{city_key}")
   end
 
   def normalize_location
