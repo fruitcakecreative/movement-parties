@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_03_19_000001) do
+ActiveRecord::Schema[7.2].define(version: 2026_03_19_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -126,8 +126,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_19_000001) do
     t.string "shotgun_url"
     t.string "posh_url"
     t.string "tixr_url"
+    t.string "edm_train_url"
     t.index ["city_key", "event_url"], name: "index_events_on_city_key_and_event_url"
     t.index ["dice_url"], name: "index_events_on_dice_url"
+    t.index ["edm_train_url"], name: "index_events_on_edm_train_url"
     t.index ["posh_url"], name: "index_events_on_posh_url"
     t.index ["ra_url"], name: "index_events_on_ra_url"
     t.index ["shotgun_url"], name: "index_events_on_shotgun_url"

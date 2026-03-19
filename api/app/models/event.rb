@@ -1,5 +1,5 @@
 class Event < ApplicationRecord
-  SOURCE_URL_COLUMNS = %w[event_url ticket_url ra_url dice_url shotgun_url posh_url tixr_url].freeze
+  SOURCE_URL_COLUMNS = %w[event_url ticket_url ra_url dice_url shotgun_url posh_url tixr_url edm_train_url].freeze
 
   belongs_to :venue
   has_and_belongs_to_many :genres
@@ -21,13 +21,32 @@ class Event < ApplicationRecord
     end
   end
 
+  # Strip ?utm=… so we match stored URLs with or without query params
+  def self.normalize_source_url(url)
+    return nil if url.blank?
+
+    url.to_s.strip.sub(/\?.*\z/, "")
+  end
+
   # Find event by any source URL - prevents duplicates across imports
   def self.find_by_any_source_url(city_key, url)
     return nil if url.blank?
 
-    url = url.to_s.strip
-    conditions = SOURCE_URL_COLUMNS.map { |col| "#{col} = :url" }.join(" OR ")
-    where(city_key: city_key).where(conditions, url: url).first
+    stripped = url.to_s.strip
+    needle = normalize_source_url(url)
+    return nil if needle.blank?
+
+    SOURCE_URL_COLUMNS.each do |col|
+      found = where(city_key: city_key).where(
+        "#{col} = ? OR #{col} = ? OR #{col} LIKE ?",
+        stripped,
+        needle,
+        "#{needle}?%"
+      ).first
+      return found if found
+    end
+
+    nil
   end
 
   before_validation :default_city_key, on: :create

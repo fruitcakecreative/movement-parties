@@ -107,6 +107,7 @@ export const getEventDisplayData = (
 
     if (lowerUrl.includes('ra.co')) return 'RA';
     if (lowerUrl.includes('dice.fm') || lowerUrl.includes('dice.com')) return 'DICE';
+    if (lowerUrl.includes('edmtrain.com')) return 'EDM_TRAIN';
     return 'OTHER';
   };
 
@@ -130,6 +131,8 @@ export const getEventDisplayData = (
         ticketLabel = isFreeTicket ? 'RA / RSVP' : 'RA / Tickets';
       } else if (ticketLinkType === 'DICE') {
         ticketLabel = isFreeTicket ? 'DICE / RSVP' : 'DICE / Tickets';
+      } else if (ticketLinkType === 'EDM_TRAIN') {
+        ticketLabel = isFreeTicket ? 'EDM Train / RSVP' : 'EDM Train / Tickets';
       } else {
         ticketLabel = isFreeTicket ? 'RSVP / Event Page' : 'Tickets / Event Page';
       }
@@ -149,6 +152,8 @@ export const getEventDisplayData = (
             ? 'RA Event'
             : eventLinkType === 'DICE'
             ? 'DICE Event'
+            : eventLinkType === 'EDM_TRAIN'
+            ? 'EDM Train Event'
             : 'Event Page',
         url: event.event_url
       });

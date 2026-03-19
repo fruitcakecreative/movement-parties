@@ -26,6 +26,9 @@ namespace :db do
       if url.include?("tixr.com") && event.tixr_url.blank?
         changes[:tixr_url] = url
       end
+      if url.include?("edmtrain.com") && event.edm_train_url.blank?
+        changes[:edm_train_url] = url
+      end
 
       next if changes.empty?
 
@@ -113,6 +116,7 @@ namespace :db do
         score += 10 if e.shotgun_url.present?
         score += 10 if e.posh_url.present?
         score += 10 if e.tixr_url.present?
+        score += 10 if e.edm_train_url.present?
         [score, (e.title.to_s.length), -e.id]
       end
 

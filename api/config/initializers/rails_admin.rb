@@ -84,6 +84,7 @@ RailsAdmin.config do |config|
     field :shotgun_url
     field :posh_url
     field :tixr_url
+    field :edm_train_url
     field :source
     field :ticket_price
     field :ticket_tier
