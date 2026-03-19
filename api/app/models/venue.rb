@@ -117,11 +117,8 @@ class Venue < ApplicationRecord
   def logo_url
     return nil unless logo.attached?
 
-    Aws::S3::Object.new(
-      bucket_name: ::ENV.fetch("AWS_BUCKET"),
-      key: logo.blob.key,
-      client: Aws::S3::Client.new
-    ).public_url
+    # Use Active Storage's service so bucket/path match where files were uploaded
+    logo.blob.url
   end
 
   # For parent venues: the venue to display (name, description). For child venues: the parent.
