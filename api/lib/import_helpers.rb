@@ -240,6 +240,14 @@ module ImportHelpers
       start_t..start_t.end_of_day
     end
 
+    # EDM Train date-only rows use local midnight; matching by clock time vs 19hz/real times fails unless we treat these as "any time that day".
+    def event_start_time_is_local_midnight_placeholder?(event, tz = MMW_TZ)
+      return false unless event&.start_time
+
+      t = event.start_time.in_time_zone(tz)
+      t.hour.zero? && t.min.zero? && t.sec.zero?
+    end
+
     # Normalize street addresses for fuzzy equality (zip, st/street, NW vs Northwest, etc.)
     def address_match_signature(addr)
       s = fold_accents(addr.to_s).downcase

@@ -86,7 +86,7 @@ class Venue < ApplicationRecord
 
   def invalidate_events_cache
     return unless city_key.present?
-    Rails.cache.delete("events-v2:#{city_key}")
+    Rails.cache.delete("events-v4:#{city_key}")
   end
 
   def normalize_location
@@ -123,8 +123,10 @@ class Venue < ApplicationRecord
   def logo_url
     return nil unless logo.attached?
 
-    # Use Active Storage's service so bucket/path match where files were uploaded
-    logo.blob.url
+    # Use Rails blob URL (production/staging use Active Storage proxy) so the browser
+    # loads from our API with a stable signed_id; S3 is read server-side with AWS keys.
+    # Direct logo.blob.url breaks when the bucket blocks public anonymous GET (403).
+    Rails.application.routes.url_helpers.rails_blob_url(logo, disposition: :inline, only_path: false)
   end
 
   # For parent venues: the venue to display (name, description). For child venues: the parent.

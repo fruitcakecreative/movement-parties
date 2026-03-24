@@ -6,7 +6,7 @@ class Api::EventsController < ApplicationController
     request.env["action_dispatch.request_start_time"] = Time.now
 
     city = current_city_key
-    cache_key = "events-v2:#{city}"
+    cache_key = "events-v4:#{city}"
 
     events = Rails.cache.fetch(cache_key, expires_in: 5.minutes) do
       Event.where(city_key: city)
@@ -48,7 +48,7 @@ class Api::EventsController < ApplicationController
     event.city_key = current_city_key
 
     if event.save
-      Rails.cache.delete("events-v2:#{event.city_key}")
+      Rails.cache.delete("events-v4:#{event.city_key}")
       render json: event, status: :created
     else
       render json: { errors: event.errors.full_messages }, status: :unprocessable_entity
@@ -57,7 +57,7 @@ class Api::EventsController < ApplicationController
 
   def update
     if @event.update(event_params)
-      Rails.cache.delete("events-v2:#{@event.city_key}")
+      Rails.cache.delete("events-v4:#{@event.city_key}")
       render json: @event
     else
       render json: { errors: @event.errors.full_messages }, status: :unprocessable_entity
@@ -67,7 +67,7 @@ class Api::EventsController < ApplicationController
   def destroy
     city = @event.city_key
     @event.destroy
-      Rails.cache.delete("events-v2:#{city}")
+      Rails.cache.delete("events-v4:#{city}")
     head :no_content
   end
 

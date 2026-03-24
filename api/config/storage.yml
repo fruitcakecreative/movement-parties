@@ -12,7 +12,9 @@ amazon:
   secret_access_key: <%= ENV["AWS_SECRET_ACCESS_KEY"] %>
   region: us-east-1
   bucket: movement-parties-assets
-  public: true
+  # Bucket uses Object Ownership (ACLs disabled). public: true sends x-amz-acl and fails.
+  # Serve blobs via rails_storage_proxy / signed URLs; use bucket policy if you need direct GET.
+  public: false
 
 
 # Use bin/rails credentials:edit to set the AWS secrets (as aws:access_key_id|secret_access_key)
