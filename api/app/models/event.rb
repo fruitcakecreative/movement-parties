@@ -16,9 +16,9 @@ class Event < ApplicationRecord
   scope :mmw,      -> { where(city_key: "mmw") }
 
   # Index / public lists: hide only after a short grace past end (or start if no end).
-  GRACE_AFTER_SCHEDULE_END = 2.hours
+  GRACE_AFTER_SCHEDULE_END = 4.hours
   scope :not_past, lambda {
-    where("COALESCE(events.end_time, events.start_time) > ?", GRACE_AFTER_SCHEDULE_END.ago)
+    where("COALESCE(events.end_time) > ?", GRACE_AFTER_SCHEDULE_END.ago)
   }
 
   rails_admin do

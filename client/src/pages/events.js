@@ -146,7 +146,7 @@ function Events() {
     locationOptions,
     lastUpdated,
     totalCount,
-  } = useEventsData({ dates: activeDates, customDateRanges });
+  } = useEventsData({ dates: activeDates, customDateRanges, timeZone: timelineTimeZone });
 
   const {
     selectedDate,

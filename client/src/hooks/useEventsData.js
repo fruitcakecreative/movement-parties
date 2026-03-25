@@ -2,9 +2,8 @@ import { useEffect, useState } from 'react';
 import * as Sentry from '@sentry/react';
 import { fetchEvents } from '../services/api';
 import { groupEventsByTimelineDate } from '../utils/groupEventsByTimelineDate';
-import { isEventNotPast } from '../utils/timelineSchedule';
 
-function useEventsData({ dates, customDateRanges }) {
+function useEventsData({ dates, customDateRanges, timeZone = 'America/New_York' }) {
   const [eventsByDate, setEventsByDate] = useState({});
   const [isLoaded, setIsLoaded] = useState(false);
   const [allEvents, setAllEvents] = useState([]);
@@ -19,9 +18,11 @@ function useEventsData({ dates, customDateRanges }) {
     Sentry.startSpan({ name: '/api/events', op: 'fetch' }, async (span) => {
       try {
         const data = await fetchEvents();
-        const eventList = (data.events || []).filter(isEventNotPast);
+        // Listing is authoritative on the API (`Event.not_past`). Do not filter again here —
+        // a second "past" check diverges easily (field order, naive vs Z) and drops real events.
+        const eventList = data.events || [];
 
-        setEventsByDate(groupEventsByTimelineDate(eventList, dates, customDateRanges));
+        setEventsByDate(groupEventsByTimelineDate(eventList, dates, customDateRanges, timeZone));
         setAllEvents(eventList);
         setLastUpdated(data.meta?.last_updated || null);
         setTotalCount(data.meta?.total_count ?? eventList.length);
@@ -69,7 +70,7 @@ function useEventsData({ dates, customDateRanges }) {
         span.end();
       }
     });
-  }, [dates, customDateRanges]);
+  }, [dates, customDateRanges, timeZone]);
 
   return {
     isLoaded,

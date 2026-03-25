@@ -64,7 +64,7 @@ const MultiDayTimeline = ({
 
   const start = new Date(startDate);
   const end = new Date(endDate);
-  const hours = Math.round((end - start) / (1000 * 60 * 60));
+  const hours = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60)));
   const dayWidth = hourWidth * hours;
   const hourClass = `hours-${hours}`;
 

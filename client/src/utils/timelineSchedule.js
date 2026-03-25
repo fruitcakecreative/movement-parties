@@ -1,5 +1,25 @@
 import { DateTime } from 'luxon';
 
+/** Same as `Event::GRACE_AFTER_SCHEDULE_END` — keep schedule rows / filters aligned with the API. */
+export const GRACE_AFTER_SCHEDULE_END_MS = 2 * 60 * 60 * 1000;
+
+function isoStringHasExplicitZone(isoLike) {
+  const s = String(isoLike).trim();
+  return /[zZ]$|[+-]\d{2}:\d{2}$|[+-]\d{4}$/.test(s);
+}
+
+/**
+ * API `formatted_*` are naive wall times in Rails `Time.zone`; JSON `start_time` / `end_time` usually have Z.
+ * Naive strings must not use the browser's local zone or events disappear "early" off the west coast.
+ */
+export function parseEventInstant(isoStr, timeZone = 'America/New_York') {
+  const s = String(isoStr).trim().replace(' ', 'T');
+  if (isoStringHasExplicitZone(s)) {
+    return DateTime.fromISO(s, { setZone: true });
+  }
+  return DateTime.fromISO(s, { zone: timeZone });
+}
+
 /**
  * Parse config strings like "2026-03-25T10:00:00" (no Z) as wall-clock time in the
  * festival timezone. Uses Luxon so behavior matches across browsers (Intl-only parsers
@@ -12,7 +32,8 @@ export function parseRangeEndMs(isoLocal, timeZone) {
 }
 
 /**
- * Festival "day" keys whose window **end** (in festival local time) is still in the future.
+ * Festival day rows to show. Stays visible until GRACE after the window `end` (matches API + not_past),
+ * so the timeline does not vanish the moment the config end passes while events are still in the list.
  */
 export function getActiveTimelineDateKeys(customDateRanges, timeZone = 'America/New_York') {
   if (!customDateRanges) return [];
@@ -21,9 +42,8 @@ export function getActiveTimelineDateKeys(customDateRanges, timeZone = 'America/
     const end = customDateRanges[key]?.end;
     if (!end) return true;
     const endMs = parseRangeEndMs(end, timeZone);
-    // Invalid parse: do not keep the day forever (old NaN→true left "Tuesday" stuck in prod).
     if (Number.isNaN(endMs)) return false;
-    return endMs > now;
+    return endMs + GRACE_AFTER_SCHEDULE_END_MS > now;
   });
 }
 
@@ -51,15 +71,4 @@ export function formatFestivalDayLong(dateKey, timeZone = 'America/New_York') {
     });
   }
   return dt.setLocale('en-US').toFormat('cccc, MMM d');
-}
-
-/** Match API Event.not_past: still show until GRACE_MS after effective end (see Event::GRACE_AFTER_SCHEDULE_END). */
-const GRACE_AFTER_END_MS = 2 * 60 * 60 * 1000;
-
-export function isEventNotPast(event) {
-  const end = event.end_time || event.formatted_end_time;
-  const start = event.start_time || event.formatted_start_time;
-  const effective = end || start;
-  if (!effective) return true;
-  return new Date(effective).getTime() > Date.now() - GRACE_AFTER_END_MS;
 }
