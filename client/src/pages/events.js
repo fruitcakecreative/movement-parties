@@ -24,6 +24,9 @@ import { getActiveTimelineDateKeys } from '../utils/timelineSchedule';
 
 const cfg = await loadCityConfig();
 const customDateRanges = cfg.customDateRanges;
+const timelineTimeZone =
+  cfg.timezone ||
+  (process.env.REACT_APP_CITY_KEY === 'movement' ? 'America/Detroit' : 'America/New_York');
 
 function Events() {
   // Recompute active festival days after each window end (e.g. Wed 10am) without a full reload.
@@ -39,7 +42,7 @@ function Events() {
   }, []);
 
   const activeDates = useMemo(
-    () => getActiveTimelineDateKeys(customDateRanges),
+    () => getActiveTimelineDateKeys(customDateRanges, timelineTimeZone),
     [customDateRanges, scheduleTick]
   );
   const [searchParams, setSearchParams] = useSearchParams();

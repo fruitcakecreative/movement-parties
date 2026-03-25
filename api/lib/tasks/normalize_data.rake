@@ -1,5 +1,13 @@
 # frozen_string_literal: true
 
+module NormalizeDataRake
+  def self.clear_events_caches
+    %w[movement mmw].each do |city|
+      %w[v1 v2 v4].each { |v| Rails.cache.delete("events-#{v}:#{city}") rescue nil }
+    end
+  end
+end
+
 namespace :db do
   desc "Normalize venue locations: combine similar values (e.g. 'miami beach' and 'Miami Beach')"
   task normalize_location: :environment do
@@ -16,7 +24,7 @@ namespace :db do
       puts "  #{venue.name}: '#{old_loc}' -> '#{canonical}'"
     end
 
-    %w[movement mmw].each { |city| Rails.cache.delete("events-v1:#{city}") }
+    NormalizeDataRake.clear_events_caches
     puts "Normalized #{updated} venue locations"
   end
 
@@ -60,7 +68,7 @@ namespace :db do
       end
     end
 
-    %w[movement mmw].each { |city| Rails.cache.delete("events-v1:#{city}") }
+    NormalizeDataRake.clear_events_caches
     puts "Normalized artists: #{updated} duplicates merged"
   end
 
@@ -82,9 +90,8 @@ namespace :db do
       exit 1
     end
 
-    # Case-insensitive find
-    from_genre = Genre.where("LOWER(TRIM(name)) = ?", from_name.to_s.downcase.strip).first
-    into_genre = Genre.where("LOWER(TRIM(name)) = ?", into_name.to_s.downcase.strip).first
+    from_genre = Genre.find_by_name_case_insensitive(from_name)
+    into_genre = Genre.find_by_name_case_insensitive(into_name)
 
     unless from_genre
       puts "Genre '#{from_name}' not found. Run 'rake db:list_genres' to see available genres"
@@ -101,21 +108,50 @@ namespace :db do
       exit 1
     end
 
-    events_with_from = Event.joins(:genres).where(genres: { id: from_genre.id }).distinct
-    count = 0
+    from_label = from_genre.name
+    into_label = into_genre.name
+    count = Genre.merge_records!(from_genre, into_genre)
+    NormalizeDataRake.clear_events_caches
 
-    from_name_actual = from_genre.name
-    into_name_actual = into_genre.name
+    puts "Merged '#{from_label}' into '#{into_label}': #{count} events updated"
+  end
 
-    events_with_from.find_each do |event|
-      event.genres.delete(from_genre)
-      event.genres << into_genre unless event.genres.include?(into_genre)
-      count += 1
+  desc "Merge genres that differ only by letter case (e.g. Afro House + afro house → afro house). " \
+       "Prefers the all-lowercase spelling when present. DRY_RUN=1 to print only."
+  task dedupe_genres_case: :environment do
+    dry = ENV["DRY_RUN"].present?
+    genres = Genre.all.to_a.reject { |g| g.name.blank? }
+    groups = genres.group_by { |g| g.name.to_s.downcase.strip }
+    merged_dupes = 0
+    events_touched = 0
+
+    groups.each do |_norm, list|
+      next if list.size <= 1
+
+      # Prefer a row whose name is already all-lowercase (e.g. "afro house"); else keep lowest id.
+      keeper = list.find { |g| g.name == g.name.to_s.downcase }
+      keeper ||= list.min_by(&:id)
+      dups = list.reject { |g| g.id == keeper.id }
+
+      dups.each do |dup|
+        next if dry
+
+        events_touched += Genre.merge_records!(dup, keeper)
+        merged_dupes += 1
+        puts "  Merged id=#{dup.id} '#{dup.name}' → id=#{keeper.id} '#{keeper.name}'"
+      end
+
+      next unless dry
+
+      names = list.map { |g| "#{g.id}:#{g.name.inspect}" }.join(", ")
+      puts "  [dry-run] would keep id=#{keeper.id} #{keeper.name.inspect}; others: #{names}"
     end
 
-    from_genre.destroy
-    %w[movement mmw].each { |city| Rails.cache.delete("events-v1:#{city}") }
-
-    puts "Merged '#{from_name_actual}' into '#{into_name_actual}': #{count} events updated"
+    if dry
+      puts "dedupe_genres_case: dry run complete (no changes). Remove DRY_RUN=1 to apply."
+    else
+      NormalizeDataRake.clear_events_caches
+      puts "dedupe_genres_case: merged #{merged_dupes} duplicate genre rows; #{events_touched} event reassignments (sum)"
+    end
   end
 end
