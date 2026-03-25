@@ -1,8 +1,30 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useEpg, Epg, Layout } from '@nessprim/planby-pro';
 import Timeline from './components/Timeline';
 import ChannelItem from './components/ChannelItem';
 import ProgramItem from './components/ProgramItem';
+
+/** Planby's isToday matches calendar day of startDate. Our ranges cross midnight (e.g. noon → next day 10am), so after midnight "now" is no longer the same calendar day as start — the current-time line disappears. Treat as "today" whenever now is inside [startDate, endDate]. */
+function useNowWithinRange(startDate, endDate) {
+  const [clock, setClock] = useState(() => Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => setClock(Date.now()), 60_000);
+    const onFocus = () => setClock(Date.now());
+    window.addEventListener('focus', onFocus);
+    return () => {
+      clearInterval(id);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, []);
+
+  return useMemo(() => {
+    const now = new Date(clock);
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    return now >= start && now <= end;
+  }, [clock, startDate, endDate]);
+}
 
 const MultiDayTimeline = ({
   date,
@@ -44,6 +66,8 @@ const MultiDayTimeline = ({
   const dayWidth = hourWidth * hours;
   const hourClass = `hours-${hours}`;
 
+  const nowWithinWindow = useNowWithinRange(startDate, endDate);
+
   const { getEpgProps, getLayoutProps, scrollX } = useEpg({
     channels,
     epg,
@@ -54,6 +78,9 @@ const MultiDayTimeline = ({
     sidebarWidth,
     isBaseTimeFormat: true,
     timelineDividers: 1,
+    isLine: true,
+    // Library default is false when omitted — line never draws. Gate on our window, not calendar day.
+    isCurrentTime: nowWithinWindow,
   });
 
   const hasAutoScrolledRef = useRef(false);
@@ -110,7 +137,12 @@ const MultiDayTimeline = ({
       <Epg {...getEpgProps()}>
         <Layout
           {...getLayoutProps()}
-          renderTimeline={(props) => <Timeline {...props} />}
+          // useEpg sets isToday from date-fns isToday(calendar day) — wrong after midnight on a noon→next-day span.
+          isToday={nowWithinWindow}
+          isCurrentTime={nowWithinWindow}
+          renderTimeline={(timelineProps) => (
+            <Timeline {...timelineProps} isToday={nowWithinWindow} isCurrentTime={nowWithinWindow} />
+          )}
           renderChannel={({ channel }) => (
             <ChannelItem
               key={channel.uuid || channel.name}
