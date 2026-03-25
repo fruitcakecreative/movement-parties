@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import * as Sentry from '@sentry/react';
 import { fetchEvents } from '../services/api';
 import { groupEventsByTimelineDate } from '../utils/groupEventsByTimelineDate';
+import { isEventNotPast } from '../utils/timelineSchedule';
 
 function useEventsData({ dates, customDateRanges }) {
   const [eventsByDate, setEventsByDate] = useState({});
@@ -18,7 +19,7 @@ function useEventsData({ dates, customDateRanges }) {
     Sentry.startSpan({ name: '/api/events', op: 'fetch' }, async (span) => {
       try {
         const data = await fetchEvents();
-        const eventList = data.events || [];
+        const eventList = (data.events || []).filter(isEventNotPast);
 
         setEventsByDate(groupEventsByTimelineDate(eventList, dates, customDateRanges));
         setAllEvents(eventList);

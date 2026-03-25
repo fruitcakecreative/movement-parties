@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 const defaultFilters = {
   genre: [],
@@ -10,7 +10,7 @@ const defaultFilters = {
   venueType: [],
 };
 
-function useEventFilters({ eventsByDate }) {
+function useEventFilters({ eventsByDate, activeDates = [] }) {
   const [selectedDate, setSelectedDate] = useState('all');
   const [filterSelections, setFilterSelections] = useState(defaultFilters);
   const [searchQuery, setSearchQuery] = useState('');
@@ -24,6 +24,13 @@ function useEventFilters({ eventsByDate }) {
   );
 
   const resetFilters = () => setFilterSelections(defaultFilters);
+
+  useEffect(() => {
+    if (selectedDate === 'all') return;
+    if (!activeDates?.includes(selectedDate)) {
+      setSelectedDate('all');
+    }
+  }, [activeDates, selectedDate]);
 
   const getFilteredEventsForDate = (date) => {
     let dayEvents = eventsByDate[date] || [];

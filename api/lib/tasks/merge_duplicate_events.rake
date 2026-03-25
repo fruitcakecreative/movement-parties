@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "../merge_event_pair"
+
 namespace :db do
   desc "Backfill source URL columns from event_url for existing events"
   task backfill_source_urls: :environment do
@@ -39,20 +41,6 @@ namespace :db do
 
     %w[movement mmw].each { |city| Rails.cache.delete("events-v1:#{city}") }
     puts "Backfilled source URLs for #{updated} events"
-  end
-
-  # Prefer event name over listing format ("DANZI & FRNDZ — Miami Music Week at The White Elephant • Mar 27")
-  best_merge_title = lambda do |t1, t2|
-    a = t1.to_s.strip
-    b = t2.to_s.strip
-    return b if a.blank?
-    return a if b.blank?
-    listing_format = /\s*[—\-]\s*|\s+at\s+|\s*•\s*/
-    a_listing = a.match?(listing_format)
-    b_listing = b.match?(listing_format)
-    return a if a_listing && !b_listing
-    return b if b_listing && !a_listing
-    a.length >= b.length ? a : b
   end
 
   desc "Merge duplicate events that share a source URL (ra_url, dice_url, etc). Safe: no venue+time guessing."
@@ -128,83 +116,12 @@ namespace :db do
 
         next if dry_run
 
-        ActiveRecord::Base.transaction do
-          # Merge source URLs
-          merge_attrs = {}
-          Event::SOURCE_URL_COLUMNS.each do |col|
-            next if col == "event_url" && keeper.event_url.present?
-            val = dup.send(col)
-            next if val.blank?
-            merge_attrs[col] = val if keeper.send(col).blank?
-          end
-          keeper.update_columns(merge_attrs) if merge_attrs.any?
-
-          # Prefer better title (unless keeper has manual_override_title)
-          unless keeper.manual_override_title
-            best_title = best_merge_title.call(keeper.title, dup.title)
-            keeper.update_column(:title, best_title) if best_title.present?
-          end
-
-          # Merge genres (respect manual_override_genres)
-          unless keeper.manual_override_genres
-            dup.genres.each do |g|
-              keeper.genres << g unless keeper.genres.include?(g)
-            end
-          end
-
-          # Merge artists (respect manual_override_artists)
-          unless keeper.manual_override_artists
-            dup.artists.each do |a|
-              keeper.artists << a unless keeper.artists.include?(a)
-            end
-          end
-
-          # Reassign event_attendees to keeper (skip if user already attends keeper)
-          keeper_user_ids = keeper.event_attendees.pluck(:user_id).to_set
-          dup.event_attendees.each do |ea|
-            if keeper_user_ids.include?(ea.user_id)
-              ea.destroy
-            else
-              ea.update!(event_id: keeper.id)
-              keeper_user_ids.add(ea.user_id)
-            end
-          end
-          dup.ticket_posts.update_all(event_id: keeper.id)
-
-          # Reassign user_events to keeper (skip if user already has keeper event)
-          keeper_ue_user_ids = keeper.user_events.pluck(:user_id).to_set
-          dup.user_events.each do |ue|
-            if keeper_ue_user_ids.include?(ue.user_id)
-              ue.destroy
-            else
-              ue.update!(event_id: keeper.id)
-              keeper_ue_user_ids.add(ue.user_id)
-            end
-          end
-
-          # Merge other fields if keeper is blank (respect manual overrides)
-          unless keeper.manual_override_times
-            keeper.update_column(:start_time, dup.start_time) if keeper.start_time.blank? && dup.start_time.present?
-            keeper.update_column(:end_time, dup.end_time) if keeper.end_time.blank? && dup.end_time.present?
-          end
-          unless keeper.manual_override_ticket
-            %i[ticket_price ticket_tier ticket_wave].each do |attr|
-              next unless keeper.respond_to?(attr)
-              keeper.update_column(attr, dup.send(attr)) if keeper.send(attr).blank? && dup.send(attr).present?
-            end
-          end
-          %i[description event_image_url promoter age].each do |attr|
-            next unless keeper.respond_to?(attr)
-            keeper.update_column(attr, dup.send(attr)) if keeper.send(attr).blank? && dup.send(attr).present?
-          end
-
-          dup.destroy
-          merged_count += 1
-        end
+        MergeEventPair.merge_duplicate_into_keeper!(keeper, dup)
+        merged_count += 1
       end
     end
 
-    %w[movement mmw].each { |city| Rails.cache.delete("events-v1:#{city}") }
+    MergeEventPair.clear_event_caches
     puts "Merged #{merged_count} duplicate events" unless dry_run
     puts "Dry run complete. Run without DRY_RUN=1 to apply." if dry_run
   end
@@ -263,53 +180,7 @@ namespace :db do
 
       return if dry_run
 
-      ActiveRecord::Base.transaction do
-        merge_attrs = {}
-        Event::SOURCE_URL_COLUMNS.each do |col|
-          next if col == "event_url" && keeper.event_url.present?
-          val = dup.send(col)
-          next if val.blank?
-          merge_attrs[col] = val if keeper.send(col).blank?
-        end
-        keeper.update_columns(merge_attrs) if merge_attrs.any?
-
-        unless keeper.manual_override_title
-          best = best_merge_title.call(keeper.title, dup.title)
-          keeper.update_column(:title, best) if best.present?
-        end
-
-        unless keeper.manual_override_genres
-          dup.genres.each { |g| keeper.genres << g unless keeper.genres.include?(g) }
-        end
-        unless keeper.manual_override_artists
-          dup.artists.each { |a| keeper.artists << a unless keeper.artists.include?(a) }
-        end
-
-        keeper_user_ids = keeper.event_attendees.pluck(:user_id).to_set
-        dup.event_attendees.each do |ea|
-          keeper_user_ids.include?(ea.user_id) ? ea.destroy : (ea.update!(event_id: keeper.id); keeper_user_ids.add(ea.user_id))
-        end
-        dup.ticket_posts.update_all(event_id: keeper.id)
-
-        keeper_ue_user_ids = keeper.user_events.pluck(:user_id).to_set
-        dup.user_events.each do |ue|
-          keeper_ue_user_ids.include?(ue.user_id) ? ue.destroy : (ue.update!(event_id: keeper.id); keeper_ue_user_ids.add(ue.user_id))
-        end
-
-        unless keeper.manual_override_times
-          keeper.update_column(:start_time, dup.start_time) if keeper.start_time.blank? && dup.start_time.present?
-          keeper.update_column(:end_time, dup.end_time) if keeper.end_time.blank? && dup.end_time.present?
-        end
-        unless keeper.manual_override_ticket
-          keeper.update_column(:ticket_price, dup.ticket_price) if keeper.ticket_price.blank? && dup.ticket_price.present?
-        end
-        %i[description event_image_url promoter age].each do |attr|
-          next unless keeper.respond_to?(attr)
-          keeper.update_column(attr, dup.send(attr)) if keeper.send(attr).blank? && dup.send(attr).present?
-        end
-
-        dup.destroy
-      end
+      MergeEventPair.merge_duplicate_into_keeper!(keeper, dup)
     end
 
     pick_keeper = lambda do |list|
@@ -346,8 +217,37 @@ namespace :db do
       end
     end
 
-    %w[movement mmw].each { |city| Rails.cache.delete("events-v1:#{city}") }
+    MergeEventPair.clear_event_caches
     puts "Fuzzy merged #{merged_count} events" unless dry_run
     puts "Dry run done. Run with APPLY=1 to apply merges." if dry_run
+  end
+
+  desc "Merge two events by ID: KEEPER_ID survives, MERGE_ID is merged in and destroyed. Same city_key required. DRY_RUN=1 to preview."
+  task merge_two_events: :environment do
+    keeper_id = ENV["KEEPER_ID"].presence
+    merge_id = ENV["MERGE_ID"].presence
+    dry_run = ENV["DRY_RUN"] == "1"
+
+    abort "Set KEEPER_ID (row to keep) and MERGE_ID (row to fold in and delete), e.g. KEEPER_ID=123 MERGE_ID=456" if keeper_id.blank? || merge_id.blank?
+    abort "KEEPER_ID and MERGE_ID must differ" if keeper_id.to_i == merge_id.to_i
+
+    keeper = Event.includes(:venue, :genres, :artists).find_by(id: keeper_id)
+    merge = Event.includes(:venue, :genres, :artists).find_by(id: merge_id)
+    abort "No event for KEEPER_ID=#{keeper_id.inspect}" unless keeper
+    abort "No event for MERGE_ID=#{merge_id.inspect}" unless merge
+
+    if keeper.city_key != merge.city_key
+      abort "city_key must match (keeper=#{keeper.city_key.inspect} merge=#{merge.city_key.inspect})"
+    end
+
+    puts "Merge MERGE_ID=#{merge.id} (#{merge.title}) -> KEEPER_ID=#{keeper.id} (#{keeper.title}) [city=#{keeper.city_key}] dry_run=#{dry_run}"
+
+    if dry_run
+      puts "Dry run only. Run without DRY_RUN=1 to apply."
+    else
+      MergeEventPair.merge_duplicate_into_keeper!(keeper, merge)
+      MergeEventPair.clear_event_caches
+      puts "Done. Event #{merge_id} merged into #{keeper_id}."
+    end
   end
 end

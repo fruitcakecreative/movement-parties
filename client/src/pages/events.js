@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import MainHeader from '../components/MainHeader';
@@ -20,13 +20,28 @@ import { createEpg } from '../timeline/data/buildEpg';
 
 import useEventsData from '../hooks/useEventsData';
 import useEventFilters from '../hooks/useEventFilters';
+import { getActiveTimelineDateKeys } from '../utils/timelineSchedule';
 
 const cfg = await loadCityConfig();
 const customDateRanges = cfg.customDateRanges;
-const dates = Object.keys(customDateRanges);
-
 
 function Events() {
+  // Recompute active festival days after each window end (e.g. Wed 10am) without a full reload.
+  const [scheduleTick, setScheduleTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setScheduleTick((n) => n + 1), 60_000);
+    const onFocus = () => setScheduleTick((n) => n + 1);
+    window.addEventListener('focus', onFocus);
+    return () => {
+      clearInterval(id);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, []);
+
+  const activeDates = useMemo(
+    () => getActiveTimelineDateKeys(customDateRanges),
+    [customDateRanges, scheduleTick]
+  );
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedEventId = searchParams.get('eventId');
   const selectedVenueId = searchParams.get('venueId');
@@ -127,7 +142,7 @@ function Events() {
     locationOptions,
     lastUpdated,
     totalCount,
-  } = useEventsData({ dates, customDateRanges });
+  } = useEventsData({ dates: activeDates, customDateRanges });
 
   const {
     selectedDate,
@@ -145,7 +160,7 @@ function Events() {
     getFilteredEventsForDate,
     hasActiveFilters,
     resetFilters,
-  } = useEventFilters({ eventsByDate });
+  } = useEventFilters({ eventsByDate, activeDates });
 
   return (
     <div className={`events-page ${(selectedEventId || selectedVenueId) ? 'has-selected-event' : ''}`}>
@@ -158,7 +173,7 @@ function Events() {
             <EventsToolbar
               selectedDate={selectedDate}
               setSelectedDate={setSelectedDate}
-              dates={dates}
+              dates={activeDates}
               isLoaded={isLoaded}
               filterSelections={filterSelections}
               setFilterSelections={setFilterSelections}
@@ -186,7 +201,7 @@ function Events() {
                   hasActiveFilters={hasActiveFilters}
                   resetFilters={resetFilters}
                 />
-                {(selectedDate === 'all' ? dates : [selectedDate]).map((date) => {
+                {(selectedDate === 'all' ? activeDates : [selectedDate]).map((date) => {
                   const dayEvents = getFilteredEventsForDate(date);
                   const epg = createEpg(dayEvents);
                   const channels = createChannels(epg);
