@@ -11,8 +11,8 @@ plugin :tmp_restart
 # In other environments, only set the PID file if requested.
 pidfile ENV["PIDFILE"] if ENV["PIDFILE"]
 
-# add certs for local https testing
-if ENV["RAILS_ENV"] == "development"
+# add certs for local https testing (skip when using bin/dev: Rails HTTP on 3001)
+if ENV["RAILS_ENV"] == "development" && ENV["SKIP_SSL"] != "1"
   ssl_bind '127.0.0.1', '3001', {
     key: 'localhost-key.pem',
     cert: 'localhost.pem'

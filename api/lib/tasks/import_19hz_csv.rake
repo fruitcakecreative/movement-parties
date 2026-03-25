@@ -1,5 +1,21 @@
 # frozen_string_literal: true
 
+# import:nineteen_hz_csv — ENV reference
+# -----------------------------------------------------------------------------
+# Source (default: hosted Miami CSV — do not set CSV_FILE):
+#   CSV_URL     Optional. Default: https://19hz.info/events_Miami.csv
+#   CSV_FILE    If set, read this path instead of fetching CSV_URL (local dev only).
+#
+# Row date filter (CSV "day" column must fall in this inclusive range):
+#   IMPORT_START   YYYY-MM-DD
+#   IMPORT_END     YYYY-MM-DD
+#   Set both for a custom range. If either is unset, each falls back to the default window (Mar 24 / Mar 30 in YEAR).
+#   YEAR           Used for those defaults and for parsing the CSV year in column 0 (default: current year).
+#
+# Other:
+#   CITY=mmw  DRY_RUN=1  VERBOSE=1  EVENTBRITE_ONLY=0 (import non-Eventbrite ticket URLs too)
+# -----------------------------------------------------------------------------
+
 require "csv"
 require "open-uri"
 require "set"
@@ -12,7 +28,11 @@ namespace :import do
     "https://feverup.com/m/500105"
   ].freeze
 
-  desc "Import 19hz CSV: Mar 24–30, allowed (…) cities, skip Dice/RA URLs; CSV_URL default 19hz Miami"
+  desc(<<~DESC.gsub(/\s+/, " ").strip)
+    Import 19hz CSV: hosted CSV by default (CSV_URL or https://19hz.info/events_Miami.csv).
+    Set CSV_FILE=path to use a local file instead. Row dates: IMPORT_START & IMPORT_END (YYYY-MM-DD),
+    else YEAR with default Mar 24–30. Eventbrite-only unless EVENTBRITE_ONLY=0. See file header for ENV list.
+  DESC
   task nineteen_hz_csv: :environment do
     # CSV date/time columns are already local Eastern (America/New_York) wall time — no UTC shift.
     # (March MMW is typically EDT; we use this zone so DST is correct.)
@@ -138,6 +158,20 @@ namespace :import do
       NINETEEN_HZ_IGNORED_URL_BASES.any? { |base| needle == base || needle.start_with?("#{base}/") }
     end
 
+    # At least one ticket URL must be Eventbrite (short links like evb.me resolve to eventbrite.com when opened).
+    eventbrite_ticket_url = lambda do |url|
+      return false if url.blank?
+
+      u = url.to_s.strip
+      return true if u.match?(%r{\beventbrite\.(com|co\.[a-z]{2})/}i)
+      return true if u.include?("evb.me/")
+
+      host = URI.parse(u).host.to_s.downcase
+      host.include?("eventbrite") || host.include?("evb.me")
+    rescue URI::InvalidURIError, ArgumentError
+      u.downcase.include?("eventbrite.com") || u.downcase.include?("evb.me")
+    end
+
     # Dedup: exact URL first, then same-day events at the same venue with a *title* match (19hz titles differ
     # from Dice/RA). Prefer venue_id when the venue row exists. Widen time window in steps and pick closest time.
     find_matching_event = lambda do |incoming_title:, incoming_start_time:, incoming_venue_name:, incoming_venue:, url_a:, url_b:|
@@ -241,7 +275,22 @@ namespace :import do
     utf = raw.force_encoding("Windows-1252").encode("UTF-8", invalid: :replace, undef: :replace)
     rows = CSV.parse(utf)
 
-    puts "19hz filters: dates #{import_range_start}..#{import_range_end} | venue (…) Miami Beach/Miami/Ft Lauderdale | skip rows with Dice or RA URLs"
+    eb_only = ENV["EVENTBRITE_ONLY"] != "0"
+
+    source_line =
+      if local_path
+        path = File.expand_path(local_path)
+        "  Source: local file #{path}  (unset CSV_FILE to fetch hosted CSV instead)"
+      else
+        "  Source: hosted #{csv_url}"
+      end
+
+    puts <<~BANNER
+      19hz CSV import
+      #{source_line}
+        Row date filter: #{import_range_start} .. #{import_range_end}  (IMPORT_START / IMPORT_END=YYYY-MM-DD; or YEAR=#{year} for default Mar 24–30)
+        Venue: (…) Miami Beach / Miami / Fort Lauderdale · skip Dice/RA ·#{eb_only ? ' Eventbrite ticket URLs only (EVENTBRITE_ONLY=0 to allow all)' : ' all ticket URLs'}
+    BANNER
 
     created_count = 0
     updated_count = 0
@@ -297,6 +346,11 @@ namespace :import do
           end
 
           if ignored_ticket_url.call(url_primary) || ignored_ticket_url.call(url_secondary)
+            skipped_count += 1
+            next
+          end
+
+          if eb_only && !eventbrite_ticket_url.call(url_primary) && !eventbrite_ticket_url.call(url_secondary)
             skipped_count += 1
             next
           end
