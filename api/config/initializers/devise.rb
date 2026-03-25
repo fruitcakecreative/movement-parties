@@ -28,6 +28,14 @@ Devise.setup do |config|
 
   config.remember_for = 2.weeks
 
+  if ENV["SESSION_COOKIE_DOMAIN"].present?
+    config.rememberable_options = {
+      domain: ENV["SESSION_COOKIE_DOMAIN"],
+      secure: Rails.env.production?,
+      same_site: Rails.env.production? ? :none : :lax
+    }
+  end
+
 
   config.password_length = 6..128
 

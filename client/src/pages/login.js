@@ -30,6 +30,7 @@ function Login() {
     try {
       const data = await userLogin({ email, password });
       if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
         window.location.href = "/profile";
       }
     } catch (err) {
