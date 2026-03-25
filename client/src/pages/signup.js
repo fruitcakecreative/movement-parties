@@ -12,6 +12,7 @@ function Signup() {
 
   const res = await fetch(`${process.env.REACT_APP_API_BASE}/users`, {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         user: {
