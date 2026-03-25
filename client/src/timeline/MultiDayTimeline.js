@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useEpg, Epg, Layout } from '@nessprim/planby-pro';
+import { formatFestivalDayShort } from '../utils/timelineSchedule';
 import Timeline from './components/Timeline';
 import ChannelItem from './components/ChannelItem';
 import ProgramItem from './components/ProgramItem';
@@ -34,7 +35,8 @@ const MultiDayTimeline = ({
   endDate,
   allEvents,
   openEvent,
-  openVenue
+  openVenue,
+  timeZone = 'America/New_York',
 }) => {
   const [dimensions, setDimensions] = useState({
     isMobile: window.innerWidth < 768,
@@ -94,11 +96,7 @@ const MultiDayTimeline = ({
         if (!existing) {
           const label = document.createElement('div');
           label.className = `corner-label corner-label-${date}`;
-          label.innerText = new Date(`${date}T12:00:00`).toLocaleDateString('en-US', {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric',
-          });
+          label.innerText = formatFestivalDayShort(date, timeZone);
           label.style.padding = '5px';
           label.style.fontWeight = 'bold';
           cornerBox.appendChild(label);
@@ -107,7 +105,7 @@ const MultiDayTimeline = ({
     }, 300);
 
     return () => clearTimeout(timeout);
-  }, [date]);
+  }, [date, timeZone]);
 
   useEffect(() => {
     if (epg.length === 0) return;

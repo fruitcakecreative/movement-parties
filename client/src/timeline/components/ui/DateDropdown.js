@@ -1,18 +1,16 @@
 import { Listbox } from '@headlessui/react';
 import React from 'react';
 
-const DateDropdown = ({ selectedDate, setSelectedDate, dates }) => {
+import { formatFestivalDayShort } from '../../../utils/timelineSchedule';
+
+const DateDropdown = ({ selectedDate, setSelectedDate, dates, timeZone = 'America/New_York' }) => {
   return (
     <div className="w-64 dropdown-wrapper">
       <Listbox value={selectedDate} onChange={setSelectedDate}>
         <Listbox.Button className="bold full-width dropdown-btn">
           {selectedDate === 'all'
             ? 'All Days'
-            : new Date(`${selectedDate}T12:00:00`).toLocaleDateString('en-US', {
-                weekday: 'short',
-                month: 'short',
-                day: 'numeric',
-              })}
+            : formatFestivalDayShort(selectedDate, timeZone)}
           <span className="dropdown-arrow">▾</span>
         </Listbox.Button>
         <Listbox.Options className="dropdown-options">
@@ -24,11 +22,7 @@ const DateDropdown = ({ selectedDate, setSelectedDate, dates }) => {
                 >
                   {date === 'all'
                     ? 'All Days'
-                    : new Date(`${date}T12:00:00`).toLocaleDateString('en-US', {
-                        weekday: 'short',
-                        month: 'short',
-                        day: 'numeric',
-                      })}
+                    : formatFestivalDayShort(date, timeZone)}
                 </div>
               )}
             </Listbox.Option>

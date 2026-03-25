@@ -116,8 +116,8 @@ namespace :db do
     puts "Merged '#{from_label}' into '#{into_label}': #{count} events updated"
   end
 
-  desc "Merge genres that differ only by letter case (e.g. Afro House + afro house → afro house). " \
-       "Prefers the all-lowercase spelling when present. DRY_RUN=1 to print only."
+  desc "Merge genres that differ only by letter case (e.g. afro house → Afro House). " \
+       "Keeps a capitalized / mixed-case name when present; all-lowercase merges into it. DRY_RUN=1 to print only."
   task dedupe_genres_case: :environment do
     dry = ENV["DRY_RUN"].present?
     genres = Genre.all.to_a.reject { |g| g.name.blank? }
@@ -128,9 +128,9 @@ namespace :db do
     groups.each do |_norm, list|
       next if list.size <= 1
 
-      # Prefer a row whose name is already all-lowercase (e.g. "afro house"); else keep lowest id.
-      keeper = list.find { |g| g.name == g.name.to_s.downcase }
-      keeper ||= list.min_by(&:id)
+      # Prefer any spelling that isn't all-lowercase (e.g. "Afro House"); merge "afro house" into it.
+      with_caps = list.select { |g| g.name.to_s != g.name.to_s.downcase }
+      keeper = with_caps.any? ? with_caps.min_by(&:id) : list.min_by(&:id)
       dups = list.reject { |g| g.id == keeper.id }
 
       dups.each do |dup|

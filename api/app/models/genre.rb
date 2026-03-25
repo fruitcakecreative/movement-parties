@@ -5,7 +5,7 @@ class Genre < ApplicationRecord
   # Alternate spellings / abbreviations → one stored genre name.
   # Keys MUST be lowercased; lookup is `GENRE_ALIASES[name.strip.downcase]`.
   # Do not use this for case-only variants ("afro house" vs "Afro House") — those
-  # are merged by find_or_create (case-insensitive) + db:dedupe_genres_case.
+  # are merged by find_or_create (case-insensitive) + db:dedupe_genres_case (keeps capitalized row).
   GENRE_ALIASES = {
     "ukg" => "Garage",
     "uk garage" => "Garage",

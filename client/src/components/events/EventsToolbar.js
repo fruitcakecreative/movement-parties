@@ -6,6 +6,7 @@ function EventsToolbar({
   selectedDate,
   setSelectedDate,
   dates,
+  timeZone,
   isLoaded,
   filterSelections,
   setFilterSelections,
@@ -28,6 +29,7 @@ function EventsToolbar({
         selectedDate={selectedDate}
         setSelectedDate={setSelectedDate}
         dates={dates}
+        timeZone={timeZone}
       />
 
       {isLoaded && (

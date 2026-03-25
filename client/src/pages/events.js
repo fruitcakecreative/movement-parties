@@ -20,7 +20,7 @@ import { createEpg } from '../timeline/data/buildEpg';
 
 import useEventsData from '../hooks/useEventsData';
 import useEventFilters from '../hooks/useEventFilters';
-import { getActiveTimelineDateKeys } from '../utils/timelineSchedule';
+import { formatFestivalDayLong, getActiveTimelineDateKeys } from '../utils/timelineSchedule';
 
 const cfg = await loadCityConfig();
 const customDateRanges = cfg.customDateRanges;
@@ -41,10 +41,11 @@ function Events() {
     };
   }, []);
 
-  const activeDates = useMemo(
-    () => getActiveTimelineDateKeys(customDateRanges, timelineTimeZone),
-    [customDateRanges, scheduleTick]
-  );
+  // customDateRanges + timelineTimeZone come from loadCityConfig (module scope); scheduleTick forces recompute when windows end.
+  const activeDates = useMemo(() => {
+    void scheduleTick;
+    return getActiveTimelineDateKeys(customDateRanges, timelineTimeZone);
+  }, [scheduleTick]);
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedEventId = searchParams.get('eventId');
   const selectedVenueId = searchParams.get('venueId');
@@ -177,6 +178,7 @@ function Events() {
               selectedDate={selectedDate}
               setSelectedDate={setSelectedDate}
               dates={activeDates}
+              timeZone={timelineTimeZone}
               isLoaded={isLoaded}
               filterSelections={filterSelections}
               setFilterSelections={setFilterSelections}
@@ -214,11 +216,7 @@ function Events() {
                       <div key={date} style={{ textAlign: 'center', margin: '40px 0' }}>
                         <p style={{ fontStyle: 'italic', color: '#aaa' }}>
                           No events match your filters for{' '}
-                          {new Date(`${date}T12:00:00`).toLocaleDateString('en-US', {
-                            weekday: 'long',
-                            month: 'short',
-                            day: 'numeric',
-                          })}
+                          {formatFestivalDayLong(date, timelineTimeZone)}
                           .
                         </p>
                       </div>
@@ -238,6 +236,7 @@ function Events() {
                       openEvent={openEvent}
                       openVenue={openVenue}
                       CustomChannelItem={CustomChannelItem}
+                      timeZone={timelineTimeZone}
                     />
                   );
                 })}
