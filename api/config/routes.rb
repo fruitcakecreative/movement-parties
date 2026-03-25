@@ -3,6 +3,8 @@ require Rails.root.join("app/middleware/metrics_authentication")
 Rails.application.routes.draw do
   mount MetricsAuthentication.new(Yabeda::Prometheus::Exporter), at: "/metrics"
 
+  # Typical operator flow: sign in with Devise (e.g. POST /api/login with credentials, same-site session
+  # cookie), then open /admin — the React app’s /profile and related API routes are optional for that.
   if Rails.env.development?
     mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
   else

@@ -53,11 +53,13 @@ export function formatFestivalDayLong(dateKey, timeZone = 'America/New_York') {
   return dt.setLocale('en-US').toFormat('cccc, MMM d');
 }
 
-/** Match API Event.not_past: COALESCE(end_time, start_time) > now */
+/** Match API Event.not_past: still show until GRACE_MS after effective end (see Event::GRACE_AFTER_SCHEDULE_END). */
+const GRACE_AFTER_END_MS = 2 * 60 * 60 * 1000;
+
 export function isEventNotPast(event) {
   const end = event.end_time || event.formatted_end_time;
   const start = event.start_time || event.formatted_start_time;
   const effective = end || start;
   if (!effective) return true;
-  return new Date(effective).getTime() > Date.now();
+  return new Date(effective).getTime() > Date.now() - GRACE_AFTER_END_MS;
 }

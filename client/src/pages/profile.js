@@ -13,6 +13,8 @@ function Profile() {
   const [userEvents, setUserEvents] = useState({});
   const [profile, setProfile] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [sessionChecked, setSessionChecked] = useState(false);
+  const [sessionError, setSessionError] = useState(false);
 
 
   const openModal = () => {
@@ -31,8 +33,10 @@ function Profile() {
         setUser(data);
       })
       .catch((err) => {
-        if (isUnauthorized(err)) window.location.href = "/login";
-      });
+        if (isUnauthorized(err)) setSessionError(true);
+        else console.error(err);
+      })
+      .finally(() => setSessionChecked(true));
   }, []);
 
   useEffect(() => {
@@ -56,6 +60,19 @@ function Profile() {
     acc[dateStr].push(event);
     return acc;
   }, {});
+
+  if (!sessionChecked) return null;
+
+  if (sessionError) {
+    return (
+      <div className="page-con" style={{ padding: '2rem' }}>
+        <p>
+          You need to sign in to view your profile.{' '}
+          <a href="/login">Sign in</a>
+        </p>
+      </div>
+    );
+  }
 
   if (!user || !profile) return null;
 

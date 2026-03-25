@@ -15,8 +15,11 @@ class Event < ApplicationRecord
   scope :movement, -> { where(city_key: "movement") }
   scope :mmw,      -> { where(city_key: "mmw") }
 
-  # Index / public lists: hide events whose end (or start if no end) is in the past.
-  scope :not_past, -> { where("COALESCE(events.end_time, events.start_time) > ?", Time.current) }
+  # Index / public lists: hide only after a short grace past end (or start if no end).
+  GRACE_AFTER_SCHEDULE_END = 2.hours
+  scope :not_past, lambda {
+    where("COALESCE(events.end_time, events.start_time) > ?", GRACE_AFTER_SCHEDULE_END.ago)
+  }
 
   rails_admin do
     list do

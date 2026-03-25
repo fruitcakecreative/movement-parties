@@ -20,7 +20,7 @@ Rails.application.configure do
   # Enable server timing.
   config.server_timing = true
 
-  config.middleware.use Rack::Attack
+  # Rack::Attack is added once in config/application.rb (do not duplicate — triple stacking breaks throttles).
 
   # Enable/disable caching. By default caching is disabled.
   # Run rails dev:cache to toggle caching.
