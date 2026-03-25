@@ -12,6 +12,9 @@ const api = axios.create({
   },
 });
 
+/** True when the server rejected the session (vs network, 429, 5xx). */
+export const isUnauthorized = (err) => err?.response?.status === 401;
+
 api.interceptors.request.use((config) => {
   config.headers = config.headers || {};
   config.headers["X-City-Key"] = city;     // server supports this

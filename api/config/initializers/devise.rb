@@ -1,6 +1,9 @@
 
 Devise.setup do |config|
 
+  # Ensure Devise controllers use the same CSRF/session stack as the rest of the app.
+  config.parent_controller = "ApplicationController"
+
   config.mailer_sender = 'please-change-me-at-config-initializers-devise@example.com'
 
   require 'devise/orm/active_record'
@@ -22,6 +25,8 @@ Devise.setup do |config|
 
 
   config.expire_all_remember_me_on_sign_out = true
+
+  config.remember_for = 2.weeks
 
 
   config.password_length = 6..128

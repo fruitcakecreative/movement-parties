@@ -17,7 +17,9 @@ module MovementParties
     config.middleware.use ActionDispatch::Session::CookieStore,
       key: "_movement_parties_session",
       same_site: Rails.env.production? ? :none : :lax,
-      secure: Rails.env.production?
+      secure: Rails.env.production?,
+      # Default Rails session cookie is "until browser closes"; persist so reloads/tabs stay signed in.
+      expire_after: 14.days
 
     config.autoload_lib(ignore: %w[assets])
   end

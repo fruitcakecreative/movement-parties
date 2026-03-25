@@ -5,7 +5,8 @@ import MiniProgramBox from "../timeline/components/MiniProgramBox";
 
 import { userLogout,
         fetchUserInfo,
-        fetchUserEvents } from "../services/api";
+        fetchUserEvents,
+        isUnauthorized } from "../services/api";
 
 function Profile() {
   const [user, setUser] = useState(null);
@@ -29,8 +30,8 @@ function Profile() {
       .then((data) => {
         setUser(data);
       })
-      .catch(() => {
-        window.location.href = "/login";
+      .catch((err) => {
+        if (isUnauthorized(err)) window.location.href = "/login";
       });
   }, []);
 

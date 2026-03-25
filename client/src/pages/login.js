@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { userLogin } from "../services/api";
-import { fetchUserInfo } from "../services/api";
+import { userLogin, fetchUserInfo } from "../services/api";
 import FacebookLoginButton from "../components/auth/FacebookLoginButton"
 
 function Login() {

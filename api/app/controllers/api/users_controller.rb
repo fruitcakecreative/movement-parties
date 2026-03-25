@@ -22,7 +22,7 @@ class Api::UsersController < ApplicationController
      @user.username = @user.email if @user.username.blank?
 
     if @user.save
-      sign_in(:user, @user)
+      sign_in(:user, @user, remember: true)
       warden.set_user(@user, scope: :user, store: true)
       Rails.logger.debug "SIGNED IN USER: #{current_user&.email}"
       Rails.logger.debug "SESSION AFTER SIGN IN: #{session.to_hash.inspect}"

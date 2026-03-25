@@ -6,7 +6,8 @@ class Rack::Attack
     req.user_agent =~ /curl|httpie|Postman/i
   end
 
-  throttle('req/ip', limit: 60, period: 60.seconds) do |req|
+  # Dev SPA + HMR can burst /api calls; 429 looks like "logged out" if the client treats any error as 401.
+  throttle('req/ip', limit: (Rails.env.development? ? 600 : 120), period: 60.seconds) do |req|
     req.ip if req.path.start_with?("/api/")
   end
 

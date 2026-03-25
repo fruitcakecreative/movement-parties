@@ -146,7 +146,8 @@ namespace :import do
       skip_urls = [
         "https://dice.fm/event/your-url-here",
         "https://dice.fm/event/another-url-here",
-        "https://dice.fm/event/dkqbaq-where-are-my-keys-mmw-by-unmute-pickle-27th-mar-94th-aero-squadron-miami-tickets"
+        "https://dice.fm/event/dkqbaq-where-are-my-keys-mmw-by-unmute-pickle-27th-mar-94th-aero-squadron-miami-tickets",
+        "https://edmtrain.com/miami-fl/adam-collins-mazin-486825?utm_source=2360&utm_medium=api"
       ]
 
       events.each_with_index do |event_data, index|

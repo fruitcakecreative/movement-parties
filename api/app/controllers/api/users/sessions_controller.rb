@@ -5,12 +5,13 @@ include ActionController::MimeResponds
 class Api::Users::SessionsController < Devise::SessionsController
   include ActionController::RequestForgeryProtection
   protect_from_forgery with: :exception
-  skip_before_action :verify_authenticity_token, if: -> { Rails.env.development? }
+  # JSON API + SPA (cookies via CORS); same as ApplicationController for /api
+  skip_before_action :verify_authenticity_token, if: -> { request.path.start_with?("/api") }
   respond_to :json
 
   def create
     self.resource = warden.authenticate!(auth_options)
-    sign_in(resource_name, resource)
+    sign_in(resource_name, resource, remember: true)
 
     render json: {
       user: {
