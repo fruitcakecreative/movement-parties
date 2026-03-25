@@ -7,6 +7,9 @@ class Api::Users::SessionsController < Devise::SessionsController
   protect_from_forgery with: :exception
   # JSON API + SPA (cookies via CORS); same as ApplicationController for /api
   skip_before_action :verify_authenticity_token, if: -> { request.path.start_with?("/api") }
+  # Devise default runs verify_signed_out_user + respond_to_on_destroy (HTML/redirect oriented);
+  # it can mis-handle JSON and stall or double-render. We handle all cases in #destroy.
+  skip_before_action :verify_signed_out_user, only: :destroy
   respond_to :json
 
   def create

@@ -6,6 +6,7 @@ const city = process.env.REACT_APP_CITY_KEY;
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
+  timeout: 25_000,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
@@ -43,9 +44,15 @@ export const userLogin = async (credentials) => {
 };
 
 export const userLogout = async () => {
-  await api.delete('/logout');
-  localStorage.removeItem('user');
-  window.location.href = '/login';
+  try {
+    // DELETE /logout must finish before navigate or the browser may cancel the request.
+    await api.delete('/logout', { timeout: 12_000 });
+  } catch (e) {
+    console.warn('Logout request failed or timed out; clearing client anyway.', e);
+  } finally {
+    localStorage.removeItem('user');
+    window.location.href = '/login';
+  }
 };
 
 //attending/interested event buttons
