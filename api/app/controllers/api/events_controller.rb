@@ -30,12 +30,15 @@ class Api::EventsController < ApplicationController
            )
     end
 
+    past_count = Event.where(city_key: city).past_for_list.count
+
     Rails.logger.info("[RAILS] Completed Api::EventsController#index city=#{city} events=#{events.length} in #{(Time.now - request.env["action_dispatch.request_start_time"]) * 1000}ms")
     render json: {
       events: events,
       meta: {
         last_updated: Event.where(city_key: city).maximum(:updated_at),
-        total_count: events.size
+        total_count: events.size,
+        past_count: past_count
       }
     }
   end

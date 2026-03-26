@@ -20,7 +20,11 @@ import { createEpg } from '../timeline/data/buildEpg';
 
 import useEventsData from '../hooks/useEventsData';
 import useEventFilters from '../hooks/useEventFilters';
-import { formatFestivalDayLong, getActiveTimelineDateKeys } from '../utils/timelineSchedule';
+import {
+  formatFestivalDayLong,
+  formatFestivalDayShort,
+  getActiveTimelineDateKeys,
+} from '../utils/timelineSchedule';
 
 const cfg = await loadCityConfig();
 const customDateRanges = cfg.customDateRanges;
@@ -146,7 +150,19 @@ function Events() {
     locationOptions,
     lastUpdated,
     totalCount,
+    pastEventsCount,
   } = useEventsData({ dates: activeDates, customDateRanges, timeZone: timelineTimeZone });
+
+  const eventsByDayStats = useMemo(
+    () =>
+      activeDates.map((dateKey, i) => ({
+        dayNumber: i + 1,
+        dateKey,
+        label: formatFestivalDayShort(dateKey, timelineTimeZone),
+        count: (eventsByDate[dateKey] || []).length,
+      })),
+    [activeDates, eventsByDate]
+  );
 
   const {
     selectedDate,
@@ -170,7 +186,13 @@ function Events() {
     <div className={`events-page ${(selectedEventId || selectedVenueId) ? 'has-selected-event' : ''}`}>
       <div ref={mainScrollRef} className="events-page__main">
         <MainHeader />
-        <EventsIntro lastUpdated={lastUpdated} totalCount={totalCount} isLoaded={isLoaded} />
+        <EventsIntro
+          lastUpdated={lastUpdated}
+          totalCount={totalCount}
+          pastEventsCount={pastEventsCount}
+          eventsByDayStats={eventsByDayStats}
+          isLoaded={isLoaded}
+        />
 
         <div className="section timeline-con">
           <div className="container">

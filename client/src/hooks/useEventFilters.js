@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { expandGenreSelections, eventMatchesGenreFilter } from '../utils/genreGroups';
 
 const defaultFilters = {
   genre: [],
@@ -36,9 +37,8 @@ function useEventFilters({ eventsByDate, activeDates = [] }) {
     let dayEvents = eventsByDate[date] || [];
 
     if (filterSelections.genre.length > 0) {
-      dayEvents = dayEvents.filter((event) =>
-        (event.genres || []).some((g) => filterSelections.genre.includes(g.name))
-      );
+      const expanded = expandGenreSelections(filterSelections.genre);
+      dayEvents = dayEvents.filter((event) => eventMatchesGenreFilter(event, expanded));
     }
 
     if (filterSelections.cost.length > 0) {

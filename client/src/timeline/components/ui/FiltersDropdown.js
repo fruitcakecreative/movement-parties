@@ -1,4 +1,11 @@
 import { Disclosure } from '@headlessui/react';
+import {
+  GENRE_GROUPS,
+  canonicalGenreOptionName,
+  isGenreInAnyGroup,
+  normalizeGenreName,
+  parentGenreToken,
+} from '../../../utils/genreGroups';
 
 const costOptions = ['Free', 'Under $20', 'Under $50'];
 const ageOptions = ['All Ages', '18+', '21+'];
@@ -170,20 +177,81 @@ const FiltersDropdown = ({
                     </Disclosure.Button>
 
                     <Disclosure.Panel className="option-item-wrapper">
-                      {genreOptions.map((g) => (
-                        <div
-                          key={g}
-                          className="option-item genre"
-                          onClick={() => toggle('genre', g)}
-                        >
-                          <input
-                            type="checkbox"
-                            readOnly
-                            checked={selected.genre?.includes(g)}
-                          />
-                          {g}
-                        </div>
-                      ))}
+                      {GENRE_GROUPS.map((group) => {
+                        const parentVal = parentGenreToken(group.id);
+                        const seenChild = new Set();
+                        const childrenInData = [];
+                        for (const m of group.members) {
+                          const name = canonicalGenreOptionName(m, genreOptions);
+                          const k = normalizeGenreName(name);
+                          if (seenChild.has(k)) continue;
+                          if (
+                            !genreOptions.some(
+                              (opt) => normalizeGenreName(opt) === k
+                            )
+                          ) {
+                            continue;
+                          }
+                          seenChild.add(k);
+                          childrenInData.push(name);
+                        }
+
+                        return (
+                          <div key={group.id} className="genre-group-block mb-sm">
+                            <div
+                              className="option-item genre genre-group-parent"
+                              onClick={() => toggle('genre', parentVal)}
+                            >
+                              <input
+                                type="checkbox"
+                                readOnly
+                                checked={selected.genre?.includes(parentVal)}
+                              />
+                              <span>{group.label}</span>
+                            </div>
+                            {childrenInData.length > 0 && (
+                              <div className="genre-group-children">
+                                {childrenInData.map((g) => (
+                                  <div
+                                    key={g}
+                                    className="option-item genre"
+                                    onClick={() => toggle('genre', g)}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      readOnly
+                                      checked={selected.genre?.includes(g)}
+                                    />
+                                    {g}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+
+                      {genreOptions.filter((g) => !isGenreInAnyGroup(g)).length > 0 && (
+                        <>
+                          <div className="option-item bold genre mt-sm">Other genres</div>
+                          {genreOptions
+                            .filter((g) => !isGenreInAnyGroup(g))
+                            .map((g) => (
+                              <div
+                                key={g}
+                                className="option-item genre"
+                                onClick={() => toggle('genre', g)}
+                              >
+                                <input
+                                  type="checkbox"
+                                  readOnly
+                                  checked={selected.genre?.includes(g)}
+                                />
+                                {g}
+                              </div>
+                            ))}
+                        </>
+                      )}
                     </Disclosure.Panel>
                   </>
                 )}

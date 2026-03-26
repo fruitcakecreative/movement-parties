@@ -9,6 +9,7 @@ function useEventsData({ dates, customDateRanges, timeZone = 'America/New_York' 
   const [allEvents, setAllEvents] = useState([]);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [totalCount, setTotalCount] = useState(0);
+  const [pastEventsCount, setPastEventsCount] = useState(null);
   const [genreOptions, setGenreOptions] = useState([]);
   const [artistOptions, setArtistOptions] = useState([]);
   const [venueOptions, setVenueOptions] = useState([]);
@@ -26,6 +27,9 @@ function useEventsData({ dates, customDateRanges, timeZone = 'America/New_York' 
         setAllEvents(eventList);
         setLastUpdated(data.meta?.last_updated || null);
         setTotalCount(data.meta?.total_count ?? eventList.length);
+        setPastEventsCount(
+          data.meta?.past_count != null ? data.meta.past_count : null
+        );
 
         setGenreOptions(
           Array.from(
@@ -82,6 +86,7 @@ function useEventsData({ dates, customDateRanges, timeZone = 'America/New_York' 
     locationOptions,
     lastUpdated,
     totalCount,
+    pastEventsCount,
   };
 }
 

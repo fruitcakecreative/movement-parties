@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatGenreFilterLabel } from '../../utils/genreGroups';
 
 function ActiveFilters({
   filterSelections,
@@ -9,13 +10,11 @@ function ActiveFilters({
   if (!hasActiveFilters) return null;
 
   return (
-    <div
-      className="active-filters"
-      style={{ margin: '10px 30px', display: 'flex', flexWrap: 'wrap', gap: '10px' }}
-    >
+    <div className="active-filters">
       {Object.entries(filterSelections).flatMap(([category, values]) =>
         values.map((val) => {
           const key = `${category}-${val}`.replace(/\s+/g, '-').toLowerCase();
+          const label = category === 'genre' ? formatGenreFilterLabel(val) : val;
 
           return (
             <button
@@ -28,7 +27,7 @@ function ActiveFilters({
                 }))
               }
             >
-              {val} <span className="x">&times;</span>
+              {label} <span className="x">&times;</span>
             </button>
           );
         })

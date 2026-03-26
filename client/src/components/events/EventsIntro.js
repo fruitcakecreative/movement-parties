@@ -1,20 +1,55 @@
 import React from 'react';
 
-function EventsIntro({ lastUpdated, totalCount, isLoaded }) {
+function EventsIntro({
+  lastUpdated,
+  totalCount,
+  pastEventsCount,
+  eventsByDayStats = [],
+  isLoaded,
+}) {
+  const showMeta =
+    isLoaded &&
+    (lastUpdated != null ||
+      totalCount != null ||
+      pastEventsCount != null ||
+      (eventsByDayStats && eventsByDayStats.length > 0));
+
   return (
     <div className="section info-con">
       <div className="container">
-        {isLoaded && (lastUpdated != null || totalCount != null) && (
+        {showMeta && (
           <div className="events-meta mb-sm" style={{ opacity: 0.9, fontSize: '0.9rem' }}>
             {lastUpdated && (
-              <p><span>Last update:</span> {new Date(lastUpdated).toLocaleString('en-US', {
-                dateStyle: 'medium',
-                timeStyle: 'short'
-              })}</p>
+              <p>
+                <span>Last update:</span>{' '}
+                {new Date(lastUpdated).toLocaleString('en-US', {
+                  dateStyle: 'medium',
+                  timeStyle: 'short',
+                })}
+              </p>
             )}
-            {lastUpdated && totalCount != null && ' '}
+            {pastEventsCount != null && (
+              <p>
+                <span>Past events (archived):</span> {pastEventsCount}
+              </p>
+            )}
             {totalCount != null && (
-              <p><span>Total events:</span> {totalCount}</p>
+              <p>
+                <span>Future events:</span> {totalCount}
+              </p>
+            )}
+            {eventsByDayStats.length > 0 && (
+              <div className="events-meta-by-day mt-xs">
+                <ul
+                  style={{
+                    margin: 0,
+                    paddingLeft: '1.1rem',
+                    listStyle: 'disc',
+                    textAlign: 'left',
+                  }}
+                >
+                </ul>
+              </div>
             )}
           </div>
         )}
@@ -23,7 +58,7 @@ function EventsIntro({ lastUpdated, totalCount, isLoaded }) {
         </h3>
         <ul>
           <li>
-            The site scrapes basic event data from RA. All other events + specific event info that
+            The site scrapes basic event data from various major platforms. All other events + specific event info that
             isn&apos;t scrapable is manually updated by me.
             <b>
               {' '}
