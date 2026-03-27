@@ -222,6 +222,9 @@
         align-items: flex-start !important;
         font-weight: 600;
         line-height: 1.25;
+        background-color: var(--color-bg-light);
+        border-radius: var(--radius-button);
+        padding: 3px 10px;
 
         span {
           flex: 1;

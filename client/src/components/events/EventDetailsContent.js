@@ -2,7 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import { getEventDisplayData } from '../../utils/eventDisplay';
 import { formatDescription } from '../../utils/formatDescription';
 
-function EventDetailsContent({ event, onClose, openVenue, fromVenueId, onBackToVenue }) {
+function EventDetailsContent({
+  event,
+  onClose,
+  openVenue,
+  fromVenueId,
+  onBackToVenue,
+  timeZone = 'America/New_York',
+}) {
   const contentRef = useRef(null);
   const [showFullDescription, setShowFullDescription] = useState(false);
 
@@ -49,7 +56,8 @@ function EventDetailsContent({ event, onClose, openVenue, fromVenueId, onBackToV
     description,
     actionButtons,
     ticketSaleMessage,
-  } = getEventDisplayData(event);
+    lateNightActuallyWeekday,
+  } = getEventDisplayData(event, { timeZone });
 
 
   const plainDescription = stripHtml(description || '');
@@ -97,6 +105,12 @@ function EventDetailsContent({ event, onClose, openVenue, fromVenueId, onBackToV
             <p className="event-time">
               <i className="fa-solid fa-clock"></i>&nbsp;
               {timeLabel}
+              {lateNightActuallyWeekday && (
+                <span className="italic late-night-inline">
+                  {' '}
+                  (actually {lateNightActuallyWeekday})
+                </span>
+              )}
             </p>
           )}
         </div>

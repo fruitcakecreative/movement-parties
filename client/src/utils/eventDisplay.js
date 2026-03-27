@@ -1,3 +1,5 @@
+import { getLateNightActuallyWeekday } from './timelineSchedule';
+
 export const formatTime = (timeStr) => {
   if (!timeStr) return '';
 
@@ -37,7 +39,12 @@ export const getPreferredGenre = (genres = []) =>
 
 export const getEventDisplayData = (
   event = {},
-  { isMobile = false, isShortMobileEvent = false, isShortEvent = false } = {}
+  {
+    isMobile = false,
+    isShortMobileEvent = false,
+    isShortEvent = false,
+    timeZone = 'America/New_York',
+  } = {}
 ) => {
   const {
     title,
@@ -73,9 +80,11 @@ export const getEventDisplayData = (
     if (current === total) resolvedTicketTier = '– Final release';
   }
 
+  const startRaw = event.formatted_start_time || start_time;
   const displayStartTime = formatTime(start_time);
   const displayEndTime = formatTime(end_time);
   const dateLabel = formatDate(start_time);
+  const lateNightActuallyWeekday = getLateNightActuallyWeekday(startRaw, timeZone);
 
   const timeLabel =
     displayStartTime && displayEndTime
@@ -192,6 +201,7 @@ export const getEventDisplayData = (
     fullTitle: title,
     dateLabel,
     timeLabel,
+    lateNightActuallyWeekday,
     displayStartTime,
     displayEndTime,
     compactStartTime,

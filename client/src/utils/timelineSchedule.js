@@ -20,6 +20,23 @@ export function parseEventInstant(isoStr, timeZone = 'America/New_York') {
   return DateTime.fromISO(s, { zone: timeZone });
 }
 
+/** Inclusive: 12:01am through 3:30am (festival wall clock). Excludes exactly midnight. */
+const LATE_NIGHT_END_MINUTE = 3 * 60 + 30;
+
+/**
+ * After-midnight starts (12:01am–3:30am festival time): previous calendar day's weekday
+ * for inline copy (e.g. "actually thursday" next to the time). Null if outside the window.
+ */
+export function getLateNightActuallyWeekday(rawStartIso, timeZone = 'America/New_York') {
+  const dt = parseEventInstant(rawStartIso || '', timeZone);
+  if (!dt.isValid) return null;
+  const zoned = dt.setZone(timeZone);
+  const totalMin = zoned.hour * 60 + zoned.minute;
+  if (totalMin < 1 || totalMin > LATE_NIGHT_END_MINUTE) return null;
+
+  return zoned.minus({ days: 1 }).setLocale('en-US').toFormat('cccc').toLowerCase();
+}
+
 /**
  * Parse config strings like "2026-03-25T10:00:00" (no Z) as wall-clock time in the
  * festival timezone. Uses Luxon so behavior matches across browsers (Intl-only parsers

@@ -1,17 +1,18 @@
 import React from 'react';
 import { getEventDisplayData } from '../utils/eventDisplay';
 
-function EventCard({ event, onClick }) {
+function EventCard({ event, onClick, timeZone = 'America/New_York' }) {
   const {
     displayTitle,
     timeLabel,
+    lateNightActuallyWeekday,
     ticketLabel,
     ticketTier,
     visibleGenres,
     displayArtists,
     cardBg,
     cardFont,
-  } = getEventDisplayData(event);
+  } = getEventDisplayData(event, { timeZone });
 
   return (
     <button
@@ -31,6 +32,12 @@ function EventCard({ event, onClick }) {
           <p className="event-card-time">
             <i className="fa-solid fa-clock"></i>&nbsp;
             {timeLabel}
+            {lateNightActuallyWeekday && (
+              <span className="late-night-inline">
+                {' '}
+                actually {lateNightActuallyWeekday}
+              </span>
+            )}
           </p>
         )}
 

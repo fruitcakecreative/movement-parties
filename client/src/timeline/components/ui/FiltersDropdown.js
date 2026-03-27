@@ -1,11 +1,16 @@
 import { Disclosure } from '@headlessui/react';
 import {
   GENRE_GROUPS,
+  GENRE_PARENT_PREFIX,
   canonicalGenreOptionName,
   isGenreInAnyGroup,
   normalizeGenreName,
   parentGenreToken,
 } from '../../../utils/genreGroups';
+
+function isParentGenreValue(v) {
+  return typeof v === 'string' && v.startsWith(GENRE_PARENT_PREFIX);
+}
 
 const costOptions = ['Free', 'Under $20', 'Under $50'];
 const ageOptions = ['All Ages', '18+', '21+'];
@@ -43,6 +48,62 @@ const FiltersDropdown = ({
         ? prev[category].filter((v) => v !== value)
         : [...(prev[category] || []), value],
     }));
+  };
+
+  const toggleGenreParent = (parentVal, childrenInData) => {
+    const exists = selected.genre?.includes(parentVal);
+    setSelected((prev) => {
+      const prevGenre = prev.genre || [];
+      if (exists) {
+        return { ...prev, genre: prevGenre.filter((v) => v !== parentVal) };
+      }
+      const childKeys = new Set(childrenInData.map((n) => normalizeGenreName(n)));
+      const withoutRedundantChildren = prevGenre.filter(
+        (v) => isParentGenreValue(v) || !childKeys.has(normalizeGenreName(v))
+      );
+      return { ...prev, genre: [...withoutRedundantChildren, parentVal] };
+    });
+  };
+
+  const toggleGenreChild = (parentVal, childrenInData, childName) => {
+    const parentOn = selected.genre?.includes(parentVal);
+    setSelected((prev) => {
+      const prevGenre = prev.genre || [];
+      if (parentOn) {
+        const next = prevGenre.filter((v) => v !== parentVal);
+        const next2 = next.filter(
+          (v) =>
+            isParentGenreValue(v) ||
+            normalizeGenreName(v) !== normalizeGenreName(childName)
+        );
+        const normInNext = new Set(
+          next2.map((v) =>
+            isParentGenreValue(v) ? v : normalizeGenreName(v)
+          )
+        );
+        const toAdd = childrenInData.filter(
+          (n) =>
+            normalizeGenreName(n) !== normalizeGenreName(childName) &&
+            !normInNext.has(normalizeGenreName(n))
+        );
+        return { ...prev, genre: [...next2, ...toAdd] };
+      }
+      const exists = prevGenre.some(
+        (v) =>
+          !isParentGenreValue(v) &&
+          normalizeGenreName(v) === normalizeGenreName(childName)
+      );
+      return {
+        ...prev,
+        genre: exists
+          ? prevGenre.filter(
+              (v) =>
+                isParentGenreValue(v) ||
+                normalizeGenreName(v) !== normalizeGenreName(childName)
+            )
+          : [...prevGenre, childName],
+      };
+    });
   };
 
   return (
@@ -196,35 +257,47 @@ const FiltersDropdown = ({
                           childrenInData.push(name);
                         }
 
+                        const parentOn = selected.genre?.includes(parentVal);
+
                         return (
                           <div key={group.id} className="genre-group-block mb-sm">
                             <div
                               className="option-item genre genre-group-parent"
-                              onClick={() => toggle('genre', parentVal)}
+                              onClick={() => toggleGenreParent(parentVal, childrenInData)}
                             >
                               <input
                                 type="checkbox"
                                 readOnly
-                                checked={selected.genre?.includes(parentVal)}
+                                checked={parentOn}
                               />
                               <span>{group.label}</span>
                             </div>
                             {childrenInData.length > 0 && (
                               <div className="genre-group-children">
-                                {childrenInData.map((g) => (
-                                  <div
-                                    key={g}
-                                    className="option-item genre"
-                                    onClick={() => toggle('genre', g)}
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      readOnly
-                                      checked={selected.genre?.includes(g)}
-                                    />
-                                    {g}
-                                  </div>
-                                ))}
+                                {childrenInData.map((g) => {
+                                  const childExplicit = selected.genre?.some(
+                                    (v) =>
+                                      !isParentGenreValue(v) &&
+                                      normalizeGenreName(v) === normalizeGenreName(g)
+                                  );
+                                  const childChecked = parentOn || childExplicit;
+                                  return (
+                                    <div
+                                      key={g}
+                                      className="option-item genre"
+                                      onClick={() =>
+                                        toggleGenreChild(parentVal, childrenInData, g)
+                                      }
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        readOnly
+                                        checked={childChecked}
+                                      />
+                                      {g}
+                                    </div>
+                                  );
+                                })}
                               </div>
                             )}
                           </div>

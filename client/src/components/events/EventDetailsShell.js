@@ -11,6 +11,7 @@ function EventDetailsShell({
   openVenue,
   fromVenueId,
   onBackToVenue,
+  timeZone = 'America/New_York',
 }) {
   const selectedEvent = useMemo(() => {
     return (allEvents || []).find(
@@ -30,6 +31,7 @@ function EventDetailsShell({
       openVenue={openVenue}
       fromVenueId={fromVenueId}
       onBackToVenue={onBackToVenue}
+      timeZone={timeZone}
       />
     </DetailsShell>
   );

@@ -87,6 +87,9 @@ const MultiDayTimeline = ({
 
   const hasAutoScrolledRef = useRef(false);
 
+  /** Pixels left of viewport edge where we want the current-time line after initial scroll. */
+  const NOW_LINE_INSET_PX = 72;
+
   useEffect(() => {
     const timeout = setTimeout(() => {
       const cornerWrapper = document.querySelector(`.corner-wrapper-${date}`);
@@ -111,16 +114,32 @@ const MultiDayTimeline = ({
     if (epg.length === 0) return;
     if (hasAutoScrolledRef.current) return;
 
-    const firstStart = new Date(Math.min(...epg.map((e) => new Date(e.since))));
-    const timelineContainer = document.querySelector('#planby-layout-scrollbox');
+    const cornerWrapper = document.querySelector(`.corner-wrapper-${date}`);
+    const timelineContainer = cornerWrapper?.querySelector('#planby-layout-scrollbox');
+    if (!timelineContainer) return;
 
-    if (timelineContainer) {
-      const hoursFromStart = (firstStart - new Date(startDate)) / (1000 * 60 * 60);
-      const nextScrollX = hoursFromStart * hourWidth;
-      timelineContainer.scrollTo({ left: nextScrollX, behavior: 'auto' });
-      hasAutoScrolledRef.current = true;
+    const startMs = new Date(startDate).getTime();
+    const endMs = new Date(endDate).getTime();
+    const nowMs = Date.now();
+    const inWindow = nowMs >= startMs && nowMs <= endMs;
+
+    let nextScrollX;
+    if (inWindow) {
+      const hoursFromStart = (nowMs - startMs) / (1000 * 60 * 60);
+      const xNow = hoursFromStart * hourWidth;
+      const inset = Math.min(NOW_LINE_INSET_PX, Math.max(0, timelineContainer.clientWidth * 0.12));
+      nextScrollX = xNow - inset;
+    } else {
+      const firstStart = new Date(Math.min(...epg.map((e) => new Date(e.since))));
+      const hoursFromStart = (firstStart - startMs) / (1000 * 60 * 60);
+      nextScrollX = hoursFromStart * hourWidth;
     }
-  }, [epg, startDate, hourWidth]);
+
+    const maxScroll = Math.max(0, timelineContainer.scrollWidth - timelineContainer.clientWidth);
+    const clamped = Math.max(0, Math.min(nextScrollX, maxScroll));
+    timelineContainer.scrollTo({ left: clamped, behavior: 'auto' });
+    hasAutoScrolledRef.current = true;
+  }, [epg, startDate, endDate, hourWidth, date]);
 
   useEffect(() => {
     hasAutoScrolledRef.current = false;

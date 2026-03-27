@@ -2,7 +2,15 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import EventCard from '../EventCard';
 import { formatDescription } from '../../utils/formatDescription';
 
-function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent, fromEventId, onBackToEvent }) {
+function VenueDetailsContent({
+  venue,
+  venueEvents = [],
+  onClose,
+  openEvent,
+  fromEventId,
+  onBackToEvent,
+  timeZone = 'America/New_York',
+}) {
   const contentRef = useRef(null);
     const [showFullDescription, setShowFullDescription] = useState(false);
 
@@ -238,6 +246,7 @@ function VenueDetailsContent({ venue, venueEvents = [], onClose, openEvent, from
                         <EventCard
                           key={event.id}
                           event={event}
+                          timeZone={timeZone}
                           onClick={() => openEvent?.(event.id, venue?.id)}
                         />
                       ))}

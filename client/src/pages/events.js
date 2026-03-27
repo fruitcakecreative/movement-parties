@@ -278,6 +278,7 @@ function Events() {
         openVenue={openVenue}
         fromVenueId={fromVenueId}
         onBackToVenue={goBackToVenue}
+        timeZone={timelineTimeZone}
       />
       <VenueDetailsShell
         venueId={selectedVenueId}
@@ -288,6 +289,7 @@ function Events() {
         openEvent={openEvent}
         fromEventId={fromEventId}
         onBackToEvent={goBackToEvent}
+        timeZone={timelineTimeZone}
       />
     </div>
   );
