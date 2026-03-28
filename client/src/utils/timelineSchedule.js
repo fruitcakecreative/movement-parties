@@ -1,8 +1,5 @@
 import { DateTime } from 'luxon';
 
-/** Same as `Event::GRACE_AFTER_SCHEDULE_END` — keep schedule rows / filters aligned with the API. */
-export const GRACE_AFTER_SCHEDULE_END_MS = 2 * 60 * 60 * 1000;
-
 function isoStringHasExplicitZone(isoLike) {
   const s = String(isoLike).trim();
   return /[zZ]$|[+-]\d{2}:\d{2}$|[+-]\d{4}$/.test(s);
@@ -49,8 +46,9 @@ export function parseRangeEndMs(isoLocal, timeZone) {
 }
 
 /**
- * Festival day rows to show. Stays visible until GRACE after the window `end` (matches API + not_past),
- * so the timeline does not vanish the moment the config end passes while events are still in the list.
+ * Festival day rows to show: only while `now` is still before that row's configured `end` in the
+ * festival zone (no extra grace — once the schedule says 10am, the row drops after 10am).
+ * API `not_past` still uses its own grace for which events are returned.
  */
 export function getActiveTimelineDateKeys(customDateRanges, timeZone = 'America/New_York') {
   if (!customDateRanges) return [];
@@ -60,7 +58,7 @@ export function getActiveTimelineDateKeys(customDateRanges, timeZone = 'America/
     if (!end) return true;
     const endMs = parseRangeEndMs(end, timeZone);
     if (Number.isNaN(endMs)) return false;
-    return endMs + GRACE_AFTER_SCHEDULE_END_MS > now;
+    return endMs > now;
   });
 }
 
