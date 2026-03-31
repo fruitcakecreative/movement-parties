@@ -159,7 +159,52 @@ end
     end
   end
 
- config.model 'ArtistEvent' do
+  config.model 'Artist' do
+    list do
+      sort_by :name
+      field :id
+      field :name
+      field :city
+      field :genre
+      field :pronouns
+      field :ra_followers
+    end
+
+    edit do
+      field :name
+      field :pronouns
+      field :city
+      field :genre
+      field :genre_list, :text do
+        help "Comma-separated genres (profile / promo; separate from primary Genre above)"
+      end
+      field :social, :text do
+        help "Social links or handles — one per line (Instagram, SoundCloud, etc.)"
+      end
+      field :tags, :text do
+        help "Comma-separated tags"
+      end
+      field :description, :text
+      field :ra_followers
+    end
+
+    show do
+      field :id
+      field :name
+      field :pronouns
+      field :city
+      field :genre
+      field :genre_list
+      field :social
+      field :tags
+      field :description
+      field :ra_followers
+      field :created_at
+      field :updated_at
+    end
+  end
+
+  config.model 'ArtistEvent' do
   edit do
     field :artist
     field :event
