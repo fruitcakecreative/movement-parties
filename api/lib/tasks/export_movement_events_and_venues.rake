@@ -32,12 +32,30 @@ module MovementCsvExport
 end
 
 namespace :export do
-  desc "CSV: Movement events (city_key = movement) — id, title, venue, description, age. FILE=path optional."
+  desc "CSV: Movement events (city_key = movement) — full ticketing + metadata columns. FILE=path optional."
   task movement_events: :environment do
-    headers = %w[id title venue description age]
-    scope = Event.where(city_key: "movement").includes(:venue).order(:id)
+    headers = %w[
+      id title description ticket_url ticket_price ticket_tier free_event food_available
+      indoor_outdoor age promoter manual_artist_names event_image_url dice_url
+    ]
+    scope = Event.where(city_key: "movement").order(:id)
     row = lambda do |e|
-      [e.id, e.title, e.venue&.name, e.description, e.age]
+      [
+        e.id,
+        e.title,
+        e.description,
+        e.ticket_url,
+        e.ticket_price,
+        e.ticket_tier,
+        e.free_event,
+        e.food_available,
+        e.indoor_outdoor,
+        e.age,
+        e.promoter,
+        e.manual_artist_names,
+        e.event_image_url,
+        e.dice_url
+      ]
     end
     MovementCsvExport.write_csv(scope, headers, row, "events")
   end
