@@ -13,6 +13,15 @@ require "csv"
 #
 # Full DB restore from pg_dump / S3 is separate — use pg_restore or psql.
 
+module MovementCsvImport
+  module_function
+
+  # CSV.read returns CSV::Table — .headers is an Array (CSV.open's reader uses headers as a boolean flag).
+  def table(path)
+    CSV.read(path, headers: true, header_converters: :downcase, encoding: "BOM|UTF-8")
+  end
+end
+
 namespace :import do
   desc "Update Movement venues from CSV (same columns as export:movement_venues). FILE= required. DRY_RUN=1 to preview."
   task movement_venues_csv: :environment do
@@ -25,11 +34,11 @@ namespace :import do
     updated = 0
     skipped = 0
 
-    CSV.open(path, "r:BOM|UTF-8", headers: true, header_converters: :downcase) do |csv|
-      missing = expected - csv.headers.map(&:to_s)
-      raise "CSV missing columns: #{missing.join(', ')}" if missing.any?
+    table = MovementCsvImport.table(path)
+    missing = expected - table.headers.map(&:to_s)
+    raise "CSV missing columns: #{missing.join(', ')}" if missing.any?
 
-      csv.each do |row|
+    table.each do |row|
         id = row["id"].to_s.strip
         next if id.blank?
 
@@ -57,7 +66,6 @@ namespace :import do
           venue.update!(attrs)
         end
         updated += 1
-      end
     end
 
     puts dry ? "DRY_RUN: would touch #{updated} venues (#{skipped} skipped)." : "Updated #{updated} venues (#{skipped} skipped)."
@@ -74,11 +82,11 @@ namespace :import do
     updated = 0
     skipped = 0
 
-    CSV.open(path, "r:BOM|UTF-8", headers: true, header_converters: :downcase) do |csv|
-      missing = expected - csv.headers.map(&:to_s)
-      raise "CSV missing columns: #{missing.join(', ')}" if missing.any?
+    table = MovementCsvImport.table(path)
+    missing = expected - table.headers.map(&:to_s)
+    raise "CSV missing columns: #{missing.join(', ')}" if missing.any?
 
-      csv.each do |row|
+    table.each do |row|
         id = row["id"].to_s.strip
         next if id.blank?
 
@@ -117,7 +125,6 @@ namespace :import do
           event.update!(attrs)
         end
         updated += 1
-      end
     end
 
     Event.clear_public_index_cache!("movement") if !dry && updated.positive?
@@ -136,11 +143,11 @@ namespace :import do
     updated = 0
     skipped = 0
 
-    CSV.open(path, "r:BOM|UTF-8", headers: true, header_converters: :downcase) do |csv|
-      missing = expected - csv.headers.map(&:to_s)
-      raise "CSV missing columns: #{missing.join(', ')}" if missing.any?
+    table = MovementCsvImport.table(path)
+    missing = expected - table.headers.map(&:to_s)
+    raise "CSV missing columns: #{missing.join(', ')}" if missing.any?
 
-      csv.each do |row|
+    table.each do |row|
         id = row["id"].to_s.strip
         next if id.blank?
 
@@ -176,7 +183,6 @@ namespace :import do
           artist.update!(attrs)
         end
         updated += 1
-      end
     end
 
     unless dry
