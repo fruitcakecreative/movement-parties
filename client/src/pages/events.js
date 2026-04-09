@@ -47,11 +47,12 @@ function Events() {
     };
   }, []);
 
-  // customDateRanges + timelineTimeZone come from loadCityConfig (module scope); scheduleTick forces recompute when windows end.
+  // customDateRanges, timelineTimeZone, showAllTimelineDays: module scope from loadCityConfig (constant per build).
+  // scheduleTick forces recompute when festival-day windows end.
   const activeDates = useMemo(() => {
     void scheduleTick;
     return getActiveTimelineDateKeys(customDateRanges, timelineTimeZone, showAllTimelineDays);
-  }, [scheduleTick, showAllTimelineDays]);
+  }, [scheduleTick]);
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedEventId = searchParams.get('eventId');
   const selectedVenueId = searchParams.get('venueId');
