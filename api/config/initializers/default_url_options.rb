@@ -1,5 +1,6 @@
-# Default host for URL helpers outside a request (Venue#logo_url, mailers, etc.).
-# Align development with client .env (REACT_APP_API_BASE): usually http://localhost:3000/api
+# Default host for URL helpers outside a request (Venue#logo_url, mailers, RailsAdmin links, etc.).
+# In dev the API runs on 3001 (see Procfile); React is 3000 — wrong port here breaks /admin navigation.
+# Override: ACTIVE_STORAGE_PUBLIC_HOST / ACTIVE_STORAGE_PUBLIC_PORT / ACTIVE_STORAGE_PUBLIC_PROTOCOL
 #
 # Production: set ACTIVE_STORAGE_PUBLIC_HOST if the API is not api.movementparties.com
 # (e.g. Render URL only) so logo URLs in JSON match a host your CDN/browser can reach.
@@ -7,7 +8,7 @@ case Rails.env
 when "development"
   Rails.application.routes.default_url_options = {
     host: ENV.fetch("ACTIVE_STORAGE_PUBLIC_HOST", "localhost"),
-    port: ENV.fetch("ACTIVE_STORAGE_PUBLIC_PORT", 3000).to_i,
+    port: ENV.fetch("ACTIVE_STORAGE_PUBLIC_PORT", 3001).to_i,
     protocol: ENV.fetch("ACTIVE_STORAGE_PUBLIC_PROTOCOL", "http")
   }
 when "staging"

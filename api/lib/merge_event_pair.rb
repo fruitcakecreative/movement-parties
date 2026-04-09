@@ -94,6 +94,6 @@ module MergeEventPair
   def clear_event_caches
     %w[movement mmw].each { |ck| Rails.cache.delete("events-v1:#{ck}") rescue nil }
     %w[movement mmw].each { |ck| Rails.cache.delete("events-v2:#{ck}") rescue nil }
-    %w[movement mmw].each { |ck| Rails.cache.delete("events-v4:#{ck}") rescue nil }
+    %w[movement mmw].each { |ck| Event.clear_public_index_cache!(ck) rescue nil }
   end
 end

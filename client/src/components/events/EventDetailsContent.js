@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
+import ArtistNameLine from '../ArtistNameLine';
 import { getEventDisplayData } from '../../utils/eventDisplay';
+import { artistDetailRowClass, artistIsHePresenting } from '../../utils/pronounDisplay';
 import { formatDescription } from '../../utils/formatDescription';
 
 function EventDetailsContent({
@@ -9,6 +11,7 @@ function EventDetailsContent({
   fromVenueId,
   onBackToVenue,
   timeZone = 'America/New_York',
+  sheTheyForwardTimeline = false,
 }) {
   const contentRef = useRef(null);
   const [showFullDescription, setShowFullDescription] = useState(false);
@@ -66,6 +69,13 @@ function EventDetailsContent({
   const previewDescription = isLongDescription
     ? `${plainDescription.slice(0, previewLength).trim()}...`
     : plainDescription;
+
+  const sortedDisplayArtists = [...displayArtists].sort((a, b) => {
+    const aHe = artistIsHePresenting(a.pronouns);
+    const bHe = artistIsHePresenting(b.pronouns);
+    if (aHe !== bHe) return aHe ? 1 : -1;
+    return (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' });
+  });
 
   return (
     <div
@@ -192,15 +202,20 @@ function EventDetailsContent({
           </div>
         )}
 
-        {displayArtists.length > 0 && (
+        {sortedDisplayArtists.length > 0 && (
           <div className="event-artists mb-xs">
             <p>
               <i className="fa-solid fa-headphones"></i>&nbsp;
               Artists:
             </p>
             <ul>
-              {displayArtists.map((artist, i) => (
-                <li key={artist.id || `${artist.name}-${i}`}>{artist.name}</li>
+              {sortedDisplayArtists.map((artist, i) => (
+                <li
+                  key={artist.id || `${artist.name}-${i}`}
+                  className={artistDetailRowClass(artist.pronouns, sheTheyForwardTimeline)}
+                >
+                  <ArtistNameLine artist={artist} />
+                </li>
               ))}
             </ul>
           </div>

@@ -53,8 +53,6 @@ export const getEventDisplayData = (
     end_time,
     venue = {},
     genres = [],
-    artists = [],
-    top_artists = [],
     ticket_url,
     event_url,
     event_image_url,
@@ -169,8 +167,21 @@ export const getEventDisplayData = (
     }
   }
 
-
-  const displayArtists = top_artists.length > 0 ? top_artists : artists;
+  const artistsList = Array.isArray(event.artists) ? event.artists : [];
+  const topArtistsList = Array.isArray(event.top_artists) ? event.top_artists : [];
+  const pronounsById = Object.fromEntries(
+    artistsList
+      .filter((a) => a && a.id != null)
+      .map((a) => [String(a.id), a.pronouns])
+  );
+  const displayArtists =
+    topArtistsList.length > 0
+      ? topArtistsList.map((a) => {
+          const fromTop = a.pronouns != null && String(a.pronouns).trim() !== '';
+          const merged = fromTop ? a.pronouns : pronounsById[String(a.id)];
+          return merged != null && String(merged).trim() !== '' ? { ...a, pronouns: merged } : { ...a };
+        })
+      : artistsList;
 
   const preferredGenre = getPreferredGenre(genres);
 

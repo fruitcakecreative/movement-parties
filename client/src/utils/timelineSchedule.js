@@ -49,11 +49,22 @@ export function parseRangeEndMs(isoLocal, timeZone) {
  * Festival day rows to show: only while `now` is still before that row's configured `end` in the
  * festival zone (no extra grace — once the schedule says 10am, the row drops after 10am).
  * API `not_past` still uses its own grace for which events are returned.
+ *
+ * When `showAllDays` is true (e.g. `showAllTimelineDays` in city config), every configured day
+ * is shown in chronological order — for archive / post-festival browsing.
  */
-export function getActiveTimelineDateKeys(customDateRanges, timeZone = 'America/New_York') {
+export function getActiveTimelineDateKeys(
+  customDateRanges,
+  timeZone = 'America/New_York',
+  showAllDays = false
+) {
   if (!customDateRanges) return [];
+  const keys = Object.keys(customDateRanges);
+  if (showAllDays) {
+    return keys.sort();
+  }
   const now = Date.now();
-  return Object.keys(customDateRanges).filter((key) => {
+  return keys.filter((key) => {
     const end = customDateRanges[key]?.end;
     if (!end) return true;
     const endMs = parseRangeEndMs(end, timeZone);

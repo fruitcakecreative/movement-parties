@@ -37,6 +37,7 @@ const MultiDayTimeline = ({
   openEvent,
   openVenue,
   timeZone = 'America/New_York',
+  sheTheyForwardTimeline = false,
 }) => {
   const [dimensions, setDimensions] = useState({
     isMobile: window.innerWidth < 768,
@@ -177,6 +178,7 @@ const MultiDayTimeline = ({
               }}
               scrollLeft={scrollX}
               openEvent={openEvent}
+              sheTheyForwardTimeline={sheTheyForwardTimeline}
               {...rest}
             />
           )}

@@ -420,8 +420,8 @@ namespace :db do
     end
 
     unless dry_run
-      Rails.cache.delete("events-v4:#{city}")
-      puts "Cleared Rails cache events-v4:#{city}"
+      Event.clear_public_index_cache!(city)
+      puts "Cleared Rails events index cache for #{city}"
     end
 
     puts "\nSummary: relinked=#{relinked} no_duplicate_found=#{no_match} dry_run=#{dry_run}"
@@ -567,11 +567,11 @@ namespace :db do
 
     unless dry_run
       if match_by == "image_filename"
-        cities_for_image_filename.each { |ck| Rails.cache.delete("events-v4:#{ck}") }
-        puts "Cleared Rails cache events-v4 for: #{cities_for_image_filename.join(', ')}"
+        cities_for_image_filename.each { |ck| Event.clear_public_index_cache!(ck) }
+        puts "Cleared Rails events index cache for: #{cities_for_image_filename.join(', ')}"
       else
-        Rails.cache.delete("events-v4:#{city}")
-        puts "Cleared Rails cache events-v4:#{city}"
+        Event.clear_public_index_cache!(city)
+        puts "Cleared Rails events index cache for #{city}"
       end
     end
 

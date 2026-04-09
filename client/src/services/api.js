@@ -24,9 +24,11 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-//get all events
-export const fetchEvents = async () => {
-  const response = await api.get('/events');
+// get all events (optional past events for archive mode — API allows for mmw + header)
+export const fetchEvents = async (includePastEvents = false) => {
+  const response = await api.get('/events', {
+    headers: includePastEvents ? { 'X-Include-Past-Events': '1' } : {},
+  });
   return response.data;
 };
 

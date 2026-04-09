@@ -84,10 +84,10 @@ const EventPage = () => {
           <p>
             <i className="fa-solid fa-headphones"></i> Artists:
           </p>
-          {eventDisplay.artists.length > 0 ? (
+          {eventDisplay.displayArtists.length > 0 ? (
             <ul>
-              {eventDisplay.artists.map((artist) => (
-                <li key={artist.id}>{artist.name}</li>
+              {eventDisplay.displayArtists.map((artist, i) => (
+                <li key={artist.id || `${artist.name}-${i}`}>{artist.name}</li>
               ))}
             </ul>
           ) : (

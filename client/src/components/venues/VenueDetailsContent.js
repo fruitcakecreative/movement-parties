@@ -10,6 +10,7 @@ function VenueDetailsContent({
   fromEventId,
   onBackToEvent,
   timeZone = 'America/New_York',
+  sheTheyForwardTimeline = false,
 }) {
   const contentRef = useRef(null);
     const [showFullDescription, setShowFullDescription] = useState(false);
@@ -247,6 +248,7 @@ function VenueDetailsContent({
                           key={event.id}
                           event={event}
                           timeZone={timeZone}
+                          sheTheyForwardTimeline={sheTheyForwardTimeline}
                           onClick={() => openEvent?.(event.id, venue?.id)}
                         />
                       ))}

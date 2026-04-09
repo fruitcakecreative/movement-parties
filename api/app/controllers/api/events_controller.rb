@@ -6,16 +6,18 @@ class Api::EventsController < ApplicationController
     request.env["action_dispatch.request_start_time"] = Time.now
 
     city = current_city_key
-    cache_key = "events-v4:#{city}"
+    include_past = city == "mmw" && request.headers["X-Include-Past-Events"].to_s == "1"
+    cache_key = "events-v7:#{city}:#{include_past ? 'all' : 'upcoming'}"
 
     events = Rails.cache.fetch(cache_key, expires_in: 5.minutes) do
-      Event.where(city_key: city)
-           .not_past
-           .includes(:genres, :artists, venue: [:parent_venue, :child_venues])
-           .order(start_time: :asc, end_time: :asc)
+      scope = Event.where(city_key: city)
+                   .includes(:genres, :artists, venue: [:parent_venue, :child_venues])
+      scope = scope.not_past unless include_past
+      scope.order(start_time: :asc, end_time: :asc)
            .as_json(
              include: {
                genres: { only: [:id, :name, :short_name, :hex_color, :font_color] },
+               artists: { only: [:id, :name, :pronouns] },
                venue: {
                  methods: [:logo_url, :venue_ids_for_events, :display_venue_for_json],
                  only: [
@@ -52,7 +54,7 @@ class Api::EventsController < ApplicationController
     event.city_key = current_city_key
 
     if event.save
-      Rails.cache.delete("events-v4:#{event.city_key}")
+      Event.clear_public_index_cache!(event.city_key)
       render json: event, status: :created
     else
       render json: { errors: event.errors.full_messages }, status: :unprocessable_entity
@@ -61,7 +63,7 @@ class Api::EventsController < ApplicationController
 
   def update
     if @event.update(event_params)
-      Rails.cache.delete("events-v4:#{@event.city_key}")
+      Event.clear_public_index_cache!(@event.city_key)
       render json: @event
     else
       render json: { errors: @event.errors.full_messages }, status: :unprocessable_entity
@@ -71,7 +73,7 @@ class Api::EventsController < ApplicationController
   def destroy
     city = @event.city_key
     @event.destroy
-      Rails.cache.delete("events-v4:#{city}")
+      Event.clear_public_index_cache!(city)
     head :no_content
   end
 

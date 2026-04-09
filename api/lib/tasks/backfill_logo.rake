@@ -80,8 +80,8 @@ namespace :backfill do
     end
 
     unless dry_run
-      %w[movement mmw].each { |ck| Rails.cache.delete("events-v4:#{ck}") }
-      puts "Cleared events-v4 cache (movement, mmw)."
+      %w[movement mmw].each { |ck| Event.clear_public_index_cache!(ck) }
+      puts "Cleared events index cache (movement, mmw)."
     end
 
     puts "\nDone. attached=#{attached}  missing_file=#{missing_file}  skipped_already_ok=#{skipped_ok}  blank_image_filename=#{blank_fn}"

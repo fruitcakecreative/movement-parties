@@ -25,9 +25,11 @@ import {
   formatFestivalDayShort,
   getActiveTimelineDateKeys,
 } from '../utils/timelineSchedule';
+import { showSheTheyForwardFilter } from '../utils/cityFeatureFlags';
 
 const cfg = await loadCityConfig();
 const customDateRanges = cfg.customDateRanges;
+const showAllTimelineDays = !!cfg.showAllTimelineDays;
 const timelineTimeZone =
   cfg.timezone ||
   (process.env.REACT_APP_CITY_KEY === 'movement' ? 'America/Detroit' : 'America/New_York');
@@ -48,8 +50,8 @@ function Events() {
   // customDateRanges + timelineTimeZone come from loadCityConfig (module scope); scheduleTick forces recompute when windows end.
   const activeDates = useMemo(() => {
     void scheduleTick;
-    return getActiveTimelineDateKeys(customDateRanges, timelineTimeZone);
-  }, [scheduleTick]);
+    return getActiveTimelineDateKeys(customDateRanges, timelineTimeZone, showAllTimelineDays);
+  }, [scheduleTick, showAllTimelineDays]);
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedEventId = searchParams.get('eventId');
   const selectedVenueId = searchParams.get('venueId');
@@ -151,7 +153,12 @@ function Events() {
     lastUpdated,
     totalCount,
     pastEventsCount,
-  } = useEventsData({ dates: activeDates, customDateRanges, timeZone: timelineTimeZone });
+  } = useEventsData({
+    dates: activeDates,
+    customDateRanges,
+    timeZone: timelineTimeZone,
+    includePastEvents: showAllTimelineDays,
+  });
 
   const eventsByDayStats = useMemo(
     () =>
@@ -180,7 +187,14 @@ function Events() {
     getFilteredEventsForDate,
     hasActiveFilters,
     resetFilters,
-  } = useEventFilters({ eventsByDate, activeDates });
+  } = useEventFilters({
+    eventsByDate,
+    activeDates,
+    sheTheyForwardFilterEnabled: showSheTheyForwardFilter,
+  });
+
+  const sheTheyForwardTimeline =
+    showSheTheyForwardFilter && filterSelections.sheTheyForwardTimeline;
 
   return (
     <div className={`events-page ${(selectedEventId || selectedVenueId) ? 'has-selected-event' : ''}`}>
@@ -259,6 +273,7 @@ function Events() {
                       openVenue={openVenue}
                       CustomChannelItem={CustomChannelItem}
                       timeZone={timelineTimeZone}
+                      sheTheyForwardTimeline={sheTheyForwardTimeline}
                     />
                   );
                 })}
@@ -279,6 +294,7 @@ function Events() {
         fromVenueId={fromVenueId}
         onBackToVenue={goBackToVenue}
         timeZone={timelineTimeZone}
+        sheTheyForwardTimeline={sheTheyForwardTimeline}
       />
       <VenueDetailsShell
         venueId={selectedVenueId}
@@ -290,6 +306,7 @@ function Events() {
         fromEventId={fromEventId}
         onBackToEvent={goBackToEvent}
         timeZone={timelineTimeZone}
+        sheTheyForwardTimeline={sheTheyForwardTimeline}
       />
     </div>
   );

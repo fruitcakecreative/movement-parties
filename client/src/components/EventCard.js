@@ -1,7 +1,13 @@
 import React from 'react';
 import { getEventDisplayData } from '../utils/eventDisplay';
+import { filterArtistsHideHePresenting } from '../utils/pronounDisplay';
 
-function EventCard({ event, onClick, timeZone = 'America/New_York' }) {
+function EventCard({
+  event,
+  onClick,
+  timeZone = 'America/New_York',
+  sheTheyForwardTimeline = false,
+}) {
   const {
     displayTitle,
     timeLabel,
@@ -13,6 +19,10 @@ function EventCard({ event, onClick, timeZone = 'America/New_York' }) {
     cardBg,
     cardFont,
   } = getEventDisplayData(event, { timeZone });
+
+  const artistsOnCard = sheTheyForwardTimeline
+    ? filterArtistsHideHePresenting(displayArtists)
+    : displayArtists;
 
   return (
     <button
@@ -41,10 +51,10 @@ function EventCard({ event, onClick, timeZone = 'America/New_York' }) {
           </p>
         )}
 
-        {displayArtists?.length > 0 && (
+        {artistsOnCard?.length > 0 && (
           <p className="event-card-artists">
             <i className="fa-solid fa-headphones"></i>&nbsp;
-            {displayArtists.map((artist) => artist.name).join(', ')}
+            {artistsOnCard.map((artist) => artist.name).join(', ')}
           </p>
         )}
 

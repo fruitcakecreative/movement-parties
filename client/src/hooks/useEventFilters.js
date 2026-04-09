@@ -9,9 +9,15 @@ const defaultFilters = {
   venue: [],
   location: [],
   venueType: [],
+  /** When true, timeline / venue cards omit he-presenting artists (he/him, duo/trio/group, he/they). */
+  sheTheyForwardTimeline: false,
 };
 
-function useEventFilters({ eventsByDate, activeDates = [] }) {
+function useEventFilters({
+  eventsByDate,
+  activeDates = [],
+  sheTheyForwardFilterEnabled = true,
+}) {
   const [selectedDate, setSelectedDate] = useState('all');
   const [filterSelections, setFilterSelections] = useState(defaultFilters);
   const [searchQuery, setSearchQuery] = useState('');
@@ -19,10 +25,12 @@ function useEventFilters({ eventsByDate, activeDates = [] }) {
   const [venueSearchQuery, setVenueSearchQuery] = useState('');
   const [filteredVenues, setFilteredVenues] = useState([]);
 
-  const hasActiveFilters = useMemo(
-    () => Object.values(filterSelections).some((values) => values.length > 0),
-    [filterSelections]
-  );
+  const hasActiveFilters = useMemo(() => {
+    if (sheTheyForwardFilterEnabled && filterSelections.sheTheyForwardTimeline) return true;
+    return Object.entries(filterSelections)
+      .filter(([k]) => k !== 'sheTheyForwardTimeline')
+      .some(([, v]) => Array.isArray(v) && v.length > 0);
+  }, [filterSelections, sheTheyForwardFilterEnabled]);
 
   const resetFilters = () => setFilterSelections(defaultFilters);
 

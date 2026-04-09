@@ -86,7 +86,7 @@ class Venue < ApplicationRecord
 
   def invalidate_events_cache
     return unless city_key.present?
-    Rails.cache.delete("events-v4:#{city_key}")
+    Event.clear_public_index_cache!(city_key)
   end
 
   def normalize_location

@@ -3,8 +3,9 @@ import { ProgramBox, ProgramContent, useProgram } from '@nessprim/planby-pro';
 import formatVenueName from '../../utils/formatVenueName';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { getEventDisplayData } from '../../utils/eventDisplay';
+import { filterArtistsHideHePresenting } from '../../utils/pronounDisplay';
 
-const ProgramItem = ({ program, scrollLeft, openEvent, ...rest }) => {
+const ProgramItem = ({ program, scrollLeft, openEvent, sheTheyForwardTimeline = false, ...rest }) => {
   const { styles } = useProgram({ program, ...rest });
   const isMobile = useIsMobile();
   const isShortMobileEvent = isMobile && (program.position?.width || 0) <= 210;
@@ -25,6 +26,10 @@ const ProgramItem = ({ program, scrollLeft, openEvent, ...rest }) => {
     cardBg,
     cardFont,
   } = getEventDisplayData(program.data, { isMobile, isShortMobileEvent, isShortEvent });
+
+  const artistsOnCard = sheTheyForwardTimeline
+    ? filterArtistsHideHePresenting(displayArtists)
+    : displayArtists;
 
   const programLeft = program.position?.left || 0;
   const titleOffset = Math.max(0, scrollLeft - programLeft);
@@ -73,11 +78,11 @@ const ProgramItem = ({ program, scrollLeft, openEvent, ...rest }) => {
           <div className="left-side" style={{ borderColor: cardFont }}>
             <p className="d-hide top-artists">
               <i className="fa-solid fa-headphones"></i>&nbsp;
-              {displayArtists.length > 0 ? (
-                displayArtists.map((artist, i) => (
+              {artistsOnCard.length > 0 ? (
+                artistsOnCard.map((artist, i) => (
                   <span key={`${artist.id}-${i}`} className="artist-name">
                     {artist.name}
-                    {i < displayArtists.length - 1 ? ', ' : ''}
+                    {i < artistsOnCard.length - 1 ? ', ' : ''}
                   </span>
                 ))
               ) : (

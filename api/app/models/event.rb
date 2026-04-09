@@ -26,6 +26,13 @@ class Event < ApplicationRecord
     where("COALESCE(events.end_time, events.start_time) <= ?", GRACE_AFTER_SCHEDULE_END.ago)
   }
 
+  # Api::EventsController#index caches two variants per city when mmw requests include past events.
+  def self.clear_public_index_cache!(city_key)
+    return if city_key.blank?
+
+    %w[upcoming all].each { |mode| Rails.cache.delete("events-v7:#{city_key}:#{mode}") }
+  end
+
   rails_admin do
     list do
       scopes [:movement, :mmw]
@@ -70,7 +77,8 @@ class Event < ApplicationRecord
       {
         id: artist.id,
         name: artist.name,
-        ra_followers: artist.ra_followers
+        ra_followers: artist.ra_followers,
+        pronouns: artist.pronouns
       }
     end
   end
