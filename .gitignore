@@ -2,6 +2,7 @@
 api/.bundle
 api/log/*
 api/public/assets
+# CSV round-trip lives in api/data/exports/ (tracked). api/tmp/ is not committed.
 api/tmp/*
 !api/log/.keep
 !api/tmp/.keep

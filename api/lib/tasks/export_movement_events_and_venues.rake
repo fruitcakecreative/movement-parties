@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Example (paths in git): FILE=api/data/exports/movement_events.csv bin/rails export:movement_events
 require "csv"
 
 module MovementCsvExport
