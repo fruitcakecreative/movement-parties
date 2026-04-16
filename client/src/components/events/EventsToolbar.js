@@ -3,6 +3,7 @@ import DateDropdown from '../../timeline/components/ui/DateDropdown';
 import FiltersDropdown from '../../timeline/components/ui/FiltersDropdown';
 import SheTheyForwardToggle from './SheTheyForwardToggle';
 import { showSheTheyForwardFilter } from '../../utils/cityFeatureFlags';
+import { trackPlausible } from '../../utils/plausible';
 
 function EventsToolbar({
   selectedDate,
@@ -30,17 +31,19 @@ function EventsToolbar({
       {showSheTheyForwardFilter && (
         <SheTheyForwardToggle
           enabled={!!filterSelections.sheTheyForwardTimeline}
-          onEnabledChange={(next) =>
+          onEnabledChange={(next) => {
+            trackPlausible('No Boys Club', { state: next ? 'on' : 'off' });
             setFilterSelections((prev) => ({
               ...prev,
               sheTheyForwardTimeline: next,
               ...(next ? {} : { sheTheyOver50Lineup: false }),
-            }))
-          }
+            }));
+          }}
           over50Only={!!filterSelections.sheTheyOver50Lineup}
-          onOver50Change={(next) =>
-            setFilterSelections((prev) => ({ ...prev, sheTheyOver50Lineup: next }))
-          }
+          onOver50Change={(next) => {
+            trackPlausible('She They 50 Percent Lineup', { state: next ? 'on' : 'off' });
+            setFilterSelections((prev) => ({ ...prev, sheTheyOver50Lineup: next }));
+          }}
         />
       )}
 
