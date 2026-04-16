@@ -81,7 +81,7 @@ class Venue < ApplicationRecord
   # before_validation :apply_type_colors
 
   def default_city_key
-    self.city_key ||= (Current.city_key.presence || "movement")
+    self.city_key ||= "movement"
   end
 
   def invalidate_events_cache

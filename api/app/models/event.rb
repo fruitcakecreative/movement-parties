@@ -69,7 +69,8 @@ class Event < ApplicationRecord
 
   before_validation :default_city_key, on: :create
   def default_city_key
-    self.city_key ||= (Current.city_key.presence || "movement")
+    # Always Movement for new rows (Rails Admin session can still be "mmw" from old scope).
+    self.city_key ||= "movement"
   end
 
   def top_artists

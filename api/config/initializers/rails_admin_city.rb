@@ -8,7 +8,8 @@ Rails.application.config.to_prepare do
     private
 
     def set_rails_admin_city_key
-      key = params[:scope].presence || session[:rails_admin_city_key].presence || "movement"
+      # Prefer URL scope; default Movement (do not inherit stale session "mmw" on every request).
+      key = params[:scope].presence || "movement"
       session[:rails_admin_city_key] = key
       Current.city_key = key
     end
