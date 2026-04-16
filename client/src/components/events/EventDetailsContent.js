@@ -1,7 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import ArtistNameLine from '../ArtistNameLine';
 import { getEventDisplayData } from '../../utils/eventDisplay';
-import { artistDetailRowClass, artistIsHePresenting } from '../../utils/pronounDisplay';
+import SheTheyForwardLineupBadge from '../SheTheyForwardLineupBadge';
+import {
+  artistDetailRowClass,
+  artistIsHePresenting,
+  artistSheTheyListSortRank,
+} from '../../utils/pronounDisplay';
 import { formatDescription } from '../../utils/formatDescription';
 
 function EventDetailsContent({
@@ -71,9 +76,15 @@ function EventDetailsContent({
     : plainDescription;
 
   const sortedDisplayArtists = [...displayArtists].sort((a, b) => {
-    const aHe = artistIsHePresenting(a.pronouns);
-    const bHe = artistIsHePresenting(b.pronouns);
-    if (aHe !== bHe) return aHe ? 1 : -1;
+    if (sheTheyForwardTimeline) {
+      const ra = artistSheTheyListSortRank(a.pronouns);
+      const rb = artistSheTheyListSortRank(b.pronouns);
+      if (ra !== rb) return ra - rb;
+    } else {
+      const aHe = artistIsHePresenting(a.pronouns);
+      const bHe = artistIsHePresenting(b.pronouns);
+      if (aHe !== bHe) return aHe ? 1 : -1;
+    }
     return (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' });
   });
 
@@ -124,6 +135,12 @@ function EventDetailsContent({
             </p>
           )}
         </div>
+
+        <SheTheyForwardLineupBadge
+          sheTheyForwardTimeline={sheTheyForwardTimeline}
+          artists={sortedDisplayArtists}
+          className="mb-xs"
+        />
 
         <h1 className="title mb-xs">{displayTitle}</h1>
 
@@ -203,7 +220,9 @@ function EventDetailsContent({
         )}
 
         {sortedDisplayArtists.length > 0 && (
-          <div className="event-artists mb-xs">
+          <div
+            className={`event-artists mb-xs${sheTheyForwardTimeline ? ' event-artists--she-they' : ''}`}
+          >
             <p>
               <i className="fa-solid fa-headphones"></i>&nbsp;
               Artists:

@@ -7,7 +7,7 @@ class Api::EventsController < ApplicationController
 
     city = current_city_key
     include_past = city == "mmw" && request.headers["X-Include-Past-Events"].to_s == "1"
-    cache_key = "events-v7:#{city}:#{include_past ? 'all' : 'upcoming'}"
+    cache_key = "events-v8:#{city}:#{include_past ? 'all' : 'upcoming'}"
 
     events = Rails.cache.fetch(cache_key, expires_in: 5.minutes) do
       scope = Event.where(city_key: city)

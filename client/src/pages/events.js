@@ -188,17 +188,15 @@ function Events() {
     getFilteredEventsForDate,
     hasActiveFilters,
     resetFilters,
-  } = useEventFilters({
-    eventsByDate,
-    activeDates,
-    sheTheyForwardFilterEnabled: showSheTheyForwardFilter,
-  });
+  } = useEventFilters({ eventsByDate, activeDates });
 
   const sheTheyForwardTimeline =
     showSheTheyForwardFilter && filterSelections.sheTheyForwardTimeline;
 
   return (
-    <div className={`events-page ${(selectedEventId || selectedVenueId) ? 'has-selected-event' : ''}`}>
+    <div
+      className={`events-page ${(selectedEventId || selectedVenueId) ? 'has-selected-event' : ''}`}
+    >
       <div ref={mainScrollRef} className="events-page__main">
         <MainHeader />
         <EventsIntro

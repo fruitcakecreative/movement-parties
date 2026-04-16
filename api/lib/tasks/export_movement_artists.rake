@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Example: FILE=api/data/exports/movement_artists.csv ALL=1 bin/rails export:movement_artists
+# From api/: FILE=data/exports/movement_artists.csv ALL=1 bin/rails export:movement_artists
 require "csv"
 
 namespace :export do

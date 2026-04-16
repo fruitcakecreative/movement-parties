@@ -1,5 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { expandGenreSelections, eventMatchesGenreFilter } from '../utils/genreGroups';
+import { showSheTheyForwardFilter } from '../utils/cityFeatureFlags';
+import {
+  readSheTheyForwardEnabled,
+  readSheTheyOver50LineupEnabled,
+  syncSheTheyForwardState,
+  syncSheTheyOver50State,
+} from '../utils/sheTheyTheme';
+import { sheTheyForwardLineupPercent } from '../utils/pronounDisplay';
 
 const defaultFilters = {
   genre: [],
@@ -11,28 +19,39 @@ const defaultFilters = {
   venueType: [],
   /** When true, timeline / venue cards omit he-presenting artists (he/him, duo/trio/group, he/they). */
   sheTheyForwardTimeline: false,
+  /** When true (and she-they mode on), list only events whose lineup is at least 50% she/they-forward. */
+  sheTheyOver50Lineup: false,
 };
 
-function useEventFilters({
-  eventsByDate,
-  activeDates = [],
-  sheTheyForwardFilterEnabled = true,
-}) {
+function useEventFilters({ eventsByDate, activeDates = [] }) {
   const [selectedDate, setSelectedDate] = useState('all');
-  const [filterSelections, setFilterSelections] = useState(defaultFilters);
+  const [filterSelections, setFilterSelections] = useState(() => {
+    const mainOn = showSheTheyForwardFilter && readSheTheyForwardEnabled();
+    return {
+      ...defaultFilters,
+      sheTheyForwardTimeline: mainOn,
+      sheTheyOver50Lineup: mainOn && readSheTheyOver50LineupEnabled(),
+    };
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredArtists, setFilteredArtists] = useState([]);
   const [venueSearchQuery, setVenueSearchQuery] = useState('');
   const [filteredVenues, setFilteredVenues] = useState([]);
 
   const hasActiveFilters = useMemo(() => {
-    if (sheTheyForwardFilterEnabled && filterSelections.sheTheyForwardTimeline) return true;
-    return Object.entries(filterSelections)
-      .filter(([k]) => k !== 'sheTheyForwardTimeline')
-      .some(([, v]) => Array.isArray(v) && v.length > 0);
-  }, [filterSelections, sheTheyForwardFilterEnabled]);
+    const arrayKeys = Object.entries(filterSelections).filter(
+      ([k]) => k !== 'sheTheyForwardTimeline' && k !== 'sheTheyOver50Lineup'
+    );
+    const arraysActive = arrayKeys.some(([, v]) => Array.isArray(v) && v.length > 0);
+    return arraysActive;
+  }, [filterSelections]);
 
-  const resetFilters = () => setFilterSelections(defaultFilters);
+  const resetFilters = () =>
+    setFilterSelections((prev) => ({
+      ...defaultFilters,
+      sheTheyForwardTimeline: prev.sheTheyForwardTimeline,
+      sheTheyOver50Lineup: false,
+    }));
 
   useEffect(() => {
     if (selectedDate === 'all') return;
@@ -40,6 +59,23 @@ function useEventFilters({
       setSelectedDate('all');
     }
   }, [activeDates, selectedDate]);
+
+  useEffect(() => {
+    if (!showSheTheyForwardFilter) return;
+    syncSheTheyForwardState(filterSelections.sheTheyForwardTimeline);
+  }, [filterSelections.sheTheyForwardTimeline]);
+
+  useEffect(() => {
+    if (!showSheTheyForwardFilter) return;
+    if (!filterSelections.sheTheyForwardTimeline) return;
+    syncSheTheyOver50State(filterSelections.sheTheyOver50Lineup);
+  }, [filterSelections.sheTheyOver50Lineup, filterSelections.sheTheyForwardTimeline]);
+
+  useEffect(() => {
+    if (!filterSelections.sheTheyForwardTimeline && filterSelections.sheTheyOver50Lineup) {
+      setFilterSelections((prev) => ({ ...prev, sheTheyOver50Lineup: false }));
+    }
+  }, [filterSelections.sheTheyForwardTimeline, filterSelections.sheTheyOver50Lineup]);
 
   const getFilteredEventsForDate = (date) => {
     let dayEvents = eventsByDate[date] || [];
@@ -112,6 +148,16 @@ function useEventFilters({
             : null;
 
         return normalizedAge && filterSelections.age.includes(normalizedAge);
+      });
+    }
+
+    if (
+      filterSelections.sheTheyForwardTimeline &&
+      filterSelections.sheTheyOver50Lineup
+    ) {
+      dayEvents = dayEvents.filter((event) => {
+        const pct = sheTheyForwardLineupPercent(event.artists || []);
+        return pct != null && pct >= 50;
       });
     }
 

@@ -1,6 +1,8 @@
 import React from 'react';
 import DateDropdown from '../../timeline/components/ui/DateDropdown';
 import FiltersDropdown from '../../timeline/components/ui/FiltersDropdown';
+import SheTheyForwardToggle from './SheTheyForwardToggle';
+import { showSheTheyForwardFilter } from '../../utils/cityFeatureFlags';
 
 function EventsToolbar({
   selectedDate,
@@ -25,6 +27,23 @@ function EventsToolbar({
 }) {
   return (
     <>
+      {showSheTheyForwardFilter && (
+        <SheTheyForwardToggle
+          enabled={!!filterSelections.sheTheyForwardTimeline}
+          onEnabledChange={(next) =>
+            setFilterSelections((prev) => ({
+              ...prev,
+              sheTheyForwardTimeline: next,
+              ...(next ? {} : { sheTheyOver50Lineup: false }),
+            }))
+          }
+          over50Only={!!filterSelections.sheTheyOver50Lineup}
+          onOver50Change={(next) =>
+            setFilterSelections((prev) => ({ ...prev, sheTheyOver50Lineup: next }))
+          }
+        />
+      )}
+
       <DateDropdown
         selectedDate={selectedDate}
         setSelectedDate={setSelectedDate}

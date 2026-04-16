@@ -29,7 +29,7 @@ function EventsIntro({
               </p>
             )}
             {pastEventsCount != null && (
-              <p>
+              <p class="hide">
                 <span>Past events (archived):</span> {pastEventsCount}
               </p>
             )}

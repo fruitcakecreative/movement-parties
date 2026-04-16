@@ -1,0 +1,200 @@
+// Alternate full-site palette when she/they–forward mode is on (Movement).
+// Activated on <html data-she-they-theme="on"> — see utils/sheTheyTheme.js
+
+:root[data-she-they-theme='on'] {
+  --font-body: 'Roboto', sans-serif;
+  --font-heading: 'Techno', sans-serif;
+
+  /* Lifted off pure black; still a deep wine/plum base */
+  --color-background: #1a1620;
+  --color-bg-dark: #12101a;
+  --color-bg-light: #262030;
+  --color-bg-alt: #c94b9b;
+
+  --color-text: #f4eaf2;
+  /* Light “ink” for labels on dark chrome (dropdowns, timeline corners, filter reset, scroll thumbs). */
+  --color-text-light: #f0e2f4;
+  --color-text-dark: #fdf8fc;
+  --color-text-alt: #e8d5e8;
+
+  --color-link: #ebb3e4;
+
+  /* Purple-forward accents with a slight pink lean */
+  --color-primary: #e879f9;
+  --color-primary-hover: #f5d0fe;
+  --color-primary-hover-border: #e879f9;
+
+  /* Primary fill is vivid; hover fill is pale lavender — same dark text works on both */
+  --color-button-text: #160d18;
+
+  --color-title: #f2b2f0;
+
+  --color-search-bar: #322a3c;
+  --color-filter-text: #f4eaf2;
+
+  --color-soft: #302838;
+
+  --radius-button: 0.35rem;
+  --radius-card: 0.65rem;
+
+  --list-content-symbol: '◆';
+}
+
+/* Giant toggle + filter chrome pick up new vars via var(--color-*) */
+:root[data-she-they-theme='on'] body {
+  background: var(--color-background);
+  color: var(--color-text);
+}
+
+:root[data-she-they-theme='on'] .she-they-forward-card {
+  border-color: color-mix(in srgb, var(--color-text) 18%, transparent);
+  background: color-mix(in srgb, var(--color-text) 6%, var(--color-bg-light));
+}
+
+:root[data-she-they-theme='on'] .she-they-forward-card--on {
+  border-color: rgba(232, 121, 249, 0.45);
+  background: linear-gradient(
+    160deg,
+    rgba(244, 114, 182, 0.1),
+    rgba(232, 121, 249, 0.1)
+  );
+  box-shadow: 0 4px 22px rgba(168, 85, 247, 0.18);
+}
+
+:root[data-she-they-theme='on'] .she-they-forward-card__copy {
+  color: color-mix(in srgb, var(--color-text) 82%, transparent);
+}
+
+:root[data-she-they-theme='on'] .she-they-forward-switch--off .she-they-forward-switch__track {
+  background: color-mix(in srgb, var(--color-text) 22%, var(--color-bg-light));
+}
+
+:root[data-she-they-theme='on'] .she-they-forward-switch--on .she-they-forward-switch__track {
+  background: linear-gradient(135deg, #f472b6, #a855f7);
+}
+
+/* “All Days” + “Other Filters” bars — light pink wash (same family as --color-title) */
+:root[data-she-they-theme='on'] .dropdown-wrapper .dropdown-btn {
+  background: color-mix(in srgb, var(--color-title) 22%, var(--color-bg-light) 78%);
+  color: var(--color-text);
+  border: 1px solid color-mix(in srgb, var(--color-title) 42%, var(--color-bg-light) 58%);
+}
+
+:root[data-she-they-theme='on'] .dropdown-wrapper .dropdown-btn:hover {
+  background: color-mix(in srgb, var(--color-title) 30%, var(--color-bg-light) 70%);
+}
+
+/* Main EPG / timeline frame — visible rim (default border was near-invisible on dark chrome) */
+:root[data-she-they-theme='on'] .planby #planby-wrapper {
+  border: 2px solid color-mix(in srgb, var(--color-title) 48%, var(--color-bg-dark) 52%);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--color-title) 18%, transparent),
+    0 8px 28px rgba(0, 0, 0, 0.35);
+}
+
+/* Timeline % chips — dark canvas; tiers track default _timeline.scss intent */
+:root[data-she-they-theme='on'] .party-content--she-they-progress .title-wrapper .program-she-they-pct--unknown {
+  color: var(--color-text);
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-bg-light) 88%, #a78bfa 12%),
+    color-mix(in srgb, var(--color-bg-light) 85%, #c4b5fd 15%)
+  );
+  border: 1px solid rgba(167, 139, 250, 0.4);
+}
+
+/* 1–74% timeline pills: one shared look (same as former “upper” band) */
+:root[data-she-they-theme='on'] .party-content--she-they-progress .title-wrapper .program-she-they-pct--tier-low,
+:root[data-she-they-theme='on'] .party-content--she-they-progress .title-wrapper .program-she-they-pct--tier-mid,
+:root[data-she-they-theme='on'] .party-content--she-they-progress .title-wrapper .program-she-they-pct--tier-upper {
+  color: var(--color-text);
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-bg-light) 68%, #f472b6 22%),
+    color-mix(in srgb, var(--color-bg-light) 62%, #e879f9 24%)
+  );
+  border: 1px solid rgba(244, 114, 182, 0.55);
+  box-shadow: 0 1px 6px rgba(168, 85, 247, 0.22);
+}
+
+:root[data-she-they-theme='on'] .party-content--she-they-progress .title-wrapper .program-she-they-pct--tier-hot {
+  color: #fdf8fc;
+  background: linear-gradient(135deg, #f472b6, #c026d3);
+  border: 1px solid color-mix(in srgb, #ffffff 42%, #f0abfc 58%);
+  box-shadow:
+    0 1px 5px rgba(192, 38, 211, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+  opacity: 1;
+}
+
+/* Event list + detail % pills — 1–74% match former upper-tier styling */
+:root[data-she-they-theme='on'] .she-they-lineup-pct-badge--tier-low,
+:root[data-she-they-theme='on'] .she-they-lineup-pct-badge--tier-mid,
+:root[data-she-they-theme='on'] .she-they-lineup-pct-badge--tier-upper {
+  color: var(--color-text);
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-bg-light) 68%, #f472b6 22%),
+    color-mix(in srgb, var(--color-bg-light) 62%, #e879f9 24%)
+  );
+  border: 1px solid rgba(244, 114, 182, 0.55);
+  box-shadow: 0 1px 6px rgba(168, 85, 247, 0.22);
+}
+
+:root[data-she-they-theme='on'] .she-they-lineup-pct-badge--tier-hot {
+  color: #fdf8fc;
+  background: linear-gradient(135deg, #f472b6, #c026d3);
+  border: 1px solid color-mix(in srgb, #ffffff 42%, #f0abfc 58%);
+  box-shadow:
+    0 1px 5px rgba(192, 38, 211, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+}
+
+:root[data-she-they-theme='on'] .she-they-lineup-pct-badge--zero {
+  color: color-mix(in srgb, var(--color-text) 52%, var(--color-background) 48%);
+  background: color-mix(in srgb, var(--color-background) 90%, #27272a 10%);
+  border: 1px solid color-mix(in srgb, var(--color-background) 72%, #71717a 28%);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+  opacity: 0.95;
+}
+
+/* Default she/they card stroke on dark (unknown, etc. — not 0% / filled bands) */
+:root[data-she-they-theme='on'] .party-content--she-they-progress:not(.party-content--she-they-zero) {
+  border-color: color-mix(in srgb, var(--color-background) 58%, #a78bfa 42%);
+}
+
+/* Filled cards: under 50% = subtle rim; 50–74 = same hue, thicker */
+:root[data-she-they-theme='on'] .party-content--she-they-filled.party-content--she-they-band-lt50 {
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(244, 114, 182, 0.26);
+  box-shadow: 0 1px 4px rgba(168, 85, 247, 0.1);
+}
+
+:root[data-she-they-theme='on'] .party-content--she-they-filled.party-content--she-they-band-50-74 {
+  border-width: 2px;
+  border-style: solid;
+  border-color: rgba(244, 114, 182, 0.55);
+  box-shadow: 0 1px 6px rgba(168, 85, 247, 0.22);
+}
+
+:root[data-she-they-theme='on'] .party-content--she-they-high.party-content--she-they-filled {
+  border-color: color-mix(in srgb, #ffffff 78%, #f472b6 22%);
+}
+
+/* 0% card — no outer frame */
+:root[data-she-they-theme='on'] .party-content--she-they-zero {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* 0% chip: still muted vs celebration chips, but readable on dark canvas */
+:root[data-she-they-theme='on'] .party-content--she-they-progress .title-wrapper .program-she-they-pct--zero {
+  color: color-mix(in srgb, var(--color-text) 52%, var(--color-background) 48%);
+  background: color-mix(in srgb, var(--color-background) 90%, #27272a 10%);
+  border: 1px solid color-mix(in srgb, var(--color-background) 72%, #71717a 28%);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+  opacity: 0.95;
+}

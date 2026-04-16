@@ -3,13 +3,14 @@
 require "csv"
 
 # Round-trip for CSVs from export:movement_* tasks. Updates existing rows by id only (no creates).
-# Use api/data/exports/ (git-tracked) — not api/tmp/ (gitignored).
+# Use data/exports/ under api/ (git-tracked) — not tmp/ (gitignored).
+# Paths below are relative to the api/ directory (where you run bin/rails).
 #
-#   FILE=api/data/exports/movement_venues.csv  bin/rails import:movement_venues_csv
-#   FILE=api/data/exports/movement_events.csv bin/rails import:movement_events_csv
-#   FILE=api/data/exports/movement_artists.csv bin/rails import:movement_artists_csv
+#   FILE=data/exports/movement_venues.csv  bin/rails import:movement_venues_csv
+#   FILE=data/exports/movement_events.csv bin/rails import:movement_events_csv
+#   FILE=data/exports/movement_artists.csv bin/rails import:movement_artists_csv
 #
-# Preview: DRY_RUN=1 FILE=api/data/exports/movement_artists.csv bin/rails import:movement_artists_csv
+# Preview: DRY_RUN=1 FILE=data/exports/movement_artists.csv bin/rails import:movement_artists_csv
 #
 # Full DB restore from pg_dump / S3 is separate — use pg_restore or psql.
 

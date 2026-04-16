@@ -7,8 +7,6 @@ import {
   normalizeGenreName,
   parentGenreToken,
 } from '../../../utils/genreGroups';
-import { showSheTheyForwardFilter } from '../../../utils/cityFeatureFlags';
-
 function isParentGenreValue(v) {
   return typeof v === 'string' && v.startsWith(GENRE_PARENT_PREFIX);
 }
@@ -127,38 +125,6 @@ const FiltersDropdown = ({
         ))}
       </div>
     </div>
-
-    {showSheTheyForwardFilter && (
-      <div className="hide small-opt-wrapper she-they-forward-wrapper">
-        <div
-          className="option-item genre she-they-forward-toggle"
-          role="button"
-          tabIndex={0}
-          onClick={() =>
-            setSelected((prev) => ({
-              ...prev,
-              sheTheyForwardTimeline: !prev.sheTheyForwardTimeline,
-            }))
-          }
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              setSelected((prev) => ({
-                ...prev,
-                sheTheyForwardTimeline: !prev.sheTheyForwardTimeline,
-              }));
-            }
-          }}
-        >
-          <input type="checkbox" readOnly checked={!!selected.sheTheyForwardTimeline} />
-          <span>She/they–forward timeline</span>
-        </div>
-        <p className="she-they-forward-hint">
-          Hides he/him (including duo/trio/group), he/they, and similar tags on program boxes and
-          venue cards. Event details still show everyone, with highlights.
-        </p>
-      </div>
-    )}
 
       <Disclosure>
         {({ open }) => (

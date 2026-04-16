@@ -2,6 +2,13 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import EventCard from '../EventCard';
 import { formatDescription } from '../../utils/formatDescription';
 
+function normalizeVenueWebsiteUrl(url) {
+  const s = String(url || '').trim();
+  if (!s) return '';
+  if (/^https?:\/\//i.test(s)) return s;
+  return `https://${s}`;
+}
+
 function VenueDetailsContent({
   venue,
   venueEvents = [],
@@ -13,10 +20,20 @@ function VenueDetailsContent({
   sheTheyForwardTimeline = false,
 }) {
   const contentRef = useRef(null);
-    const [showFullDescription, setShowFullDescription] = useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
+
+  const stripHtml = (html = '') => {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return div.textContent || div.innerText || '';
+  };
 
   useEffect(() => {
     contentRef.current?.scrollTo(0, 0);
+  }, [venue?.id]);
+
+  useEffect(() => {
+    setShowFullDescription(false);
   }, [venue?.id]);
 
   const { groupedEvents, sectionOrder } = useMemo(() => {
@@ -85,16 +102,15 @@ function VenueDetailsContent({
     venue_type,
     subheading,
     description,
+    age,
+    venue_url,
   } = venue;
 
-
-  const plainDescription = description
-    ? description.replace(/<[^>]+>/g, '').trim()
-    : '';
-
-  const isLongDescription = plainDescription.length > 130;
+  const previewLength = 145;
+  const plainDescription = stripHtml(description || '');
+  const isLongDescription = plainDescription.length > previewLength;
   const previewDescription = isLongDescription
-    ? `${plainDescription.slice(0, 130).trim()}...`
+    ? `${plainDescription.slice(0, previewLength).trim()}...`
     : plainDescription;
 
   const displayVenueType =
@@ -179,6 +195,13 @@ function VenueDetailsContent({
         </p>
       )}
 
+      {age && (
+        <p className="event-age mb-xs">
+          <i className="fa-solid fa-id-card"></i>&nbsp;
+          {age}
+        </p>
+      )}
+
       {displayVenueType && (
         <p className="event-age mb-xs">
           <i className="fa-solid fa-building"></i>&nbsp;
@@ -220,6 +243,20 @@ function VenueDetailsContent({
           )}
         </div>
       )}
+
+      {venue_url && (
+        <div className="event-details-actions mb-sm">
+          <a
+            href={normalizeVenueWebsiteUrl(venue_url)}
+            target="_blank"
+            rel="noreferrer"
+            className="button mb-xs"
+          >
+            Venue website
+          </a>
+        </div>
+      )}
+
       {venueEvents.length > 0 && (
         <div className="venue-events-list mb-xs">
           {Object.entries(groupedEvents).map(([day, dayGroups]) => {

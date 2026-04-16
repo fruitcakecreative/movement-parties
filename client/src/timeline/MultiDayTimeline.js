@@ -42,7 +42,6 @@ const MultiDayTimeline = ({
   const [dimensions, setDimensions] = useState({
     isMobile: window.innerWidth < 768,
     hourWidth: window.innerWidth < 768 ? 35 : 65,
-    itemHeight: window.innerWidth < 768 ? 75 : 90,
     sidebarWidth: window.innerWidth < 768 ? 75 : 120,
   });
 
@@ -52,7 +51,6 @@ const MultiDayTimeline = ({
       setDimensions({
         isMobile,
         hourWidth: isMobile ? 35 : 65,
-        itemHeight: isMobile ? 75 : 90,
         sidebarWidth: isMobile ? 75 : 120,
       });
     };
@@ -61,7 +59,15 @@ const MultiDayTimeline = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const { hourWidth, itemHeight, sidebarWidth } = dimensions;
+  /** She/they mode: lane height for label + % chip + title (+ filled: artist line). Compact rows use tighter padding. */
+  const itemHeight = useMemo(() => {
+    if (!sheTheyForwardTimeline) {
+      return dimensions.isMobile ? 75 : 90;
+    }
+    return dimensions.isMobile ? 76 : 90;
+  }, [sheTheyForwardTimeline, dimensions.isMobile]);
+
+  const { hourWidth, sidebarWidth } = dimensions;
 
   const start = new Date(startDate);
   const end = new Date(endDate);

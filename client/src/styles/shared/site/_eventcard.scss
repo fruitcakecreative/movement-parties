@@ -8,4 +8,11 @@
   border-style: none;
   padding: 15px 20px;
   justify-content: flex-start;
+
+  /* Tier colors live in _eventshell.scss (same as event details badge) */
+  .she-they-lineup-pct-badge.event-card-she-they-pct {
+    margin-bottom: 8px;
+    font-size: 0.75rem;
+    padding: 4px 10px;
+  }
 }

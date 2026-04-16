@@ -137,7 +137,8 @@
         max-height: calc(100vh - 120px) !important;
         background: var(--color-bg-dark);
 
-        .menjos .party-content {
+        /* Venue skins — skip she/they lineup mode (those use .party-content--she-they-progress) */
+        .menjos .party-content:not(.party-content--she-they-progress) {
           border: none !important;
           color: black;
           background: linear-gradient(
@@ -150,7 +151,7 @@
             #750787
           );
         }
-        .hartplaza .party-content {
+        .hartplaza .party-content:not(.party-content--she-they-progress) {
           border: none !important;
           color: black;
           background: linear-gradient(
@@ -163,19 +164,15 @@
           );
         }
 
-        .hartplaza:hover {
-          .party-content {
-            border: 3px solid #ff5c00 !important;
-          }
+        .hartplaza:hover .party-content:not(.party-content--she-they-progress) {
+          border: 3px solid #ff5c00 !important;
         }
 
-        .menjos:hover {
-          .party-content {
-            border: 3px solid #e40303 !important;
-          }
+        .menjos:hover .party-content:not(.party-content--she-they-progress) {
+          border: 3px solid #e40303 !important;
         }
 
-        .halobarandlounge .party-content {
+        .halobarandlounge .party-content:not(.party-content--she-they-progress) {
           border: 4px solid transparent !important;
           background:
             linear-gradient(rgb(255, 102, 207), rgb(255, 102, 207)) padding-box,
@@ -183,7 +180,7 @@
               border-box !important;
         }
 
-        .detroiteagle .party-content {
+        .detroiteagle .party-content:not(.party-content--she-they-progress) {
           border: 4px solid transparent !important;
           background:
             linear-gradient(#e40303, #e40303) padding-box,
@@ -204,19 +201,205 @@
 
 .party-box {
   &:hover {
-    .party-content {
+    .party-content:not(.party-content--she-they-progress) {
       background: none !important;
       background-color: color-mix(in srgb, var(--card-bg) 70%, white 25%) !important;
     }
+
+    .party-content--she-they-filled {
+      /* Same soft lilac canvas as TBA — color comes from the progress strip */
+      background: color-mix(in srgb, var(--color-background) 94%, #c4b5fd 6%) !important;
+    }
+
+    .party-content--she-they-unknown {
+      background-color: color-mix(in srgb, var(--color-background) 94%, #c4b5fd 6%) !important;
+    }
+
+    .party-content--she-they-zero {
+      background: color-mix(in srgb, var(--color-background) 98.5%, #09090b 1.5%) !important;
+      border: none !important;
+    }
   }
+
+  &.party-box--she-they-spotlight {
+    border-radius: 1.12rem;
+    overflow: visible;
+  }
+
   .party-content {
     background: none;
     background-color: black;
     display: block;
-    border: 3px solid;
     padding: 10px 10px;
     @media (max-width: 768px) {
       padding: 5px 10px;
+    }
+
+    /*
+     * Regular timeline cards: one hairline from venue ink + fill (same as inner columns).
+     * Avoids legacy `border: 3px solid` using currentColor — that read as random white/thick rims.
+     */
+    &:not(.party-content--she-they-progress) {
+      --program-divider: color-mix(in srgb, var(--card-font, #0c0c0c) 32%, var(--card-bg, #ffeeda) 68%);
+      border: 1px solid var(--program-divider);
+    }
+
+    /* She/they lineup — match she-they-forward-card--on + switch (util/_filters.scss) */
+    &.party-content--she-they-progress {
+      /*
+       * Never use raw `--color-background` as the stroke: on light themes it matches the page
+       * and reads as a **white rim** against the lilac card fill. Tint the border with violet.
+       */
+      border-width: 1px;
+      border-style: solid;
+      border-color: color-mix(in srgb, var(--color-background) 78%, #a78bfa 22%);
+      border-radius: 1.05rem;
+      padding: 10px 10px;
+      @media (max-width: 768px) {
+        padding: 5px 10px;
+      }
+
+      &.party-content--she-they-compact {
+        padding: 4px 10px 6px;
+        min-height: 0;
+
+        @media (max-width: 768px) {
+          padding: 3px 8px 5px;
+        }
+      }
+
+      &.party-content--she-they-filled {
+        /* Unfilled area matches TBA wash; fuchsia reads only on `.program-she-they-fill` */
+        background: color-mix(in srgb, var(--color-background) 94%, #c4b5fd 6%);
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.04);
+        color: var(--color-text);
+
+        .title-wrapper .title {
+          color: var(--color-text);
+        }
+      }
+
+      /*
+       * Under 50%: whisper of a rim (50–74% keeps the stronger upper-tier stroke).
+       */
+      &.party-content--she-they-filled.party-content--she-they-band-lt50 {
+        border-width: 1px;
+        border-style: solid;
+        box-shadow: 0 1px 3px rgba(192, 38, 211, 0.07);
+      }
+
+      &.party-content--she-they-filled.party-content--she-they-band-50-74 {
+        border-width: 2px;
+        border-style: solid;
+        border-color: color-mix(in srgb, #c026d3 42%, #f472b6 35%);
+        box-shadow: 0 1px 4px rgba(192, 38, 211, 0.18);
+      }
+
+      &.party-content--she-they-high.party-content--she-they-filled {
+        border-width: 2px;
+        border-style: solid;
+        border-color: color-mix(in srgb, #ffffff 78%, #f472b6 22%);
+        box-shadow:
+          0 3px 16px rgba(192, 38, 211, 0.14),
+          0 0 6px rgba(244, 114, 182, 0.55),
+          0 0 14px rgba(232, 121, 249, 0.28);
+      }
+
+      &.party-content--she-they-unknown {
+        background: color-mix(in srgb, var(--color-background) 94%, #c4b5fd 6%);
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.04);
+        color: color-mix(in srgb, var(--color-text) 55%, transparent);
+
+        .title-wrapper .title {
+          opacity: 0.62;
+          color: var(--color-text);
+        }
+      }
+
+      /* 0% — faded into the canvas; no frame on the card (chip keeps its own edge) */
+      &.party-content--she-they-zero {
+        border-width: 0;
+        border-style: none;
+        border-color: transparent;
+        background: color-mix(in srgb, var(--color-background) 98.5%, #09090b 1.5%);
+        box-shadow: none;
+        color: color-mix(in srgb, var(--color-text) 26%, transparent);
+
+        .title-wrapper .title {
+          opacity: 0.26;
+          color: var(--color-text);
+        }
+      }
+
+      .title-wrapper .program-she-they-pct {
+        display: inline-block;
+        max-width: 100%;
+        margin: 0 0 4px;
+        padding: 3px 10px;
+        border-radius: 999px;
+        font-size: 10px;
+        font-weight: 800;
+        line-height: 1.2;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        vertical-align: middle;
+      }
+
+      .title-wrapper .program-she-they-pct--unknown {
+        color: #1a0f18;
+        background: color-mix(in srgb, #ffffff 92%, #c4b5fd 8%);
+        border: 1px solid color-mix(in srgb, #c4b5fd 45%, #a78bfa 25%);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      }
+
+      /* 1–74%: one pill style (same as former “upper” 50–74% tier); 75%+ is `--tier-hot` */
+      .title-wrapper .program-she-they-pct--tier-low,
+      .title-wrapper .program-she-they-pct--tier-mid,
+      .title-wrapper .program-she-they-pct--tier-upper {
+        color: #1a0f18;
+        background: linear-gradient(
+          160deg,
+          color-mix(in srgb, #ffffff 55%, #fce7f3 45%),
+          color-mix(in srgb, #fbcfe8 50%, #f9a8d4 50%)
+        );
+        border: 1px solid color-mix(in srgb, #c026d3 42%, #f472b6 35%);
+        box-shadow: 0 1px 4px rgba(192, 38, 211, 0.18);
+      }
+
+      /* 75%+ — same energy as she-they-forward switch track */
+      .title-wrapper .program-she-they-pct--tier-hot {
+        color: #ffffff;
+        background: linear-gradient(135deg, #f472b6, #c026d3);
+        border: 1px solid color-mix(in srgb, #ffffff 55%, #f0abfc 45%);
+        box-shadow:
+          0 1px 4px rgba(192, 38, 211, 0.4),
+          inset 0 1px 0 rgba(255, 255, 255, 0.28);
+        text-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+      }
+
+      .title-wrapper .program-she-they-pct--zero {
+        color: color-mix(in srgb, var(--color-text, #1a0f18) 46%, var(--color-background, #fff) 54%);
+        font-weight: 800;
+        background: color-mix(in srgb, var(--color-background, #fff) 86%, #52525b 14%);
+        border: 1px solid color-mix(in srgb, var(--color-background, #fff) 65%, #71717a 35%);
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-background, #fff) 55%, transparent 45%);
+        opacity: 0.94;
+      }
+    }
+
+    /* Progress strip — vivid fuchsia like switch (`linear-gradient(135deg, #f472b6, #c026d3)`) */
+    .program-she-they-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 0;
+      pointer-events: none;
+      border-radius: inherit;
+      background: linear-gradient(135deg, #f472b6, #e879f9 52%, #c026d3);
+      opacity: 0.62;
     }
 
     .title-wrapper {
@@ -234,15 +417,31 @@
       .tooltip {
         display: none;
       }
+
+      &.title-wrapper--she-they-compact {
+        .program-she-they-pct,
+        .program-she-they-pct--unknown {
+          font-size: 9px;
+          padding: 2px 8px;
+          margin-bottom: 2px;
+        }
+
+        .title {
+          font-size: 13px;
+          margin-top: -2px;
+        }
+      }
     }
 
     .bottom-half {
-      // border: 1px solid red;
       display: flex;
       margin-top: 5px;
       column-gap: 15px;
       font-size: 12px;
       margin-top: 13px;
+
+      /* Inherits --program-divider from .party-content on regular cards */
+
       @media (max-width: 768px) {
         column-gap: 0px;
         flex-wrap: wrap;
@@ -251,8 +450,29 @@
           font-size: 12px;
         }
       }
+
+      &.bottom-half--she-they-minimal {
+        column-gap: 0;
+        flex-wrap: wrap;
+
+        .left-side {
+          flex: 1 1 100%;
+          max-width: 100%;
+          width: 100%;
+          margin-left: 0;
+          padding-left: 0;
+          border-left: none;
+          white-space: normal;
+
+          @media (max-width: 768px) {
+            border-bottom: none;
+            padding-bottom: 0;
+          }
+        }
+      }
+
       .left-side {
-        border-left: 1px solid white;
+        border-left: 1px solid var(--program-divider);
         padding-left: 7px;
         margin-left: 7px;
         flex: 1;
@@ -264,9 +484,12 @@
         @media (max-width: 768px) {
           flex: none;
           width: 100%;
-          border: none;
           margin: 0;
-          padding: 0;
+          padding-left: 0;
+          margin-left: 0;
+          border-left: none;
+          border-bottom: 1px solid var(--program-divider);
+          padding-bottom: 6px;
         }
         .top-artists {
           margin-bottom: 0px;
@@ -291,7 +514,7 @@
         }
       }
       .right-side {
-        border-left: 1px solid white;
+        border-left: 1px solid var(--program-divider);
         padding-left: 7px;
         flex: 1;
         min-width: 0; /* 👈 this is critical */
@@ -299,9 +522,9 @@
         text-overflow: ellipsis;
         white-space: nowrap;
         @media (max-width: 768px) {
-          border: none;
+          border-left: none;
           margin: 0;
-          padding: 0;
+          padding: 8px 0 0;
         }
 
         p {
@@ -337,6 +560,17 @@
         }
       }
     }
+  }
+}
+
+/* She/they mode: spacing under the lineup % line (<html data-she-they-theme="on">, see sheTheyTheme.js) */
+:root[data-she-they-theme='on'] .party-box .party-content .bottom-half {
+  margin-top: 35px;
+
+  @media (max-width: 768px) {
+    column-gap: 0;
+    flex-wrap: wrap;
+    margin-top: 35px;
   }
 }
 
@@ -460,5 +694,4 @@
     }
   }
 }
-
 

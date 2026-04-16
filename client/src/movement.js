@@ -7,6 +7,7 @@ import reportWebVitals from './setup/reportWebVitals';
 import './styles/index.css';
 import './styles/shared/index.scss';
 import './styles/themes/movement.scss';
+import './styles/themes/mmw-noboys.scss';
 
 document.documentElement.setAttribute('data-site', 'movement');
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import SheTheyForwardLineupBadge from './SheTheyForwardLineupBadge';
 import { getEventDisplayData } from '../utils/eventDisplay';
 import { filterArtistsHideHePresenting } from '../utils/pronounDisplay';
 
@@ -33,9 +34,16 @@ function EventCard({
         backgroundColor: cardBg,
         color: cardFont,
         borderColor: cardBg,
+        '--event-card-font': cardFont,
       }}
     >
       <div className="event-card-inner">
+        <SheTheyForwardLineupBadge
+          sheTheyForwardTimeline={sheTheyForwardTimeline}
+          artists={displayArtists}
+          className="event-card-she-they-pct"
+        />
+
         <h5 className="event-card-title">{displayTitle}</h5>
 
         {timeLabel && (

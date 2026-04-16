@@ -39,7 +39,8 @@ namespace :import do
       skip_urls = [
         "https://ra.co/events/2370518",
         "https://ra.co/events/2353591",
-        "https://ra.co/events/2393835"
+        "https://ra.co/events/2393835",
+        "https://ra.co/events/2400579"
       ]
 
       events.each_with_index do |event_data, index|

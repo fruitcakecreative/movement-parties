@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-# Example (paths in git): FILE=api/data/exports/movement_events.csv bin/rails export:movement_events
+# Example from api/: FILE=data/exports/movement_events.csv bin/rails export:movement_events
 require "csv"
+require "fileutils"
 
 module MovementCsvExport
   module_function
@@ -11,6 +12,9 @@ module MovementCsvExport
     path = ENV["FILE"].to_s.strip.presence
 
     if path
+      dir = File.dirname(File.expand_path(path))
+      FileUtils.mkdir_p(dir)
+
       CSV.open(path, "w:UTF-8") do |csv|
         csv << headers
         scope.find_each do |record|

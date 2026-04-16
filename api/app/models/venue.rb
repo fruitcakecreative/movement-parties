@@ -157,6 +157,8 @@ class Venue < ApplicationRecord
       subheading: dv.subheading,
       address: dv.address,
       location: dv.location,
+      age: dv.age,
+      venue_url: dv.venue_url,
       venue_type: dv.venue_type,
       logo_url: dv.logo_url,
       bg_color: dv.bg_color,
