@@ -30,7 +30,7 @@ class Event < ApplicationRecord
   def self.clear_public_index_cache!(city_key)
     return if city_key.blank?
 
-    %w[upcoming all].each { |mode| Rails.cache.delete("events-v7:#{city_key}:#{mode}") }
+    %w[upcoming all].each { |mode| Rails.cache.delete("events-v8:#{city_key}:#{mode}") }
   end
 
   rails_admin do

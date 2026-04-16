@@ -73,6 +73,48 @@
   background: linear-gradient(135deg, #f472b6, #a855f7);
 }
 
+/* JUST ADDED: keep green switch in she/they theme (override pink rule above) */
+:root[data-she-they-theme='on'] .just-added-card .she-they-forward-switch--on .she-they-forward-switch__track {
+  background: linear-gradient(135deg, #4ade80, #15803d);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.28);
+}
+
+/* JUST ADDED card on dark canvas — green accent, not pink */
+:root[data-she-they-theme='on'] .just-added-card--on {
+  border-color: color-mix(in srgb, #22c55e 48%, var(--color-text));
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, #14532d 55%, var(--color-bg-light)),
+    color-mix(in srgb, var(--color-bg-light) 92%, #052e16 8%)
+  );
+  box-shadow: 0 4px 18px rgba(34, 197, 94, 0.15);
+}
+
+:root[data-she-they-theme='on'] .just-added-card__title {
+  color: #bbf7d0;
+}
+
+:root[data-she-they-theme='on'] .just-added-card--on .just-added-card__copy {
+  color: color-mix(in srgb, #ecfdf5 88%, var(--color-text));
+}
+
+/* Active filter pill: light text on green (was #0f172a on dark green = unreadable) */
+:root[data-she-they-theme='on'] .active-filters .filter-pill--toggle.filter-pill--just-added {
+  color: #ecfdf5;
+  border-color: color-mix(in srgb, #4ade80 50%, var(--color-text));
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, #166534 40%, var(--color-bg-light)),
+    color-mix(in srgb, #14532d 35%, var(--color-background))
+  );
+  box-shadow: 0 3px 14px rgba(34, 197, 94, 0.25);
+}
+
+:root[data-she-they-theme='on'] .active-filters .filter-pill--toggle.filter-pill--just-added .x {
+  color: #ecfdf5;
+  opacity: 0.95;
+}
+
 /* “All Days” + “Other Filters” bars — light pink wash (same family as --color-title) */
 :root[data-she-they-theme='on'] .dropdown-wrapper .dropdown-btn {
   background: color-mix(in srgb, var(--color-title) 22%, var(--color-bg-light) 78%);

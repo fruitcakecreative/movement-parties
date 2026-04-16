@@ -521,10 +521,9 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        /* Desktop-only column (full times, venue, ticket). Mobile uses left-side + .time-mobile. */
         @media (max-width: 768px) {
-          border-left: none;
-          margin: 0;
-          padding: 8px 0 0;
+          display: none !important;
         }
 
         p {

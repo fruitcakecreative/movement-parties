@@ -345,6 +345,65 @@
   .filter-pill.location {
     background-color: var(--color-text-primary);
   }
+
+  /* Pills that mirror toolbar toggle cards (rounded “box” look) */
+  .filter-pill.filter-pill--toggle {
+    cursor: pointer;
+    border-radius: 1.05rem;
+    padding: 0.42rem 0.75rem 0.42rem 0.85rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+    border: 1px solid color-mix(in srgb, var(--color-text) 14%, transparent);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    transition:
+      transform 0.12s ease,
+      box-shadow 0.15s ease;
+
+    &:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .x {
+      margin-left: 0.3rem;
+      font-weight: 800;
+      opacity: 0.88;
+    }
+  }
+
+  .filter-pill--toggle.filter-pill--no-boys {
+    border-color: color-mix(in srgb, #c026d3 35%, var(--color-text));
+    background: linear-gradient(
+      160deg,
+      color-mix(in srgb, #f9a8d4 18%, var(--color-background)),
+      color-mix(in srgb, #e9d5ff 14%, var(--color-background))
+    );
+    box-shadow: 0 3px 14px rgba(192, 38, 211, 0.12);
+    color: var(--color-text);
+  }
+
+  .filter-pill--toggle.filter-pill--she-they-50 {
+    border-color: color-mix(in srgb, #9333ea 38%, var(--color-text));
+    background: linear-gradient(
+      155deg,
+      color-mix(in srgb, #ddd6fe 22%, var(--color-background)),
+      color-mix(in srgb, #fbcfe8 16%, var(--color-background))
+    );
+    box-shadow: 0 3px 12px rgba(147, 51, 234, 0.12);
+    color: var(--color-text);
+  }
+
+  .filter-pill--toggle.filter-pill--just-added {
+    border-color: color-mix(in srgb, #22c55e 42%, var(--color-text));
+    background: linear-gradient(
+      165deg,
+      color-mix(in srgb, #bbf7d0 22%, var(--color-background)),
+      color-mix(in srgb, var(--color-text) 4%, var(--color-background))
+    );
+    box-shadow: 0 3px 12px rgba(34, 197, 94, 0.12);
+    color: #0f172a;
+  }
 }
 
 /* No Boys Club card + compact switch (above date + filters). */
@@ -357,6 +416,66 @@
     margin-bottom: 30px;
     max-width: 50rem;
   }
+}
+
+/* Pull up slightly when stacked directly under No Boys card */
+.she-they-forward-rail:not(.just-added-rail) + .she-they-forward-rail.just-added-rail {
+  margin-top: -0.65rem;
+}
+
+.just-added-card {
+  border-radius: 1.1rem;
+  padding: 0.75rem 1rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent);
+  background: color-mix(in srgb, var(--color-text) 5%, var(--color-background));
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.just-added-card--on {
+  border-color: color-mix(in srgb, #22c55e 42%, var(--color-text));
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, #bbf7d0 22%, var(--color-background)),
+    color-mix(in srgb, var(--color-text) 4%, var(--color-background))
+  );
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.12);
+}
+
+.just-added-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.just-added-card__text {
+  min-width: 0;
+}
+
+.just-added-card__title {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-heading, inherit);
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1.15;
+  /* Green headline — do not inherit site --color-title (often pink) */
+  color: #166534;
+}
+
+.just-added-card__copy {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--color-text) 76%, transparent);
+}
+
+.just-added-card--on .just-added-card__copy {
+  color: color-mix(in srgb, var(--color-text) 88%, #052e16);
 }
 
 .she-they-forward-card {
@@ -430,6 +549,12 @@
 
 .she-they-forward-switch--on .she-they-forward-switch__track {
   background: linear-gradient(135deg, #f472b6, #c026d3);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.35);
+}
+
+/* JUST ADDED toolbar card — green “on” track (not No Boys pink/purple) */
+.just-added-card .she-they-forward-switch--on .she-they-forward-switch__track {
+  background: linear-gradient(135deg, #4ade80, #15803d);
   box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.35);
 }
 

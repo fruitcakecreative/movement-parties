@@ -202,19 +202,19 @@ const ProgramItem = ({ program, scrollLeft, openEvent, sheTheyForwardTimeline = 
             {!sheTheyForwardTimeline && (
               <div className="right-side">
                 <p className="time-venue">
-                  <span className="hide-m emoji">
+                  <span className="m-hide emoji">
                     <i className="fa-solid fa-clock"></i>&nbsp;
                   </span>
-                  <span className="hide-m time">
+                  <span className="m-hide time">
                     {displayStartTime}-{displayEndTime}&nbsp;
                   </span>
-                  <span className="hide-m emoji">
+                  <span className="m-hide emoji">
                     <i className="fa-solid fa-map-pin"></i>&nbsp;
                   </span>
-                  <span className="hide-m venue">{venueName}</span>
+                  <span className="m-hide venue">{venueName}</span>
                 </p>
 
-                <p className={`hide-m ${ticketLabel}`}>
+                <p className={`m-hide ${ticketLabel}`}>
                   <span className="emoji">
                     <i className="fa-solid fa-ticket"></i>
                   </span>{' '}

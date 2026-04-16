@@ -2,6 +2,7 @@ import React from 'react';
 import DateDropdown from '../../timeline/components/ui/DateDropdown';
 import FiltersDropdown from '../../timeline/components/ui/FiltersDropdown';
 import SheTheyForwardToggle from './SheTheyForwardToggle';
+import JustAddedToggle from './JustAddedToggle';
 import { showSheTheyForwardFilter } from '../../utils/cityFeatureFlags';
 import { trackPlausible } from '../../utils/plausible';
 
@@ -48,6 +49,14 @@ function EventsToolbar({
           }}
         />
       )}
+
+      <JustAddedToggle
+        enabled={!!filterSelections.addedLastWeekOnly}
+        onChange={(next) => {
+          trackPlausible('Just Added Filter', { state: next ? 'on' : 'off' });
+          setFilterSelections((prev) => ({ ...prev, addedLastWeekOnly: next }));
+        }}
+      />
 
       <DateDropdown
         selectedDate={selectedDate}

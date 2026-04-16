@@ -8,6 +8,7 @@ import {
   syncSheTheyOver50State,
 } from '../utils/sheTheyTheme';
 import { sheTheyForwardLineupPercent } from '../utils/pronounDisplay';
+import { eventCreatedInLastWeek } from '../utils/eventRecency';
 
 const defaultFilters = {
   genre: [],
@@ -21,6 +22,8 @@ const defaultFilters = {
   sheTheyForwardTimeline: false,
   /** When true (and she-they mode on), list only events whose lineup is at least 50% she/they-forward. */
   sheTheyOver50Lineup: false,
+  /** When true, only events whose `created_at` is within the last 7 days. */
+  addedLastWeekOnly: false,
 };
 
 function useEventFilters({ eventsByDate, activeDates = [] }) {
@@ -40,10 +43,18 @@ function useEventFilters({ eventsByDate, activeDates = [] }) {
 
   const hasActiveFilters = useMemo(() => {
     const arrayKeys = Object.entries(filterSelections).filter(
-      ([k]) => k !== 'sheTheyForwardTimeline' && k !== 'sheTheyOver50Lineup'
+      ([k]) =>
+        k !== 'sheTheyForwardTimeline' &&
+        k !== 'sheTheyOver50Lineup' &&
+        k !== 'addedLastWeekOnly'
     );
     const arraysActive = arrayKeys.some(([, v]) => Array.isArray(v) && v.length > 0);
-    return arraysActive;
+    return (
+      arraysActive ||
+      filterSelections.addedLastWeekOnly === true ||
+      filterSelections.sheTheyForwardTimeline === true ||
+      filterSelections.sheTheyOver50Lineup === true
+    );
   }, [filterSelections]);
 
   const resetFilters = () =>
@@ -51,6 +62,7 @@ function useEventFilters({ eventsByDate, activeDates = [] }) {
       ...defaultFilters,
       sheTheyForwardTimeline: prev.sheTheyForwardTimeline,
       sheTheyOver50Lineup: false,
+      addedLastWeekOnly: false,
     }));
 
   useEffect(() => {
@@ -159,6 +171,10 @@ function useEventFilters({ eventsByDate, activeDates = [] }) {
         const pct = sheTheyForwardLineupPercent(event.artists || []);
         return pct != null && pct >= 50;
       });
+    }
+
+    if (filterSelections.addedLastWeekOnly) {
+      dayEvents = dayEvents.filter((event) => eventCreatedInLastWeek(event));
     }
 
     return dayEvents;
