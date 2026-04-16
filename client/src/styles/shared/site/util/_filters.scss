@@ -465,9 +465,17 @@
 
 .she-they-forward-subtoggle__row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 0.65rem;
+}
+
+.she-they-forward-subtoggle__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+  flex: 1;
 }
 
 .she-they-forward-subtoggle__label {
@@ -476,6 +484,13 @@
   line-height: 1.35;
   text-align: left;
   color: color-mix(in srgb, var(--color-text) 92%, transparent);
+}
+
+.she-they-forward-subtoggle__hint {
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: color-mix(in srgb, var(--color-text) 72%, transparent);
 }
 
 .she-they-forward-switch--sub .she-they-forward-switch__track {

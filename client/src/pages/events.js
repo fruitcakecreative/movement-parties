@@ -26,6 +26,7 @@ import {
   getActiveTimelineDateKeys,
 } from '../utils/timelineSchedule';
 import { showSheTheyForwardFilter } from '../utils/cityFeatureFlags';
+import { sheTheyForwardLineupPercent } from '../utils/pronounDisplay';
 
 const cfg = await loadCityConfig();
 const customDateRanges = cfg.customDateRanges;
@@ -190,6 +191,18 @@ function Events() {
     resetFilters,
   } = useEventFilters({ eventsByDate, activeDates });
 
+  const sheTheyOver50LineupStats = useMemo(() => {
+    const total = allEvents.length;
+    if (total === 0) return null;
+    let match = 0;
+    for (const e of allEvents) {
+      const pct = sheTheyForwardLineupPercent(e.artists || []);
+      if (pct != null && pct >= 50) match += 1;
+    }
+    const pctRounded = Math.round((match / total) * 100);
+    return { match, total, pctRounded };
+  }, [allEvents]);
+
   const sheTheyForwardTimeline =
     showSheTheyForwardFilter && filterSelections.sheTheyForwardTimeline;
 
@@ -215,6 +228,7 @@ function Events() {
               dates={activeDates}
               timeZone={timelineTimeZone}
               isLoaded={isLoaded}
+              sheTheyOver50LineupStats={sheTheyOver50LineupStats}
               filterSelections={filterSelections}
               setFilterSelections={setFilterSelections}
               genreOptions={genreOptions}

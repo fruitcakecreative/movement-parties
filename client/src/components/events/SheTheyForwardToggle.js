@@ -12,6 +12,7 @@ function SheTheyForwardToggle({
   onEnabledChange,
   over50Only = false,
   onOver50Change,
+  over50LineupStats = null,
 }) {
   return (
     <div className="she-they-forward-rail">
@@ -39,14 +40,24 @@ function SheTheyForwardToggle({
         {enabled && typeof onOver50Change === 'function' && (
           <div className="she-they-forward-subtoggle">
             <div className="she-they-forward-subtoggle__row">
-              <span className="she-they-forward-subtoggle__label" id="she-they-over50-label">
-                Only show events with an over 50% she/they lineup
-              </span>
+              <div className="she-they-forward-subtoggle__copy">
+                <span className="she-they-forward-subtoggle__label" id="she-they-over50-label">
+                  Only show events that have atleast 50% she/they artists
+                </span>
+                {over50LineupStats != null && over50LineupStats.total > 0 && (
+                  <span className="she-they-forward-subtoggle__hint" id="she-they-over50-hint">
+                    {over50LineupStats.match} out of {over50LineupStats.total} events ({over50LineupStats.pctRounded}%)
+                  </span>
+                )}
+              </div>
               <button
                 type="button"
                 role="switch"
                 aria-checked={over50Only}
                 aria-labelledby="she-they-over50-label"
+                aria-describedby={
+                  over50LineupStats != null && over50LineupStats.total > 0 ? 'she-they-over50-hint' : undefined
+                }
                 aria-label={
                   over50Only
                     ? 'Turn off at least 50 percent she-they lineup filter'

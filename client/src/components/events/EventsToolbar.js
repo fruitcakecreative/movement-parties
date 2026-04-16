@@ -25,11 +25,13 @@ function EventsToolbar({
   setVenueSearchQuery,
   filteredVenues,
   setFilteredVenues,
+  sheTheyOver50LineupStats = null,
 }) {
   return (
     <>
       {showSheTheyForwardFilter && (
         <SheTheyForwardToggle
+          over50LineupStats={sheTheyOver50LineupStats}
           enabled={!!filterSelections.sheTheyForwardTimeline}
           onEnabledChange={(next) => {
             trackPlausible('No Boys Club', { state: next ? 'on' : 'off' });
