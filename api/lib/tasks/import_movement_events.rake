@@ -145,7 +145,7 @@ namespace :import do
 
             event.genres = genres unless event.manual_override_genres
 
-            if event_info["artists"]
+            if event_info["artists"] && !event.manual_override_artists
               event_info["artists"].each do |artist_data|
                 artist = Artist.find_or_create_by_canonical_name!(artist_data["name"])
                 event.artists << artist if artist && !event.artists.include?(artist)
@@ -165,7 +165,7 @@ namespace :import do
         end
       end
 
-      Rails.cache.delete("events-v1:movement") rescue nil
+      Event.clear_public_index_cache!("movement")
       puts "Finished importing Movement events from #{filename}"
       puts "Created: #{created_count}"
       puts "Updated: #{updated_count}"
