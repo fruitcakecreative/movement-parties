@@ -14,6 +14,8 @@ const HE_PRESENTING = new Set([
   'he/him duo',
   'he/him trio',
   'he/him group',
+  'doesnt use pronouns',
+  "doesn't use pronouns",
 ]);
 
 export function pronounTokens(pronouns) {
@@ -24,7 +26,7 @@ export function pronounTokens(pronouns) {
     .filter(Boolean);
 }
 
-/** True if any listed token is he-presenting (he/him, he/they, he/him duo|trio|group). */
+/** True if any listed token is he-presenting (he/him, he/they, he/him duo|trio|group, doesnt use pronouns, …). */
 export function artistIsHePresenting(pronouns) {
   const tokens = pronounTokens(pronouns);
   if (tokens.length === 0) return false;
