@@ -85,28 +85,42 @@ export function artistSheTheyListSortRank(pronouns) {
   return 0;
 }
 
-/** Mixed duo / mixed group / unknown — omitted from she/they % (still listed in UI). */
-function tokensExcludedFromSheTheyLineupPercent(tokens) {
-  if (tokensHasMixedNeutralLineup(tokens)) return true;
-  return tokens.includes('unknown');
-}
-
 /**
- * Share of billed artists who are she/they-forward (not he-presenting), among artists
- * with at least one pronoun on file. Returns null when no one has pronouns (avoids a bogus 100%).
- * `mixed duo`, `mixed group`, and `unknown` are omitted from numerator and denominator.
+ * Share of lineup that is she/they-forward, using **slots** so mixed billings count fairly:
+ * - Each normal artist = 1 slot (forward if not he-presenting).
+ * - `mixed duo` = 2 slots (1 she/they-forward, 1 he).
+ * - `mixed group` = 3 slots (1 she/they-forward, 2 he).
+ * `unknown` is still omitted (no slots). Returns null when there are no countable slots.
  */
 export function sheTheyForwardLineupPercent(artists) {
   const list = Array.isArray(artists) ? artists : [];
-  const withPronouns = list.filter((a) => {
+  let totalSlots = 0;
+  let forwardSlots = 0;
+
+  for (const a of list) {
     const tokens = pronounTokens(a?.pronouns);
-    if (tokens.length === 0) return false;
-    if (tokensExcludedFromSheTheyLineupPercent(tokens)) return false;
-    return true;
-  });
-  if (withPronouns.length === 0) return null;
-  const forward = withPronouns.filter((a) => !artistIsHePresenting(a?.pronouns));
-  return Math.round((forward.length / withPronouns.length) * 100);
+    if (tokens.length === 0) continue;
+    if (tokens.includes('unknown')) continue;
+
+    if (tokens.includes('mixed group')) {
+      totalSlots += 3;
+      forwardSlots += 1;
+      continue;
+    }
+    if (tokens.includes('mixed duo')) {
+      totalSlots += 2;
+      forwardSlots += 1;
+      continue;
+    }
+
+    totalSlots += 1;
+    if (!artistIsHePresenting(a?.pronouns)) {
+      forwardSlots += 1;
+    }
+  }
+
+  if (totalSlots === 0) return null;
+  return Math.round((forwardSlots / totalSlots) * 100);
 }
 
 /**
