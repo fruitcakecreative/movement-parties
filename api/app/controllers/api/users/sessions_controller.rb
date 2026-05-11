@@ -15,12 +15,14 @@ class Api::Users::SessionsController < Devise::SessionsController
   def create
     self.resource = warden.authenticate!(auth_options)
     sign_in(resource_name, resource, remember: true)
+    resource.save(validate: false) if resource.authentication_token.blank?
 
     render json: {
       user: {
         id: resource.id,
         email: resource.email,
         username: resource.username,
+        authentication_token: resource.authentication_token,
         # avatar_url: resource.avatar_url
       }
     }

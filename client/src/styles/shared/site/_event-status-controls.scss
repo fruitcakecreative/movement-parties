@@ -1,0 +1,479 @@
+@use "../variables" as *;
+
+/* Interested / Attending — timeline (compact), detail (pills), venue card (card) */
+.event-status {
+  flex-shrink: 0;
+  color: inherit;
+}
+
+.event-status--compact {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+
+.event-status--compact.event-status--card {
+  gap: 5px;
+  width: 100%;
+  max-width: 100%;
+  align-items: flex-end;
+}
+
+.event-status__compact-hint-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 0;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+.event-status--card .event-status__compact-hint-row {
+  justify-content: flex-end;
+}
+
+.event-status__friend-hint--compact {
+  font-size: 0.62rem;
+  font-weight: 500;
+  line-height: 1.25;
+  color: color-mix(in srgb, var(--color-text, #1a0f18) 56%, transparent);
+  white-space: nowrap;
+}
+
+.event-status__friend-sep--compact {
+  flex-shrink: 0;
+  padding: 0 0.18rem;
+  font-size: 0.62rem;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--color-text, #1a0f18) 38%, transparent);
+}
+
+.event-status__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-radius: var(--radius-button, 0.25rem);
+  /* Calm default but still scannable (too-light mix hid icons entirely on small sizes) */
+  background: transparent;
+  color: color-mix(in srgb, currentColor 62%, transparent);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.1s ease,
+    opacity 0.15s ease;
+
+  i {
+    font-size: 0.95rem;
+  }
+
+  &:hover:not(:disabled),
+  &:focus-visible:not(:disabled) {
+    color: color-mix(in srgb, currentColor 88%, transparent);
+    background: color-mix(in srgb, currentColor 12%, transparent);
+  }
+
+  &:focus-visible:not(:disabled) {
+    outline: 2px solid color-mix(in srgb, currentColor 60%, transparent);
+    outline-offset: 1px;
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+}
+
+.event-status--card .event-status__icon {
+  width: 1.8rem;
+  height: 1.8rem;
+  opacity: 1;
+  color: color-mix(in srgb, currentColor 88%, transparent);
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  background: color-mix(in srgb, currentColor 8%, transparent);
+
+  i {
+    font-size: 1.05rem;
+    opacity: 1;
+  }
+}
+
+.event-status__icon--on {
+  background: color-mix(in srgb, var(--color-primary) 22%, transparent);
+  color: var(--color-primary);
+}
+
+/* Bottom sheet / detail pills — one row each: [pill] – friend counts */
+.event-status--pills {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  width: 100%;
+}
+
+.event-status__pill-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0;
+  width: 100%;
+}
+
+.event-status--pills .event-status__pill {
+  width: auto;
+  min-width: 6.75rem;
+  flex-shrink: 0;
+}
+
+.event-status__friend-sep {
+  flex-shrink: 0;
+  padding: 0 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  font-style: italic;
+  color: var(--color-text-light);
+}
+
+.event-status__friend-hint {
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.35;
+  font-style: italic;
+  color: var(--color-text-light);
+  text-align: left;
+}
+
+.event-status__pill {
+  width: 120px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 1.66rem;
+  padding: 0.3rem .3rem;
+  border: 1px solid 
+color-mix(in srgb, currentColor 30%, transparent);
+  border-radius: var(--radius-button);
+  background: transparent;
+  color: 
+color-mix(in srgb, currentColor 78%, transparent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+
+  i {
+    font-size: .85rem;
+    opacity: 0.85;
+  }
+
+  &:hover:not(:disabled),
+  &:focus-visible:not(:disabled) {
+    border-color: color-mix(in srgb, currentColor 55%, transparent);
+    color: currentColor;
+  }
+
+  &:focus-visible:not(:disabled) {
+    outline: 2px solid color-mix(in srgb, currentColor 60%, transparent);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.event-status__pill--active {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 18%, transparent);
+  color: var(--color-primary);
+}
+
+/* Event details pills: match status semantics (yellow interested / green attending) */
+.event-status__pill--interested:hover:not(:disabled),
+.event-status__pill--interested:focus-visible:not(:disabled),
+.event-status__pill--interested.event-status__pill--active {
+  border-color: #ca8a04;
+  background: #ca8a04;
+  color: #fff;
+}
+
+.event-status__pill--attending:hover:not(:disabled),
+.event-status__pill--attending:focus-visible:not(:disabled),
+.event-status__pill--attending.event-status__pill--active {
+  border-color: #15803d;
+  background: #15803d;
+  color: #fff;
+}
+
+/* Timeline: narrow column to the RIGHT of the program box (sibling, not inside card) */
+.program-item-status-rail {
+  box-sizing: border-box;
+  padding: 4px 3px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.07);
+  -webkit-tap-highlight-color: transparent;
+  }
+
+.event-status--timeline-rail.event-status--compact {
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+/* Default (idle): keep subtle — your tuned look lives here */
+.event-status--timeline-rail .event-status__icon {
+  width: 1.65rem;
+  height: 1.65rem;
+  border: 1px solid rgba(255, 238, 218, 0.5);
+  opacity: 0.5;
+  color: color-mix(in srgb, var(--color-text) 58%, transparent);
+
+  i {
+    font-size: 0.88rem;
+    color: var(--color-text-light);
+    opacity: 0.5;
+  }
+}
+
+/* Hover / keyboard focus / press (incl. mobile :active while touching) — fully opaque */
+.event-status--timeline-rail .event-status__icon--interested:hover:not(:disabled),
+.event-status--timeline-rail .event-status__icon--interested:active:not(:disabled) {
+  opacity: 1;
+  background: #eab308;
+  border-color: #ca8a04;
+  color: #fff;
+
+  i {
+    color: #fff;
+    opacity: 1;
+  }
+}
+
+.event-status--timeline-rail .event-status__icon--interested:focus-visible:not(:disabled) {
+  opacity: 1;
+  background: #eab308;
+  border-color: #ca8a04;
+  color: #fff;
+  outline: 2px solid #713f12;
+  outline-offset: 2px;
+
+  i {
+    color: #fff;
+    opacity: 1;
+  }
+}
+
+.event-status--timeline-rail .event-status__icon--attending:hover:not(:disabled),
+.event-status--timeline-rail .event-status__icon--attending:active:not(:disabled) {
+  opacity: 1;
+  background: #16a34a;
+  border-color: #15803d;
+  color: #fff;
+
+  i {
+    color: #fff;
+    opacity: 1;
+  }
+}
+
+.event-status--timeline-rail .event-status__icon--attending:focus-visible:not(:disabled) {
+  opacity: 1;
+  background: #16a34a;
+  border-color: #15803d;
+  color: #fff;
+  outline: 2px solid #bbf7d0;
+  outline-offset: 2px;
+
+  i {
+    color: #fff;
+    opacity: 1;
+  }
+}
+
+/* Selected — same solid yellow / green (not theme primary) */
+.event-status--timeline-rail .event-status__icon--interested.event-status__icon--on {
+  opacity: 1;
+  background: #eab308;
+  border-color: #ca8a04;
+  color: #fff;
+
+  i {
+    color: #fff;
+    opacity: 1;
+  }
+}
+
+.event-status--timeline-rail .event-status__icon--attending.event-status__icon--on {
+  opacity: 1;
+  background: #16a34a;
+  border-color: #15803d;
+  color: #fff;
+
+  i {
+    color: #fff;
+    opacity: 1;
+  }
+}
+
+/* Match homepage status colors for card/footer controls too */
+.event-status--card .event-status__icon--interested:hover:not(:disabled),
+.event-status--card .event-status__icon--interested:active:not(:disabled) {
+  opacity: 1;
+  background: #eab308;
+  border-color: #ca8a04;
+  color: #fff;
+
+  i {
+    color: #fff;
+    opacity: 1;
+  }
+}
+
+.event-status--card .event-status__icon--interested:focus-visible:not(:disabled) {
+  opacity: 1;
+  background: #eab308;
+  border-color: #ca8a04;
+  color: #fff;
+  outline: 2px solid #713f12;
+  outline-offset: 2px;
+
+  i {
+    color: #fff;
+    opacity: 1;
+  }
+}
+
+.event-status--card .event-status__icon--attending:hover:not(:disabled),
+.event-status--card .event-status__icon--attending:active:not(:disabled) {
+  opacity: 1;
+  background: #16a34a;
+  border-color: #15803d;
+  color: #fff;
+
+  i {
+    color: #fff;
+    opacity: 1;
+  }
+}
+
+.event-status--card .event-status__icon--attending:focus-visible:not(:disabled) {
+  opacity: 1;
+  background: #16a34a;
+  border-color: #15803d;
+  color: #fff;
+  outline: 2px solid #bbf7d0;
+  outline-offset: 2px;
+
+  i {
+    color: #fff;
+    opacity: 1;
+  }
+}
+
+.event-status--card .event-status__icon--interested.event-status__icon--on {
+  opacity: 1;
+  background: #eab308;
+  border-color: #ca8a04;
+  color: #fff;
+
+  i {
+    color: #fff;
+    opacity: 1;
+  }
+}
+
+.event-status--card .event-status__icon--attending.event-status__icon--on {
+  opacity: 1;
+  background: #16a34a;
+  border-color: #15803d;
+  color: #fff;
+
+  i {
+    color: #fff;
+    opacity: 1;
+  }
+}
+
+/* Venue / event card footer strip */
+.event-card-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  border: 1px solid color-mix(in srgb, var(--event-card-font, var(--color-text)) 24%, transparent);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+
+.event-card-stack .event-card {
+  margin-bottom: 0;
+  border-radius: 0;
+  border: none;
+}
+
+.event-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  row-gap: 4px;
+  color: var(--event-card-font, var(--color-text));
+  padding: $space-2 $space-3;
+  background: color-mix(in srgb, var(--event-card-bg, var(--color-bg-light)) 90%, #000 10%);
+  border: 0;
+  border-top: none;
+  border-radius: 0;
+}
+
+.event-card-footer .event-status--card {
+  flex: 1 1 auto;
+  min-width: 0;
+  justify-content: flex-end;
+}
+
+/* Mobile tap feedback label (option 2): appears briefly after tap */
+.event-status--timeline-rail.event-status--compact {
+  position: relative;
+}
+
+.event-status--timeline-rail .event-status__icon-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.event-status--timeline-rail .event-status__tap-label {
+  position: absolute;
+  left: calc(100% + 0.35rem);
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  pointer-events: none;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  padding: 0.16rem 0.4rem;
+  border-radius: 9999rem;
+  background: rgb(0 0 0 / 0.65);
+  color: #fff;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.2);
+}
+
+@media (min-width: $bp-md) {
+  .event-status--timeline-rail .event-status__tap-label {
+    display: none;
+  }
+}

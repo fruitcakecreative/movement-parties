@@ -20,7 +20,14 @@ const FacebookLoginButton = (props) => {
         try {
           const data = await loginWithFacebook(userData);
           if (data.user) {
-            localStorage.setItem("user", JSON.stringify(data.user));
+            const u = data.user;
+            localStorage.setItem(
+              "user",
+              JSON.stringify({
+                ...u,
+                authentication_token: u.authentication_token || u.token,
+              })
+            );
             window.location.href = "/profile";
           }
         } catch (err) {

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { FriendCountsProvider } from '../../context/FriendCountsContext';
 import EventCard from '../EventCard';
 import { formatDescription } from '../../utils/formatDescription';
 
@@ -35,6 +36,11 @@ function VenueDetailsContent({
   useEffect(() => {
     setShowFullDescription(false);
   }, [venue?.id]);
+
+  const venueFriendCountEventIds = useMemo(
+    () => (venueEvents || []).map((e) => e.id).filter((id) => id != null),
+    [venueEvents]
+  );
 
   const { groupedEvents, sectionOrder } = useMemo(() => {
     const sortedEvents = [...venueEvents].sort(
@@ -119,6 +125,7 @@ function VenueDetailsContent({
       : venue_type;
 
   return (
+    <FriendCountsProvider eventIds={venueFriendCountEventIds}>
     <div
       ref={contentRef}
       className="event-details-content venue-details-content"
@@ -298,6 +305,7 @@ function VenueDetailsContent({
         </div>
       )}
     </div>
+    </FriendCountsProvider>
   );
 }
 

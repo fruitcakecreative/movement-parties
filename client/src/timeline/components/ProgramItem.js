@@ -1,6 +1,8 @@
 import React from 'react';
 import { ProgramBox, ProgramContent, useProgram } from '@nessprim/planby-pro';
 import formatVenueName from '../../utils/formatVenueName';
+import { useFriendCounts } from '../../context/FriendCountsContext';
+import EventStatusControls from '../../components/events/EventStatusControls';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { getEventDisplayData } from '../../utils/eventDisplay';
 import {
@@ -76,7 +78,55 @@ const ProgramItem = ({ program, scrollLeft, openEvent, sheTheyForwardTimeline = 
     openEvent?.(program.data.event_id || program.data.id);
   };
 
+  const timelineEventId = program.data?.event_id ?? program.data?.id;
+
+  const { get: friendCountsFor } = useFriendCounts();
+  const fc = friendCountsFor(timelineEventId);
+  const timelineFriendHints =
+    fc.friendsInterested != null &&
+    fc.friendsAttending != null &&
+    (fc.friendsInterested > 0 || fc.friendsAttending > 0);
+
+  const pos = program.position || {};
+  const sp = styles.position || {};
+  const leftPx =
+    typeof pos.left === 'number'
+      ? pos.left
+      : parseFloat(String(sp.left ?? 0)) || 0;
+  const widthPx =
+    typeof pos.width === 'number'
+      ? pos.width
+      : typeof styles.width === 'number'
+        ? styles.width
+        : parseFloat(String(styles.width ?? 0)) || 0;
+  const topPx =
+    typeof pos.top === 'number'
+      ? pos.top
+      : parseFloat(String(sp.top ?? 0)) || 0;
+  const heightPx =
+    typeof pos.height === 'number'
+      ? pos.height
+      : parseFloat(String(sp.height ?? 0)) || 0;
+  const zBase = parseInt(String(sp.zIndex ?? 1), 10) || 1;
+
+  const railStyle = {
+    position: 'absolute',
+    left: leftPx + widthPx,
+    top: topPx,
+    height: heightPx > 0 ? heightPx : undefined,
+    minHeight: heightPx > 0 ? undefined : 40,
+    width: timelineFriendHints ? 'auto' : 34,
+    maxWidth: timelineFriendHints ? 220 : 34,
+    minWidth: 34,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: zBase + 2,
+    pointerEvents: 'auto',
+  };
+
   return (
+    <>
     <ProgramBox
       width={styles.width}
       style={styles.position}
@@ -227,6 +277,22 @@ const ProgramItem = ({ program, scrollLeft, openEvent, sheTheyForwardTimeline = 
         )}
       </ProgramContent>
     </ProgramBox>
+    <div
+      className="program-item-status-rail"
+      style={railStyle}
+      onClick={(e) => e.stopPropagation()}
+      role="presentation"
+    >
+      <EventStatusControls
+        variant="compact"
+        eventId={timelineEventId}
+        className="event-status--timeline-rail"
+        showTapLabel={isMobile}
+        friendsInterestedCount={fc.friendsInterested}
+        friendsAttendingCount={fc.friendsAttending}
+      />
+    </div>
+    </>
   );
 };
 

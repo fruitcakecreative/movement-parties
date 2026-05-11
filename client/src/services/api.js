@@ -19,6 +19,16 @@ export const isUnauthorized = (err) => err?.response?.status === 401;
 api.interceptors.request.use((config) => {
   config.headers = config.headers || {};
   config.headers["X-City-Key"] = city;     // server supports this
+  try {
+    const raw = localStorage.getItem("user");
+    if (raw) {
+      const u = JSON.parse(raw);
+      const t = u.authentication_token || u.token;
+      if (t) config.headers.Authorization = `Bearer ${t}`;
+    }
+  } catch (_) {
+    /* ignore */
+  }
   // optional also add query param for easier debugging:
   // config.params = { ...(config.params || {}), city };
   return config;
@@ -63,6 +73,12 @@ export const fetchUserEvents = async () => {
   return response.data;
 };
 
+/** Self or accepted friend only (404 otherwise). Shape matches GET /user_events. */
+export const fetchUserEventsForUser = async (userId) => {
+  const response = await api.get(`/users/${userId}/user_events`);
+  return response.data;
+};
+
 export const saveUserEventStatus = async (eventId, status) => {
   return api.post('/user_events', {
     user_event: {
@@ -72,16 +88,89 @@ export const saveUserEventStatus = async (eventId, status) => {
   });
 };
 
-export const deleteUserEventStatus = async (eventId, status) => {
-  return api.delete('/user_events', {
-    data: { user_event: { event_id: eventId, status } },
+export const deleteUserEventStatus = async (eventId) => {
+  return api.delete(`/user_events/${eventId}`);
+};
+
+/** How many of your accepted friends have this event as attending / interested. */
+export const fetchFriendEventCounts = async (eventId) => {
+  const { data } = await api.get(`/user_events/${eventId}/friend_counts`);
+  return {
+    friendsAttending: data.friends_attending ?? 0,
+    friendsInterested: data.friends_interested ?? 0,
+  };
+};
+
+/** Batch version — one request for many event ids (string keys in response). */
+export const fetchFriendEventCountsBatch = async (eventIds) => {
+  const unique = [
+    ...new Set((eventIds || []).filter((id) => id != null).map((id) => Number(id))),
+  ].filter((n) => !Number.isNaN(n));
+  if (unique.length === 0) return {};
+
+  const { data } = await api.post('/user_events/friend_counts_batch', {
+    event_ids: unique,
   });
+  const raw = data.counts || {};
+  const out = {};
+  for (const [k, v] of Object.entries(raw)) {
+    out[String(k)] = {
+      friendsAttending: v.friends_attending ?? 0,
+      friendsInterested: v.friends_interested ?? 0,
+    };
+  }
+  return out;
+};
+
+/** Avatar upload — multipart; must not use axios default JSON Content-Type. */
+export const uploadUserAvatar = async (file) => {
+  const formData = new FormData();
+  formData.append("avatar", file);
+  const raw = localStorage.getItem("user");
+  const u = raw ? JSON.parse(raw) : {};
+  const token = u.authentication_token || u.token;
+  const headers = { "X-City-Key": city };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const res = await fetch(`${API_BASE_URL}/user/upload_avatar`, {
+    method: "POST",
+    body: formData,
+    credentials: "include",
+    headers,
+  });
+  let data = {};
+  try {
+    data = await res.json();
+  } catch (_) {
+    /* ignore */
+  }
+  if (!res.ok) {
+    const err = new Error(data.error || data.message || "Upload failed");
+    err.response = { status: res.status, data };
+    throw err;
+  }
+  return data;
 };
 
 //user profile info
-export const fetchUserInfo = async (token) => {
+/** Public-ish profile for a user id (friends only, or your own id). */
+export const fetchUserPublicProfile = async (userId) => {
+  const res = await api.get(`/users/${userId}`);
+  return res.data;
+};
+
+export const fetchUserInfo = async () => {
   const response = await api.get('/user');
-  return response.data;
+  const data = response.data;
+  try {
+    const raw = localStorage.getItem('user');
+    const prev = raw ? JSON.parse(raw) : {};
+    if (data?.authentication_token) {
+      localStorage.setItem('user', JSON.stringify({ ...prev, ...data }));
+    }
+  } catch (_) {
+    /* ignore */
+  }
+  return data;
 };
 
 
@@ -110,16 +199,26 @@ export const fetchFriendshipList = async () => {
   return res.data;
 };
 
-export const sendFriendRequest = async (username) => {
-  return api.post('/friendships', { username });
+export const searchUsers = async (q) => {
+  const res = await api.get('/friendships/search', { params: { q } });
+  return res.data;
+};
+
+export const fetchPendingFriendRequests = async () => {
+  const res = await api.get('/friendships/pending');
+  return res.data;
+};
+
+export const sendFriendRequest = async ({ username, user_id }) => {
+  return api.post('/friendships', { username, user_id });
 };
 
 export const acceptFriendRequest = async (user_id) => {
   return api.post("/friendships/accept", { user_id });
 };
 
-export const cancelFriendRequest = async (username) => {
-  return api.delete("/friendships", { data: { username } });
+export const cancelFriendRequest = async ({ username, user_id }) => {
+  return api.delete("/friendships", { data: { username, user_id } });
 };
 
 export const rejectFriendRequest = async (user_id) => {

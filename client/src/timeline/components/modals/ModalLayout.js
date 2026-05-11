@@ -6,14 +6,14 @@ const ModalLayout = ({
   className = '',
   header,
   children,
-  parent,
+  parent = '',
   innerStyle = {},
   topRowStyle = {},
 }) => {
   if (!isOpen) return null;
 
   return ReactDOM.createPortal(
-    <div className={`program-modal ${className} ${parent}`}>
+    <div className={`program-modal ${className} ${parent}`.trim()}>
       <div className="modal-outer">
         <div className="modal-inner" style={innerStyle}>
           <div className="top-row" style={topRowStyle}>

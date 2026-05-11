@@ -17,17 +17,26 @@ Rails.application.routes.draw do
     post "logs", to: "logs#create"
     post 'users/create_from_facebook', to: 'users#create_from_facebook'
     get "user_events/:event_id/friend_attendees", to: "user_events#friend_attendees"
+    get "user_events/:event_id/friend_counts", to: "user_events#friend_counts"
+    post "user_events/friend_counts_batch", to: "user_events#friend_counts_batch"
     resources :events
     resources :venues, only: [:index, :show]
     resources :artists, only: [:index, :show]
     resources :genres, only: [:index]
     resources :event_attendees, only: [:create, :destroy]
-    resources :user_events, only: [:create, :destroy, :index]
+    # DELETE by event id (client uses /user_events/:event_id — not UserEvent record id)
+    delete "user_events/:event_id", to: "user_events#destroy"
+    resources :user_events, only: [:create, :index]
     resources :ticket_posts, only: [:index, :create]
     resources :friendships, only: [:index, :create] do
         get :pending, on: :collection
+        get :search, on: :collection
         post :accept, on: :collection
+        post :reject, on: :collection
       end
+    delete "friendships", to: "friendships#destroy"
+    get "users/:user_id/user_events", to: "user_events#for_user", constraints: { user_id: /\d+/ }
+    get "users/:id", to: "users#show_by_id", constraints: { id: /\d+/ }
     resource :user, only: [:show] do
       post :upload_avatar
     end

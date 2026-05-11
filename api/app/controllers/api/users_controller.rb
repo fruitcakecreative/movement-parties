@@ -34,6 +34,7 @@ class Api::UsersController < ApplicationController
           email: @user.email,
           username: @user.username,
           picture: @user.picture,
+          authentication_token: @user.authentication_token,
           token: @user.authentication_token
         }
       }, status: :created
@@ -59,7 +60,46 @@ class Api::UsersController < ApplicationController
       name: current_user.name,
       email: current_user.email,
       username: current_user.username,
+      authentication_token: current_user.authentication_token,
       avatar_url: current_user.avatar.attached? ? url_for(current_user.avatar) : current_user.picture
+    }
+  end
+
+  # Another member's profile (must be friends, or your own id for a consistent client shape).
+  def show_by_id
+    id = Integer(params[:id], exception: false)
+    return render json: { error: "Not found" }, status: :not_found unless id
+
+    other = User.with_attached_avatar.find_by(id: id)
+    return render json: { error: "Not found" }, status: :not_found unless other
+
+    if other.id == current_user.id
+      return render json: public_user_json(other, is_self: true, is_friend: false)
+    end
+
+    unless accepted_friendship?(current_user, other)
+      return render json: { error: "Not found" }, status: :not_found
+    end
+
+    render json: public_user_json(other, is_self: false, is_friend: true)
+  end
+
+  private
+
+  def accepted_friendship?(a, b)
+    Friendship.exists?(user: a, friend: b, status: "accepted") ||
+      Friendship.exists?(user: b, friend: a, status: "accepted")
+  end
+
+  def public_user_json(user, is_self:, is_friend:)
+    {
+      id: user.id,
+      name: user.name,
+      username: user.username,
+      avatar_url: user.avatar.attached? ? url_for(user.avatar) : nil,
+      picture: user.picture.presence,
+      is_self: is_self,
+      is_friend: is_friend
     }
   end
 end

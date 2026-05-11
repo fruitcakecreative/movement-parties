@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useFriendCounts } from '../../context/FriendCountsContext';
 import ArtistNameLine from '../ArtistNameLine';
 import { getEventDisplayData } from '../../utils/eventDisplay';
 import SheTheyForwardLineupBadge from '../SheTheyForwardLineupBadge';
@@ -8,6 +9,7 @@ import {
   artistSheTheyListSortRank,
 } from '../../utils/pronounDisplay';
 import { formatDescription } from '../../utils/formatDescription';
+import EventStatusControls from './EventStatusControls';
 
 function EventDetailsContent({
   event,
@@ -20,6 +22,7 @@ function EventDetailsContent({
 }) {
   const contentRef = useRef(null);
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const { get: friendCountsFor } = useFriendCounts();
 
   const stripHtml = (html = '') => {
     const div = document.createElement('div');
@@ -88,6 +91,8 @@ function EventDetailsContent({
     return (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' });
   });
 
+  const friendCountProps = friendCountsFor(event.id);
+
   return (
     <div
       ref={contentRef}
@@ -136,6 +141,7 @@ function EventDetailsContent({
           )}
         </div>
 
+      
         <SheTheyForwardLineupBadge
           sheTheyForwardTimeline={sheTheyForwardTimeline}
           artists={sortedDisplayArtists}
@@ -143,6 +149,16 @@ function EventDetailsContent({
         />
 
         <h1 className="title mb-xs">{displayTitle}</h1>
+
+        <div className="mb-sm">
+          <EventStatusControls
+            variant="pills"
+            eventId={event?.id}
+            friendsInterestedCount={friendCountProps.friendsInterested}
+            friendsAttendingCount={friendCountProps.friendsAttending}
+          />
+        </div>
+
 
           <div className="event-venue-location flex">
             {venueName &&

@@ -12,7 +12,10 @@ class Api::Users::RegistrationsController < Devise::RegistrationsController
     resource.save
     if resource.persisted?
       sign_in(resource_name, resource, remember: true)
-      render json: { message: 'Signed up.', user: resource.slice(:id, :email) }, status: :ok
+      render json: {
+        message: 'Signed up.',
+        user: resource.slice(:id, :email, :authentication_token)
+      }, status: :ok
     else
       render json: { errors: resource.errors.full_messages }, status: :unprocessable_entity
     end

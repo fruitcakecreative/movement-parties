@@ -53,9 +53,9 @@ function EventsIntro({
             )}
           </div>
         )}
-        <h3 className="mini-heading">
+        <h4 className="mini-heading">
           Relevant Info <i className="fa-solid fa-circle-info"></i>
-        </h3>
+        </h4>
         <ul>
           <li>
             The site scrapes basic event data from various major platforms. All other events + specific event info that
@@ -79,9 +79,9 @@ function EventsIntro({
       </div>
 
       <div className="container">
-        <h3 className="mini-heading">
+        <h4 className="mini-heading">
           Connect with Me <i className="fa-solid fa-heart"></i>
-        </h3>
+        </h4>
 
         <div className="socials flex-wrap">
           <a
@@ -120,9 +120,9 @@ function EventsIntro({
       </div>
 
       <div className="container">
-        <h3 className="mini-heading">
+        <h4 className="mini-heading">
           Support the Cause <i className="fa-solid fa-handshake-angle"></i>
-        </h3>
+        </h4>
 
         <p className="mb-sm">
           I made this out of pure love for the party and expect nothing in return. But, I do pay

@@ -1,6 +1,37 @@
 class Api::UserEventsController < ApplicationController
-  # before_action :authenticate_user!
+  before_action :authenticate_user!, only: [:create, :destroy]
   before_action :set_event, only: [:create, :destroy]
+
+  # GET /api/users/:user_id/user_events — only for self or accepted friends
+  def for_user
+    return render json: {}, status: :unauthorized unless current_user
+
+    target_id = Integer(params[:user_id], exception: false)
+    return render json: { error: "Not found" }, status: :not_found unless target_id
+
+    target = User.find_by(id: target_id)
+    return render json: { error: "Not found" }, status: :not_found unless target
+
+    unless target.id == current_user.id || accepted_friendship?(current_user, target)
+      return render json: { error: "Not found" }, status: :not_found
+    end
+
+    events = target.user_events.includes(event: [:venue, :genres, :artists])
+    grouped = events.group_by(&:status).transform_values do |user_events|
+      user_events.map do |ue|
+        ue.event.as_json(
+          include: {
+            venue: {},
+            genres: {},
+            artists: {}
+          },
+          methods: [:formatted_start_time, :formatted_end_time]
+        ).merge(status: ue.status)
+      end
+    end
+
+    render json: grouped, status: :ok
+  end
 
   def index
     return render json: {}, status: :unauthorized unless current_user
@@ -56,9 +87,6 @@ class Api::UserEventsController < ApplicationController
   end
 
   def friend_attendees
-    puts "Cookies: #{request.cookies.to_h}"
-     puts "Session: #{session.to_hash}"
-     puts "Current user: #{current_user&.id || 'none'}"
     unless current_user
       return render json: { error: "Unauthorized" }, status: :unauthorized
     end
@@ -70,10 +98,73 @@ class Api::UserEventsController < ApplicationController
     render json: attendees.select(:id, :username)
   end
 
+  # GET /api/user_events/:event_id/friend_counts — accepted friends with this event saved (by status)
+  def friend_counts
+    unless current_user
+      return render json: { error: "Unauthorized" }, status: :unauthorized
+    end
+
+    event_id = params[:event_id].presence
+    return render json: { error: "Not found" }, status: :not_found unless event_id
+
+    friend_ids = current_user.friends.pluck(:id)
+    return render json: { friends_attending: 0, friends_interested: 0 } if friend_ids.empty?
+
+    scope = UserEvent.where(user_id: friend_ids, event_id: event_id)
+    attending = scope.where(status: :attending).count
+    interested = scope.where(status: :interested).count
+
+    render json: {
+      friends_attending: attending,
+      friends_interested: interested,
+    }, status: :ok
+  end
+
+  # POST /api/user_events/friend_counts_batch body: { event_ids: [1, 2, 3] }
+  def friend_counts_batch
+    unless current_user
+      return render json: { error: "Unauthorized" }, status: :unauthorized
+    end
+
+    raw_ids = params[:event_ids]
+    ids = Array(raw_ids).map { |x| Integer(x, exception: false) }.compact.uniq
+    ids = ids.first(500)
+
+    result = ids.each_with_object({}) do |id, h|
+      h[id.to_s] = { friends_attending: 0, friends_interested: 0 }
+    end
+
+    friend_ids = current_user.friends.pluck(:id)
+    if friend_ids.empty? || ids.empty?
+      return render json: { counts: result }, status: :ok
+    end
+
+    UserEvent.where(user_id: friend_ids, event_id: ids).find_each do |ue|
+      key = ue.event_id.to_s
+      next unless result.key?(key)
+
+      if ue.attending?
+        result[key][:friends_attending] += 1
+      elsif ue.interested?
+        result[key][:friends_interested] += 1
+      end
+    end
+
+    render json: { counts: result }, status: :ok
+  end
+
 
   private
 
+  def accepted_friendship?(a, b)
+    Friendship.exists?(user: a, friend: b, status: "accepted") ||
+      Friendship.exists?(user: b, friend: a, status: "accepted")
+  end
+
   def set_event
-    @event = Event.find(params.dig(:user_event, :event_id))
+    event_id = params[:event_id].presence || params.dig(:user_event, :event_id)
+    raise ActiveRecord::RecordNotFound if event_id.blank?
+
+    @event = Event.find(event_id)
   end
 end

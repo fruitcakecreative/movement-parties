@@ -9,6 +9,11 @@
   padding: 15px 20px;
   justify-content: flex-start;
 
+  .event-card-title,
+  .event-card-venue {
+    color: inherit;
+  }
+
   /* Tier colors live in _eventshell.scss (same as event details badge) */
   .she-they-lineup-pct-badge.event-card-she-they-pct {
     margin-bottom: 8px;

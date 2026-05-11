@@ -6,6 +6,7 @@ import Layout from './layout';
 
 import Login from "./pages/login";
 import Profile from "./pages/profile";
+import UserProfile from "./pages/user-profile";
 import Signup from "./pages/signup";
 import PrivacyPolicy from "./pages/privacy";
 
@@ -17,6 +18,7 @@ function App() {
           <Route path="/" element={<Events />} />
           <Route path="/login" element={<Login />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/users/:userId" element={<UserProfile />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         </Route>

@@ -1,8 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-import MainHeader from '../components/MainHeader';
-
 import EventsIntro from '../components/events/EventsIntro';
 import EventsToolbar from '../components/events/EventsToolbar';
 import ActiveFilters from '../components/events/ActiveFilters';
@@ -18,6 +16,7 @@ import { loadCityConfig } from "../services/cityConfig";
 import { createChannels } from '../timeline/data/buildChannels';
 import { createEpg } from '../timeline/data/buildEpg';
 
+import { FriendCountsProvider } from '../context/FriendCountsContext';
 import useEventsData from '../hooks/useEventsData';
 import useEventFilters from '../hooks/useEventFilters';
 import {
@@ -206,12 +205,17 @@ function Events() {
   const sheTheyForwardTimeline =
     showSheTheyForwardFilter && filterSelections.sheTheyForwardTimeline;
 
+  const friendCountEventIds = useMemo(
+    () => (allEvents || []).map((e) => e.id).filter((id) => id != null),
+    [allEvents]
+  );
+
   return (
+    <FriendCountsProvider eventIds={friendCountEventIds}>
     <div
       className={`events-page ${(selectedEventId || selectedVenueId) ? 'has-selected-event' : ''}`}
     >
       <div ref={mainScrollRef} className="events-page__main">
-        <MainHeader />
         <EventsIntro
           lastUpdated={lastUpdated}
           totalCount={totalCount}
@@ -322,6 +326,7 @@ function Events() {
         sheTheyForwardTimeline={sheTheyForwardTimeline}
       />
     </div>
+    </FriendCountsProvider>
   );
 }
 

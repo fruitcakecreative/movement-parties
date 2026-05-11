@@ -1,67 +1,53 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { Disclosure } from '@headlessui/react';
+import React, { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react";
 
-
-const pageTitle = process.env.REACT_APP_PAGE_TITLE;
-
-const navigation = [
-  { name: 'Home', href: '/' },
-  { name: 'Party Timelines', href: '/' },
-  { name: 'Post a Ticket', href: '/tickets' },
-  { name: 'Find a Ticket', href: '/tickets/new' },
-];
+const siteTitle = process.env.REACT_APP_PAGE_TITLE || "Movement Parties";
 
 function MainHeader() {
+  const location = useLocation();
+  const [hasSessionUser, setHasSessionUser] = useState(
+    () => typeof window !== "undefined" && !!localStorage.getItem("user")
+  );
 
-  const navigate = useNavigate();
+  useEffect(() => {
+    setHasSessionUser(!!localStorage.getItem("user"));
+  }, [location.pathname]);
 
-  const profileClick = () => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    navigate(user ? "/profile" : "/login");
-  };
+  const accountHref = hasSessionUser ? "/profile" : "/login";
+  const accountLabel = hasSessionUser ? "Profile" : "Login";
 
   return (
-  <div className="section header-con">
-    <div className="container logo-con">
-        <h1>{pageTitle}</h1>
-    </div>
-    <div className="hide menu-con">
-      <div className="hide profile">
-        <button onClick={profileClick}><i className="fa-solid fa-user"></i></button>
+    <header className="app-site-header" role="banner">
+      <div className="container app-site-header__inner">
+        <h1 className="app-site-header__brand">
+          <Link to="/">{siteTitle}</Link>
+        </h1>
+        <Disclosure as="nav" className="app-site-header__nav">
+          {({ close }) => (
+            <>
+              <DisclosureButton
+                type="button"
+                className="app-site-header__menu-trigger"
+                aria-label="Menu"
+              >
+                <i className="fa-solid fa-bars" aria-hidden />
+              </DisclosureButton>
+              <DisclosurePanel className="app-site-header__panel">
+                <Link
+                  to={accountHref}
+                  className="app-site-header__panel-link"
+                  onClick={() => close()}
+                >
+                  {accountLabel}
+                </Link>
+              </DisclosurePanel>
+            </>
+          )}
+        </Disclosure>
       </div>
-      <Disclosure as="nav" className="hide">
-        {({ open }) => (
-          <>
-                <div className="m-hide">
-                  {navigation.map((item) => (
-                    <a key={item.name} href={item.href} className="">
-                      {item.name}
-                    </a>
-                  ))}
-                </div>
-
-                <div className="d-hide">
-                  <Disclosure.Button className="open-close-but">
-                    {open ? <i className="fa-solid fa-xmark"></i>: <i className="fa-solid fa-bars"></i>}
-                  </Disclosure.Button>
-                </div>
-            <Disclosure.Panel className="mobile-menu">
-
-              {navigation.map((item) => (
-                <a key={item.name} href={item.href} className="">
-                  {item.name}
-                </a>
-              ))}
-            </Disclosure.Panel>
-          </>
-        )}
-      </Disclosure>
-
-
-      </div>
-
-  </div>
-)};
+    </header>
+  );
+}
 
 export default MainHeader;
