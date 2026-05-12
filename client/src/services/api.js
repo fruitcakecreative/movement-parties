@@ -18,9 +18,7 @@ export const isUnauthorized = (err) => err?.response?.status === 401;
 
 api.interceptors.request.use((config) => {
   config.headers = config.headers || {};
-  config.headers["X-City-Key"] = city;     // server supports this
-  // optional also add query param for easier debugging:
-  // config.params = { ...(config.params || {}), city };
+  config.headers["X-City-Key"] = city;
   return config;
 });
 

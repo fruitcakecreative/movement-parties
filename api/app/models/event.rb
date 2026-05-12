@@ -12,6 +12,15 @@ class Event < ApplicationRecord
   has_many :ticket_posts
   has_one_attached :logo
 
+  # Flyer in the app: ActiveStorage `logo` (Rails Admin → Event → Logo, or console) overrides RA `event_image_url`.
+  def poster_url
+    if logo.attached?
+      Rails.application.routes.url_helpers.rails_blob_url(logo, disposition: :inline, only_path: false)
+    else
+      event_image_url
+    end
+  end
+
   scope :movement, -> { where(city_key: "movement") }
   scope :mmw,      -> { where(city_key: "mmw") }
 
@@ -31,6 +40,17 @@ class Event < ApplicationRecord
     return if city_key.blank?
 
     %w[upcoming all].each { |mode| Rails.cache.delete("events-v8:#{city_key}:#{mode}") }
+  end
+
+  # Api::EventsController#index memoizes the full events JSON in Rails.cache. Rails Admin (and
+  # console / imports) bypass the API controller, so without this, logo and other edits can stay
+  # invisible until the 5-minute TTL or a manual cache delete. Venue already invalidates on save.
+  after_commit :invalidate_public_index_cache, on: %i[create update destroy]
+
+  def invalidate_public_index_cache
+    return if city_key.blank?
+
+    Event.clear_public_index_cache!(city_key)
   end
 
   rails_admin do

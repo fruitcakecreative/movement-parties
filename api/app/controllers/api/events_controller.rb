@@ -28,7 +28,7 @@ class Api::EventsController < ApplicationController
                  ]
                }
              },
-             methods: [:formatted_start_time, :formatted_end_time, :top_artists]
+             methods: [:formatted_start_time, :formatted_end_time, :top_artists, :poster_url]
            )
     end
 
@@ -46,7 +46,10 @@ class Api::EventsController < ApplicationController
   end
 
   def show
-    render json: @event.as_json(include: [:venue, :artists, :genres])
+    render json: @event.as_json(
+      include: [:venue, :artists, :genres],
+      methods: [:formatted_start_time, :formatted_end_time, :top_artists, :poster_url]
+    )
   end
 
   def create
