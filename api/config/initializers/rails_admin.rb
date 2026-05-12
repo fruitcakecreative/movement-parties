@@ -186,11 +186,9 @@ end
       end
       field :description, :text
       field :ra_followers
+      # RailsAdmin 3 has_many fields do not support `nested do` (that was older nested_form API).
       field :artist_aliases do
-        help "Alternate spellings from feeds (or after merges). Imports match these to this artist before creating a duplicate row."
-        nested do
-          field :label
-        end
+        help "Manage rows under Artist alias in the nav, or add aliases here if your RA build shows this association."
       end
     end
 
@@ -205,6 +203,32 @@ end
       field :tags
       field :description
       field :ra_followers
+      field :created_at
+      field :updated_at
+    end
+  end
+
+  config.model 'ArtistAlias' do
+    navigation_label "Artist aliases"
+    weight 5
+    list do
+      field :id
+      field :artist
+      field :label
+      field :normalized_key
+      field :created_at
+    end
+    edit do
+      field :artist
+      field :label do
+        help "Exact spelling from a feed; imports normalize this to match one canonical Artist."
+      end
+    end
+    show do
+      field :id
+      field :artist
+      field :label
+      field :normalized_key
       field :created_at
       field :updated_at
     end
