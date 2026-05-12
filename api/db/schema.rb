@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_03_28_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_05_11_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -40,6 +40,16 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_28_120000) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "artist_aliases", force: :cascade do |t|
+    t.bigint "artist_id", null: false
+    t.string "label", null: false
+    t.string "normalized_key", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["artist_id"], name: "index_artist_aliases_on_artist_id"
+    t.index ["normalized_key"], name: "index_artist_aliases_on_normalized_key", unique: true
   end
 
   create_table "artist_events", force: :cascade do |t|
@@ -243,6 +253,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_28_120000) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "artist_aliases", "artists", on_delete: :cascade
   add_foreign_key "artist_events", "artists", on_delete: :cascade
   add_foreign_key "artist_events", "events", on_delete: :cascade
   add_foreign_key "artists", "genres"

@@ -186,6 +186,12 @@ end
       end
       field :description, :text
       field :ra_followers
+      field :artist_aliases do
+        help "Alternate spellings from feeds (or after merges). Imports match these to this artist before creating a duplicate row."
+        nested do
+          field :label
+        end
+      end
     end
 
     show do
