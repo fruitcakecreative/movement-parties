@@ -53,6 +53,30 @@ export const userLogin = async (credentials) => {
   return response.data;
 };
 
+/** Devise recoverable — always succeeds with generic message (no email enumeration). */
+export const requestPasswordReset = async (email) => {
+  const { data } = await api.post('/users/password', {
+    user: { email: email.trim() },
+  });
+  return data;
+};
+
+/** PUT /users/password with raw token from email link query param. */
+export const resetPasswordWithToken = async ({
+  resetPasswordToken,
+  password,
+  passwordConfirmation,
+}) => {
+  const { data } = await api.put('/users/password', {
+    user: {
+      reset_password_token: resetPasswordToken,
+      password,
+      password_confirmation: passwordConfirmation,
+    },
+  });
+  return data;
+};
+
 export const userLogout = async () => {
   try {
     // DELETE /logout must finish before navigate or the browser may cancel the request.

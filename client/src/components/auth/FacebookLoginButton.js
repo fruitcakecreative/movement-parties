@@ -1,8 +1,7 @@
 import FacebookLogin from 'react-facebook-login';
 import { loginWithFacebook } from "../../services/api";
 
-const FacebookLoginButton = (props) => {
-
+function FacebookLoginButton({ textButton = "Continue with Facebook" }) {
   const handleFacebookCallback = async (response) => {
 
     console.log(response);
@@ -37,12 +36,14 @@ const FacebookLoginButton = (props) => {
 
   return (
     <FacebookLogin
-      buttonStyle={{padding:"6px"}}
+      textButton={textButton}
+      buttonStyle={{ padding: "6px" }}
       appId="1371232790678843"
       autoLoad={false}
       fields="name,email,picture.width(400).height(400)"
-      callback={handleFacebookCallback} />
+      callback={handleFacebookCallback}
+    />
   );
-};
+}
 
 export default FacebookLoginButton;

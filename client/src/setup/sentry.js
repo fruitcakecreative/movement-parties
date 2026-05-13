@@ -1,8 +1,16 @@
 import * as Sentry from '@sentry/react';
 
+// Prefer NODE_ENV for "production" / "development" — CRA sets it at build time.
+// Avoid REACT_APP_ENV=production in Netlify: their secrets scanner matches that string
+// across README, source maps, and node_modules (false positives).
+const sentryEnvironment =
+  process.env.REACT_APP_ENV ||
+  process.env.NODE_ENV ||
+  'development';
+
 Sentry.init({
   dsn: process.env.REACT_APP_SENTRY_DSN,
-  environment: process.env.REACT_APP_ENV || 'development',
+  environment: sentryEnvironment,
   release: process.env.REACT_APP_RELEASE,
   sendDefaultPii: true,
   integrations: [
