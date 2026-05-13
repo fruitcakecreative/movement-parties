@@ -36,6 +36,24 @@ Rails.application.configure do
 
   config.action_mailer.perform_caching = false
 
+  # Postmark (https://postmarkapp.com): set POSTMARK_API_TOKEN and MAILER_FROM (verified sender in Postmark).
+  if ENV["POSTMARK_API_TOKEN"].present?
+    config.action_mailer.delivery_method = :postmark
+    config.action_mailer.postmark_settings = { api_token: ENV["POSTMARK_API_TOKEN"] }
+    config.action_mailer.raise_delivery_errors = true
+    config.action_mailer.perform_deliveries = true
+    config.action_mailer.default_url_options = {
+      host: ENV.fetch("ACTION_MAILER_DEFAULT_HOST", "api.movementparties.com"),
+      protocol: "https",
+    }
+    if (from = ENV["MAILER_FROM"].presence)
+      config.action_mailer.default_options = { from: from }
+    end
+  else
+    config.action_mailer.perform_deliveries = false
+    config.action_mailer.raise_delivery_errors = false
+  end
+
   config.i18n.fallbacks = true
 
   config.active_support.report_deprecations = false
@@ -46,4 +64,6 @@ Rails.application.configure do
   # Only use :id for inspections in production.
   config.active_record.attributes_for_inspect = [ :id ]
 
+  # Password reset emails link to the SPA; set CLIENT_ORIGIN (e.g. https://movementparties.com).
+  # Configure Action Mailer (SMTP, Postmark, etc.) so reset emails actually send.
 end

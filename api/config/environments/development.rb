@@ -48,6 +48,9 @@ Rails.application.configure do
 
   config.action_mailer.default_url_options = { host: "localhost", port: 3001 }
 
+  # Password reset emails link to the React app; set CLIENT_ORIGIN to that origin (e.g. http://localhost:3002).
+  # Example: CLIENT_ORIGIN=http://localhost:3002 bin/rails server
+
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 

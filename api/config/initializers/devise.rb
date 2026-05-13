@@ -4,7 +4,8 @@ Devise.setup do |config|
   # Ensure Devise controllers use the same CSRF/session stack as the rest of the app.
   config.parent_controller = "ApplicationController"
 
-  config.mailer_sender = 'please-change-me-at-config-initializers-devise@example.com'
+  # Use a Postmark-verified sender (same as MAILER_FROM in production). Example: "Movement <noreply@yourdomain.com>"
+  config.mailer_sender = ENV.fetch("MAILER_FROM", "please-change-me-at-config-initializers-devise@example.com")
 
   require 'devise/orm/active_record'
 
