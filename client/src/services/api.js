@@ -1,7 +1,22 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE;
+const rawApiBase = (process.env.REACT_APP_API_BASE || '').trim().replace(/\/+$/, '');
+const API_BASE_URL = rawApiBase || undefined;
 const city = process.env.REACT_APP_CITY_KEY;
+
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
+  if (!API_BASE_URL) {
+    // eslint-disable-next-line no-console
+    console.error(
+      '[api] REACT_APP_API_BASE is missing. Set it in Netlify (Build env) to your HTTPS API root, e.g. https://api.movementparties.com/api — then redeploy.'
+    );
+  } else if (API_BASE_URL.startsWith('http:')) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[api] REACT_APP_API_BASE uses http:. On an https site the browser will block API calls (mixed content). Use https:// for the API URL.'
+    );
+  }
+}
 
 const api = axios.create({
   baseURL: API_BASE_URL,
