@@ -18,9 +18,9 @@ export const isUnauthorized = (err) => err?.response?.status === 401;
 
 api.interceptors.request.use((config) => {
   config.headers = config.headers || {};
-  config.headers["X-City-Key"] = city;     // server supports this
+  config.headers['X-City-Key'] = city;
   try {
-    const raw = localStorage.getItem("user");
+    const raw = localStorage.getItem('user');
     if (raw) {
       const u = JSON.parse(raw);
       const t = u.authentication_token || u.token;
@@ -29,8 +29,6 @@ api.interceptors.request.use((config) => {
   } catch (_) {
     /* ignore */
   }
-  // optional also add query param for easier debugging:
-  // config.params = { ...(config.params || {}), city };
   return config;
 });
 

@@ -32,8 +32,9 @@ namespace :db do
     Rake::Task["db:normalize_location"].invoke
   end
 
-  desc "Merge duplicate artists (case-insensitive). CRISTOPH and Cristoph become one."
+  desc "Merge duplicate artists (case-insensitive). CRISTOPH and Cristoph become one. DRY_RUN=1 to print only."
   task normalize_artists: :environment do
+    dry = ENV["DRY_RUN"].present?
     groups = Artist.all.group_by { |a| a.name.to_s.downcase.strip }
     updated = 0
 
@@ -47,6 +48,12 @@ namespace :db do
       canonical_event_ids = canonical_artist.artist_events.pluck(:event_id).to_set
 
       duplicates.each do |dup|
+        if dry
+          puts "  [dry-run] would merge id=#{dup.id} '#{dup.name}' -> id=#{canonical_artist.id} '#{canonical_name}'"
+          updated += 1
+          next
+        end
+
         dup.artist_events.find_each do |ae|
           next if ae.artist_id == canonical_artist.id
           next if canonical_event_ids.include?(ae.event_id)
@@ -55,12 +62,19 @@ namespace :db do
           canonical_event_ids.add(ae.event_id)
         end
         dup.artist_events.destroy_all
+        Artist.reassign_or_record_aliases_when_merging!(canonical_artist, dup)
         dup.destroy
         updated += 1
         puts "  Merged '#{dup.name}' -> '#{canonical_name}'"
       end
 
+      if dry && canonical_artist.name != canonical_name
+        puts "  [dry-run] would rename id=#{canonical_artist.id} '#{canonical_artist.name}' -> '#{canonical_name}'"
+      end
+
       # Update canonical artist's name to titleized if different
+      next if dry
+
       if canonical_artist.name != canonical_name
         old_name = canonical_artist.name
         canonical_artist.update_column(:name, canonical_name)
@@ -68,8 +82,68 @@ namespace :db do
       end
     end
 
-    NormalizeDataRake.clear_events_caches
-    puts "Normalized artists: #{updated} duplicates merged"
+    unless dry
+      NormalizeDataRake.clear_events_caches
+      %w[movement mmw].each { |ck| Event.clear_public_index_cache!(ck) }
+    end
+
+    if dry
+      puts "normalize_artists: dry run — #{updated} duplicate rows would be removed (no changes). Remove DRY_RUN=1 to apply."
+    else
+      puts "Normalized artists: #{updated} duplicates merged"
+    end
+  end
+
+  desc "Merge one artist into another (different spellings / duplicate rows). " \
+       "KEEPER survives, MERGE is deleted. By name: FROM=bad INTO=good (same as merge_genres). " \
+       "By id: KEEPER_ID=1 MERGE_ID=2. DRY_RUN=1 to preview only."
+  task merge_artists: :environment do
+    dry = ENV["DRY_RUN"].present?
+    keeper_id = ENV["KEEPER_ID"].presence
+    merge_id = ENV["MERGE_ID"].presence
+    from_name = ENV["FROM"].presence
+    into_name = ENV["INTO"].presence
+
+    keeper, merge =
+      if keeper_id.present? && merge_id.present?
+        [Artist.find_by(id: keeper_id), Artist.find_by(id: merge_id)]
+      elsif from_name.present? && into_name.present?
+        [Artist.find_by_name_case_insensitive(into_name), Artist.find_by_name_case_insensitive(from_name)]
+      else
+        puts "Usage:"
+        puts "  bin/rails db:merge_artists KEEPER_ID=123 MERGE_ID=456"
+        puts "  bin/rails db:merge_artists FROM='Old Spelling' INTO='Preferred Name'"
+        puts "Add DRY_RUN=1 to preview (no database writes)."
+        exit 1
+      end
+
+    unless keeper
+      label = keeper_id.present? ? "KEEPER_ID=#{keeper_id}" : "INTO=#{into_name.inspect}"
+      puts "Keeper artist not found (#{label})"
+      exit 1
+    end
+    unless merge
+      label = merge_id.present? ? "MERGE_ID=#{merge_id}" : "FROM=#{from_name.inspect}"
+      puts "Merge artist not found (#{label})"
+      exit 1
+    end
+
+    if keeper.id == merge.id
+      puts "Keeper and merge are the same artist (id=#{keeper.id})"
+      exit 1
+    end
+
+    puts "#{dry ? '[dry-run] ' : ''}Merge id=#{merge.id} #{merge.name.inspect} -> id=#{keeper.id} #{keeper.name.inspect}"
+    stats = Artist.merge_into!(keeper, merge, dry_run: dry)
+    puts "  Lineup rows reassigned: #{stats[:reassigned]}; duplicate event links dropped: #{stats[:duplicate_joins_removed]}"
+
+    unless dry
+      %w[movement mmw].each { |ck| Event.clear_public_index_cache!(ck) }
+      NormalizeDataRake.clear_events_caches
+      puts "Done."
+    else
+      puts "Dry run only. Remove DRY_RUN=1 to apply."
+    end
   end
 
   desc "List all genre names in the database (to find exact names for merge)"
