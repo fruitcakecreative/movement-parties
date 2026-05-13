@@ -442,7 +442,7 @@ function Profile() {
               {friends.length === 0 ? (
                 <p className="profile-page__empty-small">No friends yet.</p>
               ) : (
-                <ul className="profile-page__friends-tiles" role="list">
+                <ul className="profile-page__friends-tiles">
                   {friends.map((friend) => (
                     <li key={friend.id} className="profile-page__friend-tile-wrap">
                       <Link
