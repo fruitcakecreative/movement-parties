@@ -58,12 +58,18 @@ function Login() {
           Welcome back
         </h1>
         <p className="auth-page__lede">
-          Log in to save events, see friends’ plans, and sync your profile.
+          Log in to save events, and see friends’ plans.
         </p>
 
         <div className="auth-page__social">
-          <FacebookLoginButton />
+          <FacebookLoginButton onFacebookNotice={setError} />
         </div>
+
+        {error && (
+          <p className="auth-page__error" role="alert">
+            {error}
+          </p>
+        )}
 
         <div className="auth-page__divider" aria-hidden="true">
           <span>or email</span>
@@ -101,12 +107,6 @@ function Login() {
               <Link to="/forgot-password">Forgot password?</Link>
             </p>
           </div>
-
-          {error && (
-            <p className="auth-page__error" role="alert">
-              {error}
-            </p>
-          )}
 
           <button
             type="submit"

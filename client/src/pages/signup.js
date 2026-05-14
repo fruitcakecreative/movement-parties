@@ -75,8 +75,17 @@ function Signup() {
         </p>
 
         <div className="auth-page__social">
-          <FacebookLoginButton textButton="Sign up with Facebook" />
+          <FacebookLoginButton
+            textButton="Sign up with Facebook"
+            onFacebookNotice={setError}
+          />
         </div>
+
+        {error && (
+          <p className="auth-page__error" role="alert">
+            {error}
+          </p>
+        )}
 
         <div className="auth-page__divider" aria-hidden="true">
           <span>or email</span>
@@ -140,12 +149,6 @@ function Signup() {
               required
             />
           </div>
-
-          {error && (
-            <p className="auth-page__error" role="alert">
-              {error}
-            </p>
-          )}
 
           <button
             type="submit"
