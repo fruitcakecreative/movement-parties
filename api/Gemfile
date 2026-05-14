@@ -64,3 +64,6 @@ gem "omniauth-facebook", "~> 10.0"
 gem "rspec-rails", "~> 8.0", :groups => [:development, :test]
 
 gem "honeybadger", "~> 5.28"
+
+# Adds ActionMailer `delivery_method :postmark` and `config.action_mailer.postmark_settings` (see production.rb).
+gem "postmark-rails", "~> 0.22"
