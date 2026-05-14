@@ -8,7 +8,19 @@ class Users::PasswordsController < Devise::PasswordsController
   def create
     email = resource_params[:email].to_s.strip.downcase
     user = resource_class.find_for_authentication(email: email) if email.present?
-    user&.send_reset_password_instructions
+    if user.present?
+      begin
+        user.send_reset_password_instructions
+      rescue StandardError => e
+        # Postmark/SMTP misconfig often raises here while `raise_delivery_errors` is true — do not 500
+        # the SPA; same JSON body preserves anti-enumeration. Check Render logs / MAILER_FROM / Postmark.
+        Rails.logger.error(
+          "[Users::PasswordsController#create] send_reset_password_instructions failed " \
+          "user_id=#{user.id} #{e.class}: #{e.message}"
+        )
+        Rails.error.report(e, handled: true)
+      end
+    end
 
     render json: {
       message: "If that email is registered, you'll receive password reset instructions shortly."
