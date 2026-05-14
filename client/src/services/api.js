@@ -1,22 +1,7 @@
 import axios from 'axios';
 
-const rawApiBase = (process.env.REACT_APP_API_BASE || '').trim().replace(/\/+$/, '');
-const API_BASE_URL = rawApiBase || undefined;
+const API_BASE_URL = process.env.REACT_APP_API_BASE;
 const city = process.env.REACT_APP_CITY_KEY;
-
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
-  if (!API_BASE_URL) {
-    // eslint-disable-next-line no-console
-    console.error(
-      '[api] REACT_APP_API_BASE is missing. Set it in Netlify (Build env) to your HTTPS API root, e.g. https://api.movementparties.com/api — then redeploy.'
-    );
-  } else if (API_BASE_URL.startsWith('http:')) {
-    // eslint-disable-next-line no-console
-    console.warn(
-      '[api] REACT_APP_API_BASE uses http:. On an https site the browser will block API calls (mixed content). Use https:// for the API URL.'
-    );
-  }
-}
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -61,35 +46,10 @@ export const fetchEventById = async (id) => {
   return response.data;
 };
 
-
 //login/logout
 export const userLogin = async (credentials) => {
   const response = await api.post('/login', { user: credentials });
   return response.data;
-};
-
-/** Devise recoverable — generic success body (no email enumeration). SPA link uses CLIENT_ORIGIN on API. */
-export const requestPasswordReset = async (email) => {
-  const { data } = await api.post('/password', {
-    user: { email: String(email).trim() },
-  });
-  return data;
-};
-
-/** PUT /api/password — raw token from email; response includes authentication_token for Bearer API calls. */
-export const resetPasswordWithToken = async ({
-  resetPasswordToken,
-  password,
-  passwordConfirmation,
-}) => {
-  const { data } = await api.put('/password', {
-    user: {
-      reset_password_token: resetPasswordToken,
-      password,
-      password_confirmation: passwordConfirmation,
-    },
-  });
-  return data;
 };
 
 export const userLogout = async () => {
@@ -110,7 +70,7 @@ export const fetchUserEvents = async () => {
   return response.data;
 };
 
-/** Self or accepted friend only (404 otherwise). Shape matches GET /user_events. */
+/** Friend’s saved events (same shape as fetchUserEvents) — self or accepted friend only. */
 export const fetchUserEventsForUser = async (userId) => {
   const response = await api.get(`/users/${userId}/user_events`);
   return response.data;
@@ -119,17 +79,19 @@ export const fetchUserEventsForUser = async (userId) => {
 export const saveUserEventStatus = async (eventId, status) => {
   return api.post('/user_events', {
     user_event: {
-      event_id: Number(eventId), // ensure it’s a number
+      event_id: Number(eventId),
       status,
     },
   });
 };
 
-export const deleteUserEventStatus = async (eventId) => {
-  return api.delete(`/user_events/${eventId}`);
+export const deleteUserEventStatus = async (eventId, status) => {
+  return api.delete('/user_events', {
+    data: { user_event: { event_id: eventId, status } },
+  });
 };
 
-/** How many of your accepted friends have this event as attending / interested. */
+/** How many accepted friends have this event as attending / interested. */
 export const fetchFriendEventCounts = async (eventId) => {
   const { data } = await api.get(`/user_events/${eventId}/friend_counts`);
   return {
@@ -138,7 +100,7 @@ export const fetchFriendEventCounts = async (eventId) => {
   };
 };
 
-/** Batch version — one request for many event ids (string keys in response). */
+/** Batch friend counts for many event ids (string keys in response). */
 export const fetchFriendEventCountsBatch = async (eventIds) => {
   const unique = [
     ...new Set((eventIds || []).filter((id) => id != null).map((id) => Number(id))),
@@ -159,7 +121,7 @@ export const fetchFriendEventCountsBatch = async (eventIds) => {
   return out;
 };
 
-/** Accepted friends attending + interested for event detail (avatars + name list). */
+/** Accepted friends attending + interested for event detail UI. */
 export const fetchFriendEventRsvps = async (eventId) => {
   const id = Number(eventId);
   if (!id) return { attending: [], interested: [] };
@@ -177,57 +139,11 @@ export const fetchFriendEventRsvps = async (eventId) => {
   }
 };
 
-/** Avatar upload — multipart; must not use axios default JSON Content-Type. */
-export const uploadUserAvatar = async (file) => {
-  const formData = new FormData();
-  formData.append("avatar", file);
-  const raw = localStorage.getItem("user");
-  const u = raw ? JSON.parse(raw) : {};
-  const token = u.authentication_token || u.token;
-  const headers = { "X-City-Key": city };
-  if (token) headers.Authorization = `Bearer ${token}`;
-  const res = await fetch(`${API_BASE_URL}/user/upload_avatar`, {
-    method: "POST",
-    body: formData,
-    credentials: "include",
-    headers,
-  });
-  let data = {};
-  try {
-    data = await res.json();
-  } catch (_) {
-    /* ignore */
-  }
-  if (!res.ok) {
-    const err = new Error(data.error || data.message || "Upload failed");
-    err.response = { status: res.status, data };
-    throw err;
-  }
-  return data;
-};
-
 //user profile info
-/** Public-ish profile for a user id (friends only, or your own id). */
-export const fetchUserPublicProfile = async (userId) => {
-  const res = await api.get(`/users/${userId}`);
-  return res.data;
-};
-
-export const fetchUserInfo = async () => {
+export const fetchUserInfo = async (token) => {
   const response = await api.get('/user');
-  const data = response.data;
-  try {
-    const raw = localStorage.getItem('user');
-    const prev = raw ? JSON.parse(raw) : {};
-    if (data?.authentication_token) {
-      localStorage.setItem('user', JSON.stringify({ ...prev, ...data }));
-    }
-  } catch (_) {
-    /* ignore */
-  }
-  return data;
+  return response.data;
 };
-
 
 export const loginWithFacebook = async (userData) => {
   const res = await fetch(`${process.env.REACT_APP_API_BASE}/users/create_from_facebook`, {
@@ -242,7 +158,6 @@ export const loginWithFacebook = async (userData) => {
 
   return res.json();
 };
-
 
 export const fetchAllUsers = async () => {
   const res = await api.get('/users');
@@ -259,26 +174,25 @@ export const searchUsers = async (q) => {
   return res.data;
 };
 
-export const fetchPendingFriendRequests = async () => {
-  const res = await api.get('/friendships/pending');
-  return res.data;
-};
-
-export const sendFriendRequest = async ({ username, user_id }) => {
-  return api.post('/friendships', { username, user_id });
+/** `username` string or `{ username, user_id }` */
+export const sendFriendRequest = async (usernameOrPayload) => {
+  const body =
+    typeof usernameOrPayload === 'string'
+      ? { username: usernameOrPayload }
+      : usernameOrPayload;
+  return api.post('/friendships', body);
 };
 
 export const acceptFriendRequest = async (user_id) => {
-  return api.post("/friendships/accept", { user_id });
+  return api.post('/friendships/accept', { user_id });
 };
 
-export const cancelFriendRequest = async ({ username, user_id }) => {
-  return api.delete("/friendships", { data: { username, user_id } });
+export const cancelFriendRequest = async (username) => {
+  return api.delete('/friendships', { data: { username } });
 };
 
 export const rejectFriendRequest = async (user_id) => {
-  return api.post("/friendships/reject", { user_id });
+  return api.post('/friendships/reject', { user_id });
 };
-
 
 export default api;
