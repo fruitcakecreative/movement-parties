@@ -10,6 +10,8 @@ import {
 } from '../../utils/pronounDisplay';
 import { formatDescription } from '../../utils/formatDescription';
 import EventStatusControls from './EventStatusControls';
+import EventDetailsFriendSocial from './EventDetailsFriendSocial';
+import { fetchFriendEventRsvps } from '../../services/api';
 
 function EventDetailsContent({
   event,
@@ -22,6 +24,7 @@ function EventDetailsContent({
 }) {
   const contentRef = useRef(null);
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [friendRsvps, setFriendRsvps] = useState({ attending: [], interested: [] });
   const { get: friendCountsFor } = useFriendCounts();
 
   const stripHtml = (html = '') => {
@@ -36,6 +39,30 @@ function EventDetailsContent({
 
   useEffect(() => {
     setShowFullDescription(false);
+  }, [event?.id]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const id = event?.id;
+    if (!id) {
+      setFriendRsvps({ attending: [], interested: [] });
+      return;
+    }
+    fetchFriendEventRsvps(id)
+      .then((payload) => {
+        if (!cancelled) {
+          setFriendRsvps({
+            attending: payload?.attending ?? [],
+            interested: payload?.interested ?? [],
+          });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setFriendRsvps({ attending: [], interested: [] });
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [event?.id]);
 
 
@@ -234,6 +261,12 @@ function EventDetailsContent({
             </div>
           </div>
         )}
+
+        <EventDetailsFriendSocial
+          friendsAttending={friendRsvps.attending}
+          friendsInterested={friendRsvps.interested}
+          onNavigate={onClose}
+        />
 
         {sortedDisplayArtists.length > 0 && (
           <div

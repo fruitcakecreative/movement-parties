@@ -24,6 +24,8 @@ const defaultFilters = {
   sheTheyOver50Lineup: false,
   /** When true, only events whose `created_at` is within the last 7 days. */
   addedLastWeekOnly: false,
+  /** When true, timeline shows only events with at least one accepted friend attending or interested. */
+  friendsTimelineOnly: false,
 };
 
 function useEventFilters({ eventsByDate, activeDates = [] }) {
@@ -46,12 +48,14 @@ function useEventFilters({ eventsByDate, activeDates = [] }) {
       ([k]) =>
         k !== 'sheTheyForwardTimeline' &&
         k !== 'sheTheyOver50Lineup' &&
-        k !== 'addedLastWeekOnly'
+        k !== 'addedLastWeekOnly' &&
+        k !== 'friendsTimelineOnly'
     );
     const arraysActive = arrayKeys.some(([, v]) => Array.isArray(v) && v.length > 0);
     return (
       arraysActive ||
       filterSelections.addedLastWeekOnly === true ||
+      filterSelections.friendsTimelineOnly === true ||
       filterSelections.sheTheyForwardTimeline === true ||
       filterSelections.sheTheyOver50Lineup === true
     );
@@ -63,6 +67,7 @@ function useEventFilters({ eventsByDate, activeDates = [] }) {
       sheTheyForwardTimeline: prev.sheTheyForwardTimeline,
       sheTheyOver50Lineup: false,
       addedLastWeekOnly: false,
+      friendsTimelineOnly: false,
     }));
 
   useEffect(() => {

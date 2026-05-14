@@ -51,11 +51,23 @@ function ActiveFilters({
           JUST ADDED <span className="x">&times;</span>
         </button>
       )}
+      {filterSelections.friendsTimelineOnly && (
+        <button
+          type="button"
+          className="filter-pill filter-pill--toggle filter-pill--friends-timeline"
+          onClick={() =>
+            setFilterSelections((prev) => ({ ...prev, friendsTimelineOnly: false }))
+          }
+        >
+          Friends on lineup <span className="x">&times;</span>
+        </button>
+      )}
       {Object.entries(filterSelections).flatMap(([category, values]) => {
         if (
           category === 'sheTheyForwardTimeline' ||
           category === 'sheTheyOver50Lineup' ||
-          category === 'addedLastWeekOnly'
+          category === 'addedLastWeekOnly' ||
+          category === 'friendsTimelineOnly'
         ) {
           return [];
         }

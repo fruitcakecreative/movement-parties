@@ -198,8 +198,9 @@
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--color-text);
-  background: color-mix(in srgb, var(--color-text) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
+  /* Mix with page background — mixing with `transparent` maps to black and vanishes on dark themes */
+  background: color-mix(in srgb, var(--color-text) 22%, var(--color-background, #fff));
+  border: 1px solid color-mix(in srgb, var(--color-text) 40%, var(--color-background, #fff));
 }
 
 .profile-page__friend-columns {
@@ -405,8 +406,16 @@
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--color-text);
-  background: color-mix(in srgb, var(--color-text) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
+  background: color-mix(in srgb, var(--color-text) 22%, var(--color-background, #fff));
+  border: 1px solid color-mix(in srgb, var(--color-text) 40%, var(--color-background, #fff));
+}
+
+/* Event details / side panels use .dark-bg — mix against panel colors, not page --color-background */
+.dark-bg .profile-page__friend-tile-avatar--placeholder,
+.dark-bg .profile-page__friend-avatar--placeholder {
+  color: var(--color-text-light);
+  background: color-mix(in srgb, var(--color-text-light) 30%, var(--color-bg-dark));
+  border: 1px solid color-mix(in srgb, var(--color-text-light) 48%, var(--color-bg-dark));
 }
 
 .profile-page__friend-tile-name {
@@ -578,6 +587,46 @@
 
 .profile-page__status-group--interested {
   opacity: 0.95;
+}
+
+/* Your profile + friend profile: event card footer — stacked status, left-aligned */
+.profile-page {
+  .event-card-footer {
+    justify-content: flex-start;
+  }
+
+  .event-card-footer .event-status--card {
+    justify-content: flex-start;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .event-status--compact.event-status--card {
+    align-items: flex-start;
+    align-self: stretch;
+    width: 100%;
+  }
+
+  .event-status--card .event-status__compact-hint-row {
+    justify-content: flex-start;
+    width: 100%;
+  }
+}
+
+/* Two columns on small+ screens; single column on very narrow viewports. */
+.profile-page__interested-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: $space-2;
+  align-items: start;
+
+  @media (max-width: 22rem) {
+    grid-template-columns: 1fr;
+  }
+
+  .event-card-stack {
+    min-width: 0;
+  }
 }
 
 .profile-page__empty {

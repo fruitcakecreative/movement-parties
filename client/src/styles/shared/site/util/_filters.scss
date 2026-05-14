@@ -404,6 +404,17 @@
     box-shadow: 0 3px 12px rgba(34, 197, 94, 0.12);
     color: #0f172a;
   }
+
+  .filter-pill--toggle.filter-pill--friends-timeline {
+    border-color: color-mix(in srgb, #0284c7 42%, var(--color-text));
+    background: linear-gradient(
+      165deg,
+      color-mix(in srgb, #bae6fd 26%, var(--color-background)),
+      color-mix(in srgb, var(--color-text) 4%, var(--color-background))
+    );
+    box-shadow: 0 3px 12px rgba(2, 132, 199, 0.12);
+    color: #0c4a6e;
+  }
 }
 
 /* No Boys Club card + compact switch (above date + filters). */
@@ -420,6 +431,11 @@
 
 /* Pull up slightly when stacked directly under No Boys card */
 .she-they-forward-rail:not(.just-added-rail) + .she-they-forward-rail.just-added-rail {
+  margin-top: -0.65rem;
+}
+
+/* Stack Friends card under JUST ADDED */
+.she-they-forward-rail.just-added-rail + .she-they-forward-rail.friends-timeline-rail {
   margin-top: -0.65rem;
 }
 
@@ -476,6 +492,67 @@
 
 .just-added-card--on .just-added-card__copy {
   color: color-mix(in srgb, var(--color-text) 88%, #052e16);
+}
+
+/* Friends on lineup — toolbar card (sky accent, distinct from green JUST ADDED) */
+.friends-timeline-card {
+  border-radius: 1.1rem;
+  padding: 0.75rem 1rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent);
+  background: color-mix(in srgb, var(--color-text) 5%, var(--color-background));
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.friends-timeline-card--on {
+  border-color: color-mix(in srgb, #0284c7 42%, var(--color-text));
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, #bae6fd 26%, var(--color-background)),
+    color-mix(in srgb, var(--color-text) 4%, var(--color-background))
+  );
+  box-shadow: 0 4px 16px rgba(2, 132, 199, 0.14);
+}
+
+.friends-timeline-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.friends-timeline-card__text {
+  min-width: 0;
+}
+
+.friends-timeline-card__title {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-heading, inherit);
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  color: #0369a1;
+}
+
+.friends-timeline-card__copy {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--color-text) 76%, transparent);
+}
+
+.friends-timeline-card--on .friends-timeline-card__copy {
+  color: color-mix(in srgb, var(--color-text) 88%, #0c4a6e);
+}
+
+/* Friends card — sky “on” switch track */
+.friends-timeline-card .she-they-forward-switch--on .she-they-forward-switch__track {
+  background: linear-gradient(135deg, #38bdf8, #0284c7);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.35);
 }
 
 .she-they-forward-card {

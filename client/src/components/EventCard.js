@@ -12,6 +12,8 @@ function EventCard({
   sheTheyForwardTimeline = false,
   showVenueName = false,
   showArtists = true,
+  /** 'compact' — denser card (e.g. profile “interested” grid). */
+  density = 'default',
 }) {
   const {
     displayTitle,
@@ -33,9 +35,14 @@ function EventCard({
   const { get: friendCountsFor } = useFriendCounts();
   const fc = friendCountsFor(event?.id);
 
+  const stackClass =
+    density === 'compact'
+      ? 'event-card-stack event-card-stack--compact mb-xs'
+      : 'event-card-stack mb-xs';
+
   return (
     <div
-      className="event-card-stack mb-xs"
+      className={stackClass}
       style={{
         '--event-card-font': cardFont,
         '--event-card-bg': cardBg,

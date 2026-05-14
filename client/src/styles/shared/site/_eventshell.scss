@@ -201,6 +201,65 @@
   margin-bottom: 16px;
 }
 
+/* Event detail: friends attending (profile-style blobs) + interested (clickable names) */
+.event-details-friend-social {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.event-details-friends-attending__title,
+.event-details-friends-interested__title {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-light);
+}
+
+.event-details-friends-attending__tiles {
+  grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr));
+}
+
+.event-details-friends-attending--full-blob {
+  .profile-page__friend-tile-img,
+  .profile-page__friend-tile-avatar {
+    width: 4.25rem;
+    height: 4.25rem;
+  }
+
+  .profile-page__friend-tile-name {
+    font-size: 0.8125rem;
+  }
+
+  .profile-page__friend-tile {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+}
+
+.event-details-friends-interested__line {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: inherit;
+}
+
+.event-details-friends-interested__link {
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary, #06c);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
 .desktop-only {
   display: block;
 }

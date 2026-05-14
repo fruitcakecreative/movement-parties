@@ -115,6 +115,45 @@
   opacity: 0.95;
 }
 
+:root[data-she-they-theme='on'] .friends-timeline-card--on {
+  border-color: color-mix(in srgb, #38bdf8 50%, var(--color-text));
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, #0c4a6e 42%, var(--color-bg-light)),
+    color-mix(in srgb, var(--color-bg-light) 90%, #075985 10%)
+  );
+  box-shadow: 0 4px 18px rgba(14, 165, 233, 0.2);
+}
+
+:root[data-she-they-theme='on'] .friends-timeline-card__title {
+  color: #e0f2fe;
+}
+
+:root[data-she-they-theme='on'] .friends-timeline-card--on .friends-timeline-card__copy {
+  color: color-mix(in srgb, #e0f2fe 90%, var(--color-text));
+}
+
+:root[data-she-they-theme='on'] .friends-timeline-card .she-they-forward-switch--on .she-they-forward-switch__track {
+  background: linear-gradient(135deg, #38bdf8, #0284c7);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.28);
+}
+
+:root[data-she-they-theme='on'] .active-filters .filter-pill--toggle.filter-pill--friends-timeline {
+  color: #e0f2fe;
+  border-color: color-mix(in srgb, #38bdf8 52%, var(--color-text));
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, #075985 38%, var(--color-bg-light)),
+    color-mix(in srgb, #0c4a6e 35%, var(--color-background))
+  );
+  box-shadow: 0 3px 14px rgba(14, 165, 233, 0.22);
+}
+
+:root[data-she-they-theme='on'] .active-filters .filter-pill--toggle.filter-pill--friends-timeline .x {
+  color: #e0f2fe;
+  opacity: 0.95;
+}
+
 /* “All Days” + “Other Filters” bars — light pink wash (same family as --color-title) */
 :root[data-she-they-theme='on'] .dropdown-wrapper .dropdown-btn {
   background: color-mix(in srgb, var(--color-title) 22%, var(--color-bg-light) 78%);

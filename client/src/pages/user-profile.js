@@ -324,13 +324,16 @@ export default function UserProfile() {
                 {dayData.interested.length > 0 && (
                   <div className="profile-page__status-group profile-page__status-group--interested">
                     <h3 className="profile-page__subsection-title">Interested</h3>
-                    {dayData.interested.map((event, i) => (
-                      <MiniProgramBox
-                        key={`int-${event.id || i}`}
-                        event={event}
-                        onClick={() => openEvent(event.id)}
-                      />
-                    ))}
+                    <div className="profile-page__interested-grid">
+                      {dayData.interested.map((event, i) => (
+                        <MiniProgramBox
+                          key={`int-${event.id || i}`}
+                          event={event}
+                          onClick={() => openEvent(event.id)}
+                          density="compact"
+                        />
+                      ))}
+                    </div>
                   </div>
                 )}
               </section>

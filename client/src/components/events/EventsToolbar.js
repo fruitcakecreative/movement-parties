@@ -3,6 +3,7 @@ import DateDropdown from '../../timeline/components/ui/DateDropdown';
 import FiltersDropdown from '../../timeline/components/ui/FiltersDropdown';
 import SheTheyForwardToggle from './SheTheyForwardToggle';
 import JustAddedToggle from './JustAddedToggle';
+import FriendsTimelineToggle from './FriendsTimelineToggle';
 import { showSheTheyForwardFilter } from '../../utils/cityFeatureFlags';
 import { trackPlausible } from '../../utils/plausible';
 
@@ -55,6 +56,14 @@ function EventsToolbar({
         onChange={(next) => {
           trackPlausible('Just Added Filter', { state: next ? 'on' : 'off' });
           setFilterSelections((prev) => ({ ...prev, addedLastWeekOnly: next }));
+        }}
+      />
+
+      <FriendsTimelineToggle
+        enabled={!!filterSelections.friendsTimelineOnly}
+        onChange={(next) => {
+          trackPlausible('Friends Timeline Filter', { state: next ? 'on' : 'off' });
+          setFilterSelections((prev) => ({ ...prev, friendsTimelineOnly: next }));
         }}
       />
 

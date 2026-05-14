@@ -91,11 +91,26 @@ class Api::UserEventsController < ApplicationController
       return render json: { error: "Unauthorized" }, status: :unauthorized
     end
 
-    event_id = params[:event_id]
-    friends = current_user.friends
-    attendees = friends.joins(:user_events)
-                       .where(user_events: { event_id:, status: "attending" })
-    render json: attendees.select(:id, :username)
+    eid = Integer(params[:event_id], exception: false)
+    return render json: { error: "Not found" }, status: :not_found unless eid
+
+    ordered = ordered_friend_users_for_event(eid, :attending)
+    render json: ordered.map { |u| friend_attendee_json(u) }
+  end
+
+  # GET /api/user_events/:event_id/friend_rsvps — accepted friends attending + interested (detail UI)
+  def friend_rsvps
+    unless current_user
+      return render json: { error: "Unauthorized" }, status: :unauthorized
+    end
+
+    eid = Integer(params[:event_id], exception: false)
+    return render json: { error: "Not found" }, status: :not_found unless eid
+
+    attending = ordered_friend_users_for_event(eid, :attending).map { |u| friend_attendee_json(u) }
+    interested = ordered_friend_users_for_event(eid, :interested).map { |u| friend_attendee_json(u) }
+
+    render json: { attending: attending, interested: interested }, status: :ok
   end
 
   # GET /api/user_events/:event_id/friend_counts — accepted friends with this event saved (by status)
@@ -155,6 +170,30 @@ class Api::UserEventsController < ApplicationController
 
 
   private
+
+  # Preserves UserEvent row order within status; loads avatars in one query.
+  def ordered_friend_users_for_event(event_id, status)
+    friend_ids = current_user.friends.pluck(:id)
+    return [] if friend_ids.empty?
+
+    user_ids = UserEvent
+      .where(user_id: friend_ids, event_id: event_id, status: status)
+      .distinct
+      .pluck(:user_id)
+
+    users = User.with_attached_avatar.where(id: user_ids).index_by(&:id)
+    user_ids.filter_map { |id| users[id] }
+  end
+
+  def friend_attendee_json(user)
+    {
+      id: user.id,
+      username: user.username,
+      name: user.name,
+      avatar_url: user.avatar.attached? ? url_for(user.avatar) : nil,
+      picture: user.picture.presence,
+    }
+  end
 
   def accepted_friendship?(a, b)
     Friendship.exists?(user: a, friend: b, status: "accepted") ||

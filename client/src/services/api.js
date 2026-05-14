@@ -159,6 +159,24 @@ export const fetchFriendEventCountsBatch = async (eventIds) => {
   return out;
 };
 
+/** Accepted friends attending + interested for event detail (avatars + name list). */
+export const fetchFriendEventRsvps = async (eventId) => {
+  const id = Number(eventId);
+  if (!id) return { attending: [], interested: [] };
+  try {
+    const { data } = await api.get(`/user_events/${id}/friend_rsvps`);
+    return {
+      attending: Array.isArray(data.attending) ? data.attending : [],
+      interested: Array.isArray(data.interested) ? data.interested : [],
+    };
+  } catch (e) {
+    if (e?.response?.status === 401 || e?.response?.status === 403) {
+      return { attending: [], interested: [] };
+    }
+    throw e;
+  }
+};
+
 /** Avatar upload — multipart; must not use axios default JSON Content-Type. */
 export const uploadUserAvatar = async (file) => {
   const formData = new FormData();

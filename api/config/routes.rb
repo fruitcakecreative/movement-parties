@@ -19,6 +19,7 @@ Rails.application.routes.draw do
     post "logs", to: "logs#create"
     post 'users/create_from_facebook', to: 'users#create_from_facebook'
     get "user_events/:event_id/friend_attendees", to: "user_events#friend_attendees"
+    get "user_events/:event_id/friend_rsvps", to: "user_events#friend_rsvps"
     get "user_events/:event_id/friend_counts", to: "user_events#friend_counts"
     post "user_events/friend_counts_batch", to: "user_events#friend_counts_batch"
     resources :events
