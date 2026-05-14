@@ -68,15 +68,15 @@ export const userLogin = async (credentials) => {
   return response.data;
 };
 
-/** Devise recoverable — always succeeds with generic message (no email enumeration). */
+/** Devise recoverable — generic success body (no email enumeration). SPA link uses CLIENT_ORIGIN on API. */
 export const requestPasswordReset = async (email) => {
   const { data } = await api.post('/password', {
-    user: { email: email.trim() },
+    user: { email: String(email).trim() },
   });
   return data;
 };
 
-/** PUT /api/password with raw token from email link query param (see `bin/rails routes | grep password`). */
+/** PUT /api/password — raw token from email; response includes authentication_token for Bearer API calls. */
 export const resetPasswordWithToken = async ({
   resetPasswordToken,
   password,
