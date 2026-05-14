@@ -64,6 +64,30 @@ export const userLogout = async () => {
   }
 };
 
+/** Devise recoverable — generic success body (no email enumeration). SPA link uses CLIENT_ORIGIN on API. */
+export const requestPasswordReset = async (email) => {
+  const { data } = await api.post('/password', {
+    user: { email: String(email).trim() },
+  });
+  return data;
+};
+
+/** PUT /api/password — raw token from email; response may include authentication_token for Bearer API calls. */
+export const resetPasswordWithToken = async ({
+  resetPasswordToken,
+  password,
+  passwordConfirmation,
+}) => {
+  const { data } = await api.put('/password', {
+    user: {
+      reset_password_token: resetPasswordToken,
+      password,
+      password_confirmation: passwordConfirmation,
+    },
+  });
+  return data;
+};
+
 //attending/interested event buttons
 export const fetchUserEvents = async () => {
   const response = await api.get('/user_events');
@@ -145,6 +169,37 @@ export const fetchUserInfo = async (token) => {
   return response.data;
 };
 
+/** Another member’s profile — self or accepted friend only (404 otherwise). */
+export const fetchUserPublicProfile = async (userId) => {
+  const response = await api.get(`/users/${userId}`);
+  return response.data;
+};
+
+/** Avatar upload — multipart; must not use axios default JSON Content-Type. */
+export const uploadUserAvatar = async (file) => {
+  const formData = new FormData();
+  formData.append('avatar', file);
+  const raw = localStorage.getItem('user');
+  const u = raw ? JSON.parse(raw) : {};
+  const token = u.authentication_token || u.token;
+  const base = (API_BASE_URL || '').replace(/\/+$/, '');
+  const headers = { 'X-City-Key': city };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const res = await fetch(`${base}/user/upload_avatar`, {
+    method: 'POST',
+    headers,
+    body: formData,
+    credentials: 'include',
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.error || 'Upload failed');
+    err.response = { data, status: res.status };
+    throw err;
+  }
+  return data;
+};
+
 export const loginWithFacebook = async (userData) => {
   const res = await fetch(`${process.env.REACT_APP_API_BASE}/users/create_from_facebook`, {
     method: 'POST',
@@ -166,6 +221,11 @@ export const fetchAllUsers = async () => {
 
 export const fetchFriendshipList = async () => {
   const res = await api.get('/friendships');
+  return res.data;
+};
+
+export const fetchPendingFriendRequests = async () => {
+  const res = await api.get('/friendships/pending');
   return res.data;
 };
 
