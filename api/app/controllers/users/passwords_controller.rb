@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# JSON API for SPA: POST /api/users/password (request email), PUT /api/users/password (new password + token).
+# JSON API for SPA: POST /api/password (request email), PUT /api/password (new password + token).
 class Users::PasswordsController < Devise::PasswordsController
   respond_to :json
 

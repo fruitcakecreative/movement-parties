@@ -70,19 +70,19 @@ export const userLogin = async (credentials) => {
 
 /** Devise recoverable — always succeeds with generic message (no email enumeration). */
 export const requestPasswordReset = async (email) => {
-  const { data } = await api.post('/users/password', {
+  const { data } = await api.post('/password', {
     user: { email: email.trim() },
   });
   return data;
 };
 
-/** PUT /users/password with raw token from email link query param. */
+/** PUT /api/password with raw token from email link query param (see `bin/rails routes | grep password`). */
 export const resetPasswordWithToken = async ({
   resetPasswordToken,
   password,
   passwordConfirmation,
 }) => {
-  const { data } = await api.put('/users/password', {
+  const { data } = await api.put('/password', {
     user: {
       reset_password_token: resetPasswordToken,
       password,
