@@ -1,12 +1,11 @@
-import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import FacebookLogin from 'react-facebook-login';
 import { loginWithFacebook } from '../../services/api';
 
 /** OAuth redirect must match Meta “Valid OAuth Redirect URIs” exactly — no query or hash. */
-function canonicalFacebookRedirectUri() {
+function redirectUriFromPathname(pathname) {
   if (typeof window === 'undefined') return '';
-  let path = window.location.pathname || '/';
+  let path = pathname || '/';
   if (path.length > 1 && path.endsWith('/')) {
     path = path.slice(0, -1);
   }
@@ -17,11 +16,8 @@ const FB_APP_ID =
   process.env.REACT_APP_FB_APP_ID || process.env.REACT_APP_FACEBOOK_APP_ID || '';
 
 function FacebookLoginButton({ textButton = 'Continue with Facebook' }) {
-  const location = useLocation();
-  const redirectUri = useMemo(
-    () => canonicalFacebookRedirectUri(),
-    [location.pathname]
-  );
+  const { pathname } = useLocation();
+  const redirectUri = redirectUriFromPathname(pathname);
 
   const handleFacebookCallback = async (response) => {
     if (response?.status === 'unknown') {
