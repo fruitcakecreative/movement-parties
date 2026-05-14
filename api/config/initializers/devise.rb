@@ -36,6 +36,8 @@ Devise.setup do |config|
 
   config.reset_password_within = 6.hours
 
+  # SPA handles session via localStorage + token; do not establish a Devise session on the API host after reset.
+  config.sign_in_after_reset_password = false
 
   config.sign_out_via = :delete
 
