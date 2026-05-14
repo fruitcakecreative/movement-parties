@@ -12,6 +12,11 @@ class Rack::Attack
     if req.path == "/api/user" || req.path == "/api/login" || req.path == "/api/logout"
       false
     elsif req.path.start_with?("/api/")
+      # CORS preflight — 429 here has no CORS headers and looks like a CORS failure in the browser.
+      next false if req.request_method == "OPTIONS"
+      # One batched call per view; still counts toward /api throttle and can 429 alongside other calls.
+      next false if req.path == "/api/user_events/friend_counts_batch"
+
       req.ip
     end
   end
