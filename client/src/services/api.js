@@ -18,7 +18,17 @@ export const isUnauthorized = (err) => err?.response?.status === 401;
 
 api.interceptors.request.use((config) => {
   config.headers = config.headers || {};
-  config.headers["X-City-Key"] = city;
+  config.headers['X-City-Key'] = city;
+  try {
+    const raw = localStorage.getItem('user');
+    if (raw) {
+      const u = JSON.parse(raw);
+      const t = u.authentication_token || u.token;
+      if (t) config.headers.Authorization = `Bearer ${t}`;
+    }
+  } catch (_) {
+    /* ignore */
+  }
   return config;
 });
 
@@ -35,7 +45,6 @@ export const fetchEventById = async (id) => {
   const response = await api.get(`/events/${id}`);
   return response.data;
 };
-
 
 //login/logout
 export const userLogin = async (credentials) => {
@@ -61,10 +70,16 @@ export const fetchUserEvents = async () => {
   return response.data;
 };
 
+/** Friend’s saved events (same shape as fetchUserEvents) — self or accepted friend only. */
+export const fetchUserEventsForUser = async (userId) => {
+  const response = await api.get(`/users/${userId}/user_events`);
+  return response.data;
+};
+
 export const saveUserEventStatus = async (eventId, status) => {
   return api.post('/user_events', {
     user_event: {
-      event_id: Number(eventId), // ensure it’s a number
+      event_id: Number(eventId),
       status,
     },
   });
@@ -76,12 +91,59 @@ export const deleteUserEventStatus = async (eventId, status) => {
   });
 };
 
+/** How many accepted friends have this event as attending / interested. */
+export const fetchFriendEventCounts = async (eventId) => {
+  const { data } = await api.get(`/user_events/${eventId}/friend_counts`);
+  return {
+    friendsAttending: data.friends_attending ?? 0,
+    friendsInterested: data.friends_interested ?? 0,
+  };
+};
+
+/** Batch friend counts for many event ids (string keys in response). */
+export const fetchFriendEventCountsBatch = async (eventIds) => {
+  const unique = [
+    ...new Set((eventIds || []).filter((id) => id != null).map((id) => Number(id))),
+  ].filter((n) => !Number.isNaN(n));
+  if (unique.length === 0) return {};
+
+  const { data } = await api.post('/user_events/friend_counts_batch', {
+    event_ids: unique,
+  });
+  const raw = data.counts || {};
+  const out = {};
+  for (const [k, v] of Object.entries(raw)) {
+    out[String(k)] = {
+      friendsAttending: v.friends_attending ?? 0,
+      friendsInterested: v.friends_interested ?? 0,
+    };
+  }
+  return out;
+};
+
+/** Accepted friends attending + interested for event detail UI. */
+export const fetchFriendEventRsvps = async (eventId) => {
+  const id = Number(eventId);
+  if (!id) return { attending: [], interested: [] };
+  try {
+    const { data } = await api.get(`/user_events/${id}/friend_rsvps`);
+    return {
+      attending: Array.isArray(data.attending) ? data.attending : [],
+      interested: Array.isArray(data.interested) ? data.interested : [],
+    };
+  } catch (e) {
+    if (e?.response?.status === 401 || e?.response?.status === 403) {
+      return { attending: [], interested: [] };
+    }
+    throw e;
+  }
+};
+
 //user profile info
 export const fetchUserInfo = async (token) => {
   const response = await api.get('/user');
   return response.data;
 };
-
 
 export const loginWithFacebook = async (userData) => {
   const res = await fetch(`${process.env.REACT_APP_API_BASE}/users/create_from_facebook`, {
@@ -97,7 +159,6 @@ export const loginWithFacebook = async (userData) => {
   return res.json();
 };
 
-
 export const fetchAllUsers = async () => {
   const res = await api.get('/users');
   return res.data;
@@ -108,21 +169,30 @@ export const fetchFriendshipList = async () => {
   return res.data;
 };
 
-export const sendFriendRequest = async (username) => {
-  return api.post('/friendships', { username });
+export const searchUsers = async (q) => {
+  const res = await api.get('/friendships/search', { params: { q } });
+  return res.data;
+};
+
+/** `username` string or `{ username, user_id }` */
+export const sendFriendRequest = async (usernameOrPayload) => {
+  const body =
+    typeof usernameOrPayload === 'string'
+      ? { username: usernameOrPayload }
+      : usernameOrPayload;
+  return api.post('/friendships', body);
 };
 
 export const acceptFriendRequest = async (user_id) => {
-  return api.post("/friendships/accept", { user_id });
+  return api.post('/friendships/accept', { user_id });
 };
 
 export const cancelFriendRequest = async (username) => {
-  return api.delete("/friendships", { data: { username } });
+  return api.delete('/friendships', { data: { username } });
 };
 
 export const rejectFriendRequest = async (user_id) => {
-  return api.post("/friendships/reject", { user_id });
+  return api.post('/friendships/reject', { user_id });
 };
-
 
 export default api;
