@@ -55,4 +55,6 @@ Rails.application.routes.draw do
   end
 
   get "up" => "rails/health#show", as: :rails_health_check
+  # Browsers hitting https://api…/ get a 200 instead of a misleading 404 (this host is the API, not a site).
+  root to: "rails/health#show"
 end
