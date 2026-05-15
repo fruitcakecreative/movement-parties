@@ -87,34 +87,16 @@ const ProgramItem = ({ program, scrollLeft, openEvent, sheTheyForwardTimeline = 
     fc.friendsAttending != null &&
     (fc.friendsInterested > 0 || fc.friendsAttending > 0);
 
-  const pos = program.position || {};
   const sp = styles.position || {};
-  const leftPx =
-    typeof pos.left === 'number'
-      ? pos.left
-      : parseFloat(String(sp.left ?? 0)) || 0;
-  const widthPx =
-    typeof pos.width === 'number'
-      ? pos.width
-      : typeof styles.width === 'number'
-        ? styles.width
-        : parseFloat(String(styles.width ?? 0)) || 0;
-  const topPx =
-    typeof pos.top === 'number'
-      ? pos.top
-      : parseFloat(String(sp.top ?? 0)) || 0;
-  const heightPx =
-    typeof pos.height === 'number'
-      ? pos.height
-      : parseFloat(String(sp.height ?? 0)) || 0;
   const zBase = parseInt(String(sp.zIndex ?? 1), 10) || 1;
 
+  /** Outside the Planby width math (`left: 100%`) so status controls do not shift time alignment. */
   const railStyle = {
     position: 'absolute',
-    left: leftPx + widthPx,
-    top: topPx,
-    height: heightPx > 0 ? heightPx : undefined,
-    minHeight: heightPx > 0 ? undefined : 40,
+    left: '100%',
+    top: 0,
+    height: '100%',
+    minHeight: 40,
     width: timelineFriendHints ? 'auto' : 34,
     maxWidth: timelineFriendHints ? 220 : 34,
     minWidth: 34,
@@ -123,15 +105,17 @@ const ProgramItem = ({ program, scrollLeft, openEvent, sheTheyForwardTimeline = 
     justifyContent: 'center',
     zIndex: zBase + 2,
     pointerEvents: 'auto',
+    marginLeft: 2,
+    boxSizing: 'border-box',
   };
 
   return (
-    <>
     <ProgramBox
       width={styles.width}
       style={styles.position}
       className={[
         'party-box',
+        'party-box--timeline',
         formatVenueName(venueName),
         sheTheyHigh ? 'party-box--she-they-spotlight' : '',
         sheTheyCompact ? 'party-box--she-they-compact' : '',
@@ -276,23 +260,22 @@ const ProgramItem = ({ program, scrollLeft, openEvent, sheTheyForwardTimeline = 
           </div>
         )}
       </ProgramContent>
+      <div
+        className="program-item-status-rail"
+        style={railStyle}
+        onClick={(e) => e.stopPropagation()}
+        role="presentation"
+      >
+        <EventStatusControls
+          variant="compact"
+          className="event-status--timeline-rail"
+          eventId={timelineEventId}
+          showTapLabel
+          friendsInterestedCount={fc.friendsInterested}
+          friendsAttendingCount={fc.friendsAttending}
+        />
+      </div>
     </ProgramBox>
-    <div
-      className="program-item-status-rail"
-      style={railStyle}
-      onClick={(e) => e.stopPropagation()}
-      role="presentation"
-    >
-      <EventStatusControls
-        variant="compact"
-        eventId={timelineEventId}
-        className="event-status--timeline-rail"
-        showTapLabel={isMobile}
-        friendsInterestedCount={fc.friendsInterested}
-        friendsAttendingCount={fc.friendsAttending}
-      />
-    </div>
-    </>
   );
 };
 

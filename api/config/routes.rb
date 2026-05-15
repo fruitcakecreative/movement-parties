@@ -22,7 +22,11 @@ Rails.application.routes.draw do
     get "user_events/:event_id/friend_rsvps", to: "user_events#friend_rsvps"
     get "user_events/:event_id/friend_counts", to: "user_events#friend_counts"
     post "user_events/friend_counts_batch", to: "user_events#friend_counts_batch"
-    resources :events
+    resources :events do
+      member do
+        get :rsvp_totals
+      end
+    end
     resources :venues, only: [:index, :show]
     resources :artists, only: [:index, :show]
     resources :genres, only: [:index]
@@ -39,8 +43,9 @@ Rails.application.routes.draw do
       end
     delete "friendships", to: "friendships#destroy"
     get "users/:user_id/user_events", to: "user_events#for_user", constraints: { user_id: /\d+/ }
+    get "users/:user_id/friends", to: "friendships#friends_of_user", constraints: { user_id: /\d+/ }
     get "users/:id", to: "users#show_by_id", constraints: { id: /\d+/ }
-    resource :user, only: [:show] do
+    resource :user, only: [:show, :update] do
       post :upload_avatar
     end
   end

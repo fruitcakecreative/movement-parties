@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import EventDetailsShell from "../components/events/EventDetailsShell";
 import VenueDetailsShell from "../components/venues/VenueDetailsShell";
-import MiniProgramBox from "../timeline/components/MiniProgramBox";
+import EventCard from "../components/EventCard";
 import {
   fetchUserPublicProfile,
   fetchUserEventsForUser,
+  fetchFriendsOfUser,
   cancelFriendRequest,
+  sendFriendRequest,
   isUnauthorized,
 } from "../services/api";
 import { FriendCountsProvider } from "../context/FriendCountsContext";
@@ -27,6 +29,8 @@ function displayAvatarSrc(u) {
 export default function UserProfile() {
   const { userId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const backToEventId = location.state?.fromEventId ?? null;
   const mainScrollRef = useRef(null);
   const desktopScrollRef = useRef(0);
   const [selectedEventId, setSelectedEventId] = useState(null);
@@ -44,6 +48,11 @@ export default function UserProfile() {
   });
   const [eventsLoading, setEventsLoading] = useState(false);
   const [eventsError, setEventsError] = useState("");
+
+  const [theirFriends, setTheirFriends] = useState([]);
+  const [theirFriendsLoading, setTheirFriendsLoading] = useState(false);
+  const [theirFriendsError, setTheirFriendsError] = useState("");
+  const [theirFriendsBusy, setTheirFriendsBusy] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -89,6 +98,31 @@ export default function UserProfile() {
       })
       .finally(() => {
         if (!cancelled) setEventsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [profile]);
+
+  useEffect(() => {
+    if (!profile?.id || !profile.is_friend) return;
+
+    let cancelled = false;
+    setTheirFriendsLoading(true);
+    setTheirFriendsError("");
+    fetchFriendsOfUser(profile.id)
+      .then((list) => {
+        if (!cancelled) setTheirFriends(Array.isArray(list) ? list : []);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        console.error("Failed to load their friends", err);
+        setTheirFriendsError("Could not load their friends.");
+        setTheirFriends([]);
+      })
+      .finally(() => {
+        if (!cancelled) setTheirFriendsLoading(false);
       });
 
     return () => {
@@ -186,10 +220,7 @@ export default function UserProfile() {
     setBusy(true);
     setActionError("");
     try {
-      await cancelFriendRequest({
-        user_id: profile.id,
-        username: profile.username,
-      });
+      await cancelFriendRequest({ user_id: profile.id });
       navigate("/profile");
     } catch (e) {
       const msg =
@@ -198,6 +229,59 @@ export default function UserProfile() {
     } finally {
       setBusy(false);
     }
+  };
+
+  const handleSendFriendRequestToConnection = async (candidate) => {
+    setTheirFriendsBusy(true);
+    setTheirFriendsError("");
+    try {
+      await sendFriendRequest({ user_id: candidate.id });
+      setTheirFriends((rows) =>
+        rows.map((u) =>
+          u.id === candidate.id ? { ...u, friendship_status: "outgoing_pending" } : u
+        )
+      );
+    } catch (err) {
+      const msg =
+        err?.response?.data?.error || err?.response?.data?.message || "Could not send request.";
+      setTheirFriendsError(msg);
+    } finally {
+      setTheirFriendsBusy(false);
+    }
+  };
+
+  const renderTheirFriendAction = (row) => {
+    const status = row.friendship_status || "none";
+    if (status === "friend") {
+      return (
+        <span className="profile-page__friend-action-label" aria-live="polite">
+          Friends
+        </span>
+      );
+    }
+    if (status === "outgoing_pending") {
+      return (
+        <span className="profile-page__friend-action-label" aria-live="polite">
+          Pending
+        </span>
+      );
+    }
+    if (status === "incoming_pending") {
+      return (
+        <span className="profile-page__friend-action-label" aria-live="polite">
+          In requests
+        </span>
+      );
+    }
+    return (
+      <button
+        type="button"
+        disabled={theirFriendsBusy}
+        onClick={() => handleSendFriendRequestToConnection(row)}
+      >
+        Add
+      </button>
+    );
   };
 
   if (loading) {
@@ -242,8 +326,16 @@ export default function UserProfile() {
     >
       <div ref={mainScrollRef} className="user-profile-page__main">
       <nav className="user-profile-page__nav" aria-label="Profile">
+        {backToEventId != null && (
+          <Link
+            to={`/?eventId=${backToEventId}`}
+            className="user-profile-page__back user-profile-page__back--event"
+          >
+            ← Back to event
+          </Link>
+        )}
         <Link to="/profile" className="user-profile-page__back">
-          ← Back to profile
+          ← Back to your profile
         </Link>
       </nav>
 
@@ -256,12 +348,14 @@ export default function UserProfile() {
               className="profile-page__avatar profile-page__avatar--placeholder"
               aria-hidden
             >
-              {(profile.name || profile.username || "?").charAt(0).toUpperCase()}
+              {(profile.name || profile.email || "?").charAt(0).toUpperCase()}
             </div>
           )}
         </div>
-        <h1 className="profile-page__title">{profile.name || profile.username}</h1>
-        <p className="user-profile-page__username">@{profile.username}</p>
+        <h1 className="profile-page__title">{profile.name || profile.email}</h1>
+        {profile.email && profile.name ? (
+          <p className="user-profile-page__subtitle">{profile.email}</p>
+        ) : null}
       </div>
 
       {profile.is_self ? (
@@ -271,7 +365,7 @@ export default function UserProfile() {
           </Link>
         </div>
       ) : profile.is_friend ? (
-        <div className="user-profile-page__actions">
+        <div className="user-profile-page__actions user-profile-page__actions--unfriend">
           {actionError && (
             <p className="profile-page__error" role="alert">
               {actionError}
@@ -279,7 +373,7 @@ export default function UserProfile() {
           )}
           <button
             type="button"
-            className="profile-page__btn profile-page__btn--ghost"
+            className="profile-page__btn profile-page__btn--ghost user-profile-page__btn-unfriend"
             disabled={busy}
             onClick={handleUnfriend}
           >
@@ -287,6 +381,62 @@ export default function UserProfile() {
           </button>
         </div>
       ) : null}
+
+      {profile.is_friend && (
+        <section
+          className="profile-page__section user-profile-page__their-friends"
+          aria-label="Their friends"
+        >
+          <h2 className="profile-page__section-title">Their friends</h2>
+          {theirFriendsLoading && (
+            <p className="profile-page__empty-small">Loading friends…</p>
+          )}
+          {theirFriendsError && (
+            <p className="profile-page__error" role="alert">
+              {theirFriendsError}
+            </p>
+          )}
+          {!theirFriendsLoading && !theirFriendsError && theirFriends.length === 0 && (
+            <p className="profile-page__empty-small">No friends to show yet.</p>
+          )}
+          {!theirFriendsLoading && !theirFriendsError && theirFriends.length > 0 && (
+            <div className="user-profile-page__their-friends-scroll">
+              <ul className="profile-page__friend-results">
+                {theirFriends.map((row) => (
+                  <li key={row.id} className="profile-page__friend-row">
+                    <Link
+                      to={`/users/${row.id}`}
+                      className="profile-page__friend-row-main profile-page__friend-row-main--link"
+                    >
+                      {displayAvatarSrc(row) ? (
+                        <img
+                          className="profile-page__friend-avatar-img"
+                          src={displayAvatarSrc(row)}
+                          alt=""
+                        />
+                      ) : (
+                        <div
+                          className="profile-page__friend-avatar profile-page__friend-avatar--placeholder"
+                          aria-hidden
+                        >
+                          {(row.name || row.email || "?").charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="profile-page__friend-row-text">
+                        <strong>{row.name || row.email || "?"}</strong>
+                        {row.email && row.name ? <p>{row.email}</p> : null}
+                      </div>
+                    </Link>
+                    <div className="profile-page__friend-row-action">
+                      {renderTheirFriendAction(row)}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </section>
+      )}
 
       {showEventSection && (
         <section
@@ -312,9 +462,13 @@ export default function UserProfile() {
                   <div className="profile-page__status-group profile-page__status-group--attending">
                     <h3 className="profile-page__subsection-title">Attending</h3>
                     {dayData.attending.map((event, i) => (
-                      <MiniProgramBox
+                      <EventCard
                         key={`att-${event.id || i}`}
                         event={event}
+                        timeZone={timelineTimeZone}
+                        sheTheyForwardTimeline={sheTheyForwardTimeline}
+                        showVenueName
+                        showArtists={false}
                         onClick={() => openEvent(event.id)}
                       />
                     ))}
@@ -326,11 +480,15 @@ export default function UserProfile() {
                     <h3 className="profile-page__subsection-title">Interested</h3>
                     <div className="profile-page__interested-grid">
                       {dayData.interested.map((event, i) => (
-                        <MiniProgramBox
+                        <EventCard
                           key={`int-${event.id || i}`}
                           event={event}
-                          onClick={() => openEvent(event.id)}
+                          timeZone={timelineTimeZone}
+                          sheTheyForwardTimeline={sheTheyForwardTimeline}
+                          showVenueName
+                          showArtists={false}
                           density="compact"
+                          onClick={() => openEvent(event.id)}
                         />
                       ))}
                     </div>

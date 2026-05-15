@@ -123,6 +123,14 @@ export function sheTheyForwardLineupPercent(artists) {
   return Math.round((forwardSlots / totalSlots) * 100);
 }
 
+/** Short label for event detail “Artists” heading (normal + she/they modes). */
+export function artistsSheTheyLineupSubtitle(artists) {
+  const pct = sheTheyForwardLineupPercent(artists);
+  if (pct === null) return '(she/they % — no pronoun data)';
+  if (pct === 0) return '(0% she/they… SHAME!)';
+  return `(${pct}% she/they)`;
+}
+
 /**
  * Shared tier for timeline % chip and card/detail badges. `zero` is 0%; otherwise tier-low … tier-hot.
  */

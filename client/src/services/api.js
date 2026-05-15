@@ -145,6 +145,21 @@ export const fetchFriendEventCountsBatch = async (eventIds) => {
   return out;
 };
 
+/** How many users (any account) saved this event as interested or attending. */
+export const fetchEventRsvpTotals = async (eventId) => {
+  const id = Number(eventId);
+  if (!id) return { interested: 0, attending: 0 };
+  try {
+    const { data } = await api.get(`/events/${id}/rsvp_totals`);
+    return {
+      interested: data.app_interested_count ?? 0,
+      attending: data.app_attending_count ?? 0,
+    };
+  } catch (e) {
+    return { interested: 0, attending: 0 };
+  }
+};
+
 /** Accepted friends attending + interested for event detail UI. */
 export const fetchFriendEventRsvps = async (eventId) => {
   const id = Number(eventId);
@@ -169,10 +184,27 @@ export const fetchUserInfo = async (token) => {
   return response.data;
 };
 
+/** PATCH /user — display name (`name`) and sign-in email. */
+export const updateCurrentUser = async ({ name, email }) => {
+  const { data } = await api.patch('/user', {
+    user: {
+      name: String(name ?? '').trim(),
+      email: String(email ?? '').trim(),
+    },
+  });
+  return data;
+};
+
 /** Another member’s profile — self or accepted friend only (404 otherwise). */
 export const fetchUserPublicProfile = async (userId) => {
   const response = await api.get(`/users/${userId}`);
   return response.data;
+};
+
+/** Accepted friends of `userId` (no emails). You must be that user or their accepted friend. */
+export const fetchFriendsOfUser = async (userId) => {
+  const { data } = await api.get(`/users/${userId}/friends`);
+  return Array.isArray(data) ? data : [];
 };
 
 /** Avatar upload — multipart; must not use axios default JSON Content-Type. */
@@ -234,7 +266,7 @@ export const searchUsers = async (q) => {
   return res.data;
 };
 
-/** `username` string or `{ username, user_id }` */
+/** `username` string or `{ username?, user_id? }` */
 export const sendFriendRequest = async (usernameOrPayload) => {
   const body =
     typeof usernameOrPayload === 'string'
@@ -247,8 +279,15 @@ export const acceptFriendRequest = async (user_id) => {
   return api.post('/friendships/accept', { user_id });
 };
 
-export const cancelFriendRequest = async (username) => {
-  return api.delete('/friendships', { data: { username } });
+/** `{ user_id }` preferred, or legacy string `username` */
+export const cancelFriendRequest = async (payload) => {
+  const body =
+    payload != null && typeof payload === 'object' && payload.user_id != null
+      ? { user_id: payload.user_id }
+      : typeof payload === 'string'
+        ? { username: payload }
+        : payload;
+  return api.delete('/friendships', { data: body });
 };
 
 export const rejectFriendRequest = async (user_id) => {

@@ -14,6 +14,14 @@ function friendCountLabel(count, kind) {
   return `${n} ${friendWord} attending`;
 }
 
+function siteRsvpTotalsLine(interested, attending) {
+  const parts = [];
+  if (interested > 0) parts.push(`${interested} users interested`);
+  if (attending > 0) parts.push(`${attending} users attending`);
+  if (parts.length === 0) return null;
+  return `${parts.join(", ")}`;
+}
+
 function EventStatusControls({
   eventId,
   variant = "compact",
@@ -22,6 +30,11 @@ function EventStatusControls({
   tapLabelDurationMs = 1000,
   friendsInterestedCount,
   friendsAttendingCount,
+  /** When false, hide “N friends attending/interested” beside controls (e.g. event detail panel). */
+  showFriendCountHints = true,
+  /** All users on the app with this event saved (detail panel). */
+  siteInterestedTotal,
+  siteAttendingTotal,
 }) {
   const navigate = useNavigate();
   const {
@@ -82,8 +95,16 @@ function EventStatusControls({
   const attendingOn = status === "attending";
 
   if (variant === "pills") {
-    const interestedHint = friendCountLabel(friendsInterestedCount, "interested");
-    const attendingHint = friendCountLabel(friendsAttendingCount, "attending");
+    const interestedHint = showFriendCountHints
+      ? friendCountLabel(friendsInterestedCount, "interested")
+      : null;
+    const attendingHint = showFriendCountHints
+      ? friendCountLabel(friendsAttendingCount, "attending")
+      : null;
+    const siteTotalsLine = siteRsvpTotalsLine(
+      Number(siteInterestedTotal) || 0,
+      Number(siteAttendingTotal) || 0
+    );
     return (
       <div
         className={`event-status event-status--pills ${className}`.trim()}
@@ -145,13 +166,22 @@ function EventStatusControls({
             </>
           )}
         </div>
+        {siteTotalsLine && (
+          <p className="event-status__site-totals" aria-live="polite">
+            {siteTotalsLine}
+          </p>
+        )}
       </div>
     );
   }
 
   /* compact + card — optional friend hints (same line as each icon, smaller text) */
-  const interestedHintCompact = friendCountLabel(friendsInterestedCount, "interested");
-  const attendingHintCompact = friendCountLabel(friendsAttendingCount, "attending");
+  const interestedHintCompact = showFriendCountHints
+    ? friendCountLabel(friendsInterestedCount, "interested")
+    : null;
+  const attendingHintCompact = showFriendCountHints
+    ? friendCountLabel(friendsAttendingCount, "attending")
+    : null;
 
   return (
     <div

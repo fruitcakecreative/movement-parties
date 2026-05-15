@@ -226,6 +226,11 @@
     overflow: visible;
   }
 
+  /* Status rail sits at `left: 100%`; parent must not clip it. */
+  &.party-box--timeline {
+    overflow: visible !important;
+  }
+
   .party-content {
     background: none;
     background-color: black;

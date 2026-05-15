@@ -5,6 +5,17 @@ class Venue < ApplicationRecord
   belongs_to :parent_venue, class_name: "Venue", optional: true
   has_many :child_venues, class_name: "Venue", foreign_key: :parent_venue_id, dependent: :nullify
 
+  # Keyed by normalized parent `name` (downcased, spaces removed) — must match `ordered_child_venues` lookup.
+  # Patterns apply in order; each child matches the first hit on either subheading or name (see child_subsection_order_labels).
+  CHILD_SUBSECTION_ORDER_BY_PARENT_NAME = {
+    "spkrbox" => [
+      "Spkrbox (Upstairs)",
+      /\bupstairs\b/i,
+      "Spkrbox (Downstairs)",
+      /\bdownstairs\b/i
+    ]
+  }.freeze
+
   has_many :events
   has_one_attached :logo
 
@@ -134,12 +145,40 @@ class Venue < ApplicationRecord
     parent_venue || self
   end
 
+  # Display / API order for sub-venues under a parent (see CHILD_SUBSECTION_ORDER_BY_PARENT_NAME).
+  def ordered_child_venues
+    children = child_venues.to_a
+    return children if children.empty?
+
+      key = name.to_s.strip.downcase.gsub(/\s+/, "")
+      order = CHILD_SUBSECTION_ORDER_BY_PARENT_NAME[key]
+    return children.sort_by(&:id) if order.blank?
+
+    children.sort_by do |child|
+      labels = child_subsection_order_labels(child)
+      idx = order.index do |pat|
+        case pat
+        when Regexp then labels.any? { |l| l.match?(pat) }
+        when String then labels.any? { |l| l.casecmp?(pat) }
+        else false
+        end
+      end
+      [(idx.nil? ? order.size : idx), child.id]
+    end
+  end
+
+  # Strings we compare against CHILD_SUBSECTION_ORDER patterns (subheading and name; both can appear in API/UI).
+  def child_subsection_order_labels(child)
+    [child.subheading, child.name].compact.map { |s| s.to_s.strip }.reject(&:blank?).uniq
+  end
+  private :child_subsection_order_labels
+
   # Venue IDs whose events should be shown when viewing this venue (self + siblings, or self + children)
   def venue_ids_for_events
     if parent_venue_id.present?
-      [parent_venue_id] + parent_venue.child_venues.pluck(:id)
+      [parent_venue_id] + parent_venue.ordered_child_venues.map(&:id)
     elsif child_venues.any?
-      [id] + child_venues.pluck(:id)
+      [id] + ordered_child_venues.map(&:id)
     else
       [id]
     end
@@ -164,7 +203,13 @@ class Venue < ApplicationRecord
       bg_color: dv.bg_color,
       font_color: dv.font_color,
       parent_section_label: dv.parent_section_label,
-      child_venues: (dv.child_venues.any? ? dv.child_venues.map { |c| { id: c.id, name: c.name, subheading: c.subheading, logo_url: c.logo_url } } : [])
+      child_venues: (
+        if dv.child_venues.any?
+          dv.ordered_child_venues.map { |c| { id: c.id, name: c.name, subheading: c.subheading, logo_url: c.logo_url } }
+        else
+          []
+        end
+      )
     }
   end
 end

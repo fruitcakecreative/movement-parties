@@ -170,6 +170,45 @@
   }
 }
 
+.timeline-day.hours-25 {
+  .timeline-wrapper {
+    background: none !important;
+    background: linear-gradient(
+      to right,
+      #fef46f 0%,
+      #fef46f 34%,
+      #ffc665 39%,
+      #ffc665 41%,
+      #3a6476 45%,
+      #1c3d4b 47%,
+      #10252f 48%,
+      #10252f 68%,
+      #1c3d4b 70%,
+      #3a6476 73%,
+      #abdfff 75%,
+      #fffcce 77%,
+      #fef46f 82%,
+      #fef46f 100%
+    ) !important;
+    .timeline-time {
+      color: black;
+    }
+    [data-index='0'] {
+      display: none;
+    }
+    [data-index='12'],
+    [data-index='13'],
+    [data-index='14'],
+    [data-index='15'],
+    [data-index='16'],
+    [data-index='17'],
+    [data-index='18'],
+    [data-index='19'] {
+      color: white;
+    }
+  }
+}
+
 .timeline-day.hours-26 {
   .timeline-wrapper {
     background: none !important;
@@ -285,6 +324,58 @@
     }
   }
 }
+
+.timeline-day.hours-31 {
+  .timeline-wrapper {
+    background: none !important;
+    background: linear-gradient(
+      to right,
+      #fef46f 0%,
+      #fef46f 40%,
+      #fef46f 40%,
+      #ffc665 44%,
+      #ffc665 47%,
+      #3a6476 50%,
+      #1c3d4b 52%,
+      #10252f 54%,
+      #10252f 70%,
+      #1c3d4b 72%,
+      #3a6476 73%,
+      #abdfff 75%,
+      #fffcce 77%,
+      #fef46f 80%,
+      #fef46f 100%
+    ) !important;
+    .timeline-time {
+      color: black;
+    }
+    [data-index='0'] {
+      display: none;
+    }
+    [data-index='16'],
+    [data-index='17'],
+    [data-index='18'],
+    [data-index='19'],
+    [data-index='20'],
+    [data-index='21'],
+    [data-index='22'],
+    [data-index='23'] {
+      color: white;
+    }
+  }
+}
+
+
+.timeline-day.corner-wrapper-2026-05-22 {
+  .timeline-wrapper {
+    [data-index='30'],
+    [data-index='29']
+     {
+      display: none;
+    }
+  }
+}
+
 
 
 

@@ -55,14 +55,16 @@ class Api::UsersController < ApplicationController
 
 
   def show
-    render json: {
-      id: current_user.id,
-      name: current_user.name,
-      email: current_user.email,
-      username: current_user.username,
-      authentication_token: current_user.authentication_token,
-      avatar_url: current_user.avatar.attached? ? url_for(current_user.avatar) : current_user.picture
-    }
+    render json: current_user_json
+  end
+
+  def update
+    permitted = params.require(:user).permit(:name, :email)
+    if current_user.update(permitted)
+      render json: current_user_json
+    else
+      render json: { errors: current_user.errors.full_messages }, status: :unprocessable_entity
+    end
   end
 
   # Another member's profile (must be friends, or your own id for a consistent client shape).
@@ -86,6 +88,16 @@ class Api::UsersController < ApplicationController
 
   private
 
+  def current_user_json
+    {
+      id: current_user.id,
+      name: current_user.name,
+      email: current_user.email,
+      authentication_token: current_user.authentication_token,
+      avatar_url: current_user.avatar.attached? ? url_for(current_user.avatar) : current_user.picture
+    }
+  end
+
   def accepted_friendship?(a, b)
     Friendship.exists?(user: a, friend: b, status: "accepted") ||
       Friendship.exists?(user: b, friend: a, status: "accepted")
@@ -95,7 +107,7 @@ class Api::UsersController < ApplicationController
     {
       id: user.id,
       name: user.name,
-      username: user.username,
+      email: user.email,
       avatar_url: user.avatar.attached? ? url_for(user.avatar) : nil,
       picture: user.picture.presence,
       is_self: is_self,

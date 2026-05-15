@@ -5,8 +5,16 @@ function displayAvatarSrc(u) {
   return u?.avatar_url || u?.picture || null;
 }
 
-function displayName(u) {
-  return u?.name || u?.username || "";
+/** Display name only (no email) for event-detail friend lists. */
+function displayNameOnly(u) {
+  const n = (u?.name || "").trim();
+  if (n) return n;
+  return (u?.email || "").trim() || "";
+}
+
+function displayInitial(u) {
+  const base = (u?.name || u?.email || "?").trim() || "?";
+  return base.charAt(0).toUpperCase();
 }
 
 /**
@@ -17,6 +25,8 @@ function EventDetailsFriendSocial({
   friendsAttending = [],
   friendsInterested = [],
   onNavigate,
+  /** When set, friend profile links include state so the profile can offer “Back to event”. */
+  fromEventId = null,
 }) {
   const hasAttending = Array.isArray(friendsAttending) && friendsAttending.length > 0;
   const hasInterested =
@@ -24,19 +34,25 @@ function EventDetailsFriendSocial({
 
   if (!hasAttending && !hasInterested) return null;
 
+  const nAttending = friendsAttending.length;
+  const nInterested = friendsInterested.length;
+
   return (
     <div className="event-details-friend-social mb-sm">
       {hasAttending && (
         <div className="event-details-friends-attending event-details-friends-attending--full-blob">
-          <p className="event-details-friends-attending__title">
-            <i className="fa-solid fa-user-group" aria-hidden />
-            &nbsp;Friends attending:
-          </p>
+          <h2 className="event-details-section-head">
+            <span className="event-details-section-head__row">
+              <i className="fa-solid fa-user-group" aria-hidden />
+              &nbsp;Friends attending ({nAttending})
+            </span>
+          </h2>
           <ul className="profile-page__friends-tiles event-details-friends-attending__tiles">
             {friendsAttending.map((friend) => (
               <li key={friend.id} className="profile-page__friend-tile-wrap">
                 <Link
                   to={`/users/${friend.id}`}
+                  state={fromEventId != null ? { fromEventId } : undefined}
                   className="profile-page__friend-tile"
                   onClick={() => onNavigate?.()}
                 >
@@ -51,13 +67,13 @@ function EventDetailsFriendSocial({
                       className="profile-page__friend-tile-avatar profile-page__friend-tile-avatar--placeholder"
                       aria-hidden
                     >
-                      {(friend.name || friend.username || "?")
-                        .charAt(0)
-                        .toUpperCase()}
+                      {(displayInitial(friend))}
                     </div>
                   )}
                   <span className="profile-page__friend-tile-name">
-                    {displayName(friend)}
+                    <span className="profile-page__friend-tile-line">
+                      {displayNameOnly(friend)}
+                    </span>
                   </span>
                 </Link>
               </li>
@@ -68,10 +84,12 @@ function EventDetailsFriendSocial({
 
       {hasInterested && (
         <div className="event-details-friends-interested">
-          <p className="event-details-friends-interested__title">
-            <i className="fa-regular fa-star" aria-hidden />
-            &nbsp;Friends interested:
-          </p>
+          <h2 className="event-details-section-head">
+            <span className="event-details-section-head__row">
+              <i className="fa-regular fa-star" aria-hidden />
+              &nbsp;Friends interested ({nInterested})
+            </span>
+          </h2>
           <p className="event-details-friends-interested__line">
             {friendsInterested.map((friend, index) => (
               <span key={friend.id} className="event-details-friends-interested__chunk">
@@ -82,10 +100,11 @@ function EventDetailsFriendSocial({
                 ) : null}
                 <Link
                   to={`/users/${friend.id}`}
+                  state={fromEventId != null ? { fromEventId } : undefined}
                   className="event-details-friends-interested__link"
                   onClick={() => onNavigate?.()}
                 >
-                  {displayName(friend)}
+                  {displayNameOnly(friend)}
                 </Link>
               </span>
             ))}

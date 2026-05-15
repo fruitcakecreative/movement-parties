@@ -98,3 +98,63 @@ export function formatFestivalDayLong(dateKey, timeZone = 'America/New_York') {
   }
   return dt.setLocale('en-US').toFormat('cccc, MMM d');
 }
+
+const DATE_KEY_RE = /^\d{4}-\d{2}-\d{2}/;
+
+/**
+ * Timeline row keys are a festival calendar day (`YYYY-MM-DD`). The row’s window often crosses
+ * midnight (e.g. Fri noon → Sat noon). Events that **start** on the **next** calendar day in
+ * `timeZone` at **04:00 or later** are treated as the next row’s programme only — not this row’s.
+ * Starts from midnight up to 03:59:59.999 on that next day still appear on this row (after-parties).
+ */
+export function isEventHiddenFromTimelineRowByNextDayFourAm(
+  event,
+  timelineDateKey,
+  timeZone = 'America/New_York'
+) {
+  const raw = event?.formatted_start_time || event?.start_time;
+  if (!raw || !timelineDateKey) return false;
+
+  const keyMatch = String(timelineDateKey).match(DATE_KEY_RE);
+  if (!keyMatch) return false;
+
+  const start = parseEventInstant(raw, timeZone);
+  if (!start.isValid) return false;
+
+  const rowDay = DateTime.fromISO(keyMatch[0], { zone: timeZone }).startOf('day');
+  if (!rowDay.isValid) return false;
+
+  const cutoff = rowDay.plus({ days: 1 }).set({ hour: 4, minute: 0, second: 0, millisecond: 0 });
+  const startLocal = start.setZone(timeZone);
+  return startLocal >= cutoff;
+}
+
+/**
+ * Row calendar date `D` (`YYYY-MM-DD`). If the event **ends** in `timeZone` still on **that same
+ * calendar date** and at **11:00 or earlier** (through 11:00:00), omit from this row — those
+ * endings read as the tail of the prior festival window, not this row’s programme.
+ */
+export function isEventHiddenFromTimelineRowBySameDayEndThroughElevenAm(
+  event,
+  timelineDateKey,
+  timeZone = 'America/New_York'
+) {
+  const raw = event?.formatted_end_time || event?.end_time;
+  if (!raw || !timelineDateKey) return false;
+
+  const keyMatch = String(timelineDateKey).match(DATE_KEY_RE);
+  if (!keyMatch) return false;
+
+  const end = parseEventInstant(raw, timeZone);
+  if (!end.isValid) return false;
+
+  const endLocal = end.setZone(timeZone);
+  const rowDate = keyMatch[0];
+  if (endLocal.toISODate() !== rowDate) return false;
+
+  const rowDayStart = DateTime.fromISO(rowDate, { zone: timeZone }).startOf('day');
+  if (!rowDayStart.isValid) return false;
+
+  const elevenAm = rowDayStart.plus({ hours: 11 });
+  return endLocal <= elevenAm;
+}

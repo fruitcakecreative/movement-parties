@@ -1,21 +1,23 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
 function EventsIntro({
   lastUpdated,
   totalCount,
   pastEventsCount,
-  eventsByDayStats = [],
   isLoaded,
 }) {
   const showMeta =
     isLoaded &&
-    (lastUpdated != null ||
-      totalCount != null ||
-      pastEventsCount != null ||
-      (eventsByDayStats && eventsByDayStats.length > 0));
+    (lastUpdated != null || totalCount != null || pastEventsCount != null);
+
+  const location = useLocation();
+  const hasAccount =
+    typeof window !== 'undefined' && !!window.localStorage.getItem('user');
+  void location.pathname;
 
   return (
-    <div className="section info-con">
+    <div className="section info-con" id="site-guide">
       <div className="container">
         {showMeta && (
           <div className="events-meta mb-sm" style={{ opacity: 0.9, fontSize: '0.9rem' }}>
@@ -29,7 +31,7 @@ function EventsIntro({
               </p>
             )}
             {pastEventsCount != null && (
-              <p class="hide">
+              <p className="hide">
                 <span>Past events (archived):</span> {pastEventsCount}
               </p>
             )}
@@ -38,49 +40,43 @@ function EventsIntro({
                 <span>Future events:</span> {totalCount}
               </p>
             )}
-            {eventsByDayStats.length > 0 && (
-              <div className="events-meta-by-day mt-xs">
-                <ul
-                  style={{
-                    margin: 0,
-                    paddingLeft: '1.1rem',
-                    listStyle: 'disc',
-                    textAlign: 'left',
-                  }}
-                >
-                </ul>
-              </div>
-            )}
           </div>
         )}
+        <p className="mb-lg" style={{ lineHeight: 1.45, fontSize: '0.9rem', opacity: 0.88 }}>
+          Welcome! This website is a community-driven, unbiased, all-inclusive event listing hub for events happening in Detroit on Memorial Day weekend. 
+          I auto-import events from Resident Advisor twice a day, otherwise everything is manually entered by me. If you see any wrong information or something is missing, please reach out via my socials below.
+        </p>
         <h4 className="mini-heading">
-          Relevant Info <i className="fa-solid fa-circle-info"></i>
+          What&apos;s new{' '}
+          <i className="fa-solid fa-circle-info" aria-hidden />
         </h4>
-        <ul>
-          <li>
-            The site scrapes basic event data from various major platforms. All other events + specific event info that
-            isn&apos;t scrapable is manually updated by me.
-            <b>
-              {' '}
-              So please reach out (via socials) if you don&apos;t see an event that should be included
-              or if you notice any incorrect info.
-            </b>
-          </li>
-          <li>
-            The timelines are mobile-friendly, but more info is available on the desktop version
-            of the site and it is a bit easier to navigate.
-          </li>
-          <li>
-            You can click on both events on the timeline and venues on the left for more
-            information. I am still updating all the venue info so be patient with me there{' '}
-            <i className="fa-regular fa-heart"></i>
-          </li>
-        </ul>
+        <p className="mb-xs" style={{ lineHeight: 1.5, maxWidth: '40rem' }}>
+          You can create a <strong>user profile</strong> now, save events you're interested in or attending, and add friends to see what they will be up to. 
+        </p>
+        <div
+          className="events-intro-actions mb-sm flex flex-wrap"
+          style={{ gap: '10px', alignItems: 'center' }}
+        >
+          {hasAccount ? (
+            <Link to="/profile" className="button">
+              View Your Profile
+            </Link>
+          ) : (
+            <>
+              <Link to="/signup" className="button">
+                Sign Up
+              </Link>
+              <Link to="/login" className="button button--secondary">
+                Log in
+              </Link>
+            </>
+          )}
+        </div>
       </div>
 
       <div className="container">
         <h4 className="mini-heading">
-          Connect with Me <i className="fa-solid fa-heart"></i>
+          Connect with Me <i className="fa-solid fa-heart" aria-hidden />
         </h4>
 
         <div className="socials flex-wrap">
@@ -90,7 +86,7 @@ function EventsIntro({
             rel="noreferrer"
             href="https://instagram.com/carlymarsh"
           >
-            <i className="highlight icon fa-brands fa-instagram"></i> Instagram
+            <i className="highlight icon fa-brands fa-instagram" aria-hidden /> Instagram
           </a>
           <a
             className="flex-center"
@@ -98,7 +94,7 @@ function EventsIntro({
             rel="noreferrer"
             href="https://facebook.com/carly.marsh1"
           >
-            <i className="highlight icon fa-brands fa-square-facebook"></i> Facebook
+            <i className="highlight icon fa-brands fa-square-facebook" aria-hidden /> Facebook
           </a>
           <a
             className="flex-center"
@@ -106,7 +102,7 @@ function EventsIntro({
             rel="noreferrer"
             href="mailto:carlypmarsh@gmail.com"
           >
-            <i className="highlight icon fa-solid fa-envelope"></i> carlypmarsh@gmail.com
+            <i className="highlight icon fa-solid fa-envelope" aria-hidden /> carlypmarsh@gmail.com
           </a>
           <a
             className="flex-center"
@@ -114,20 +110,20 @@ function EventsIntro({
             rel="noreferrer"
             href="https://www.linkedin.com/in/carly-marsh-a4735316a/"
           >
-            <i className="highlight icon fa-brands fa-linkedin"></i> LinkedIn *sigh*
+            <i className="highlight icon fa-brands fa-linkedin" aria-hidden /> LinkedIn *sigh*
           </a>
         </div>
       </div>
 
       <div className="container">
         <h4 className="mini-heading">
-          Support the Cause <i className="fa-solid fa-handshake-angle"></i>
+          Support the Cause <i className="fa-solid fa-handshake-angle" aria-hidden />
         </h4>
 
         <p className="mb-sm">
           I made this out of pure love for the party and expect nothing in return. But, I do pay
           for the domain, server and software costs. If you&apos;d like to show me some love or buy
-          me a coffee for my efforts, I wouldn&apos;t mind <i className="fa-regular fa-heart"></i>
+          me a coffee for my efforts, I wouldn&apos;t mind <i className="fa-regular fa-heart" aria-hidden />
         </p>
 
         <div className="flex mb-sm">
@@ -147,7 +143,7 @@ function EventsIntro({
           <br />
           <span className="etrans-blurb">
             e-transfer email for my fellow Canadians{' '}
-            <i className="fa-brands fa-canadian-maple-leaf"></i>
+            <i className="fa-brands fa-canadian-maple-leaf" aria-hidden />
           </span>
         </p>
       </div>

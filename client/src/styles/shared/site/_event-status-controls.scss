@@ -118,6 +118,39 @@
   width: 100%;
 }
 
+.event-status__site-totals {
+  margin: 0;
+  padding-top: 2px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  font-style: italic;
+  line-height: 1.4;
+  color: color-mix(in srgb, var(--color-text-light, #71717a) 72%, var(--color-text, #1a0f18) 28%);
+}
+
+/* Event detail panel: two RSVP pills side-by-side when hints are off */
+.event-status--pills.event-status--pills-inline {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: $space-3;
+
+  .event-status__pill-row {
+    flex: 1 1 calc(50% - #{$space-3 * 0.5});
+    min-width: 8.5rem;
+  }
+
+  .event-status__pill {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .event-status__site-totals {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+}
+
 .event-status__pill-row {
   display: flex;
   flex-direction: row;
@@ -226,7 +259,8 @@ color-mix(in srgb, currentColor 78%, transparent);
   border-radius: 8px;
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.07);
   -webkit-tap-highlight-color: transparent;
-  }
+  background: color-mix(in srgb, var(--color-bg-dark, #1a1a1a) 82%, transparent);
+}
 
 .event-status--timeline-rail.event-status--compact {
   flex-direction: column;

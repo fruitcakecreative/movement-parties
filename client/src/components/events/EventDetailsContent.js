@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useFriendCounts } from '../../context/FriendCountsContext';
 import ArtistNameLine from '../ArtistNameLine';
 import { getEventDisplayData } from '../../utils/eventDisplay';
 import SheTheyForwardLineupBadge from '../SheTheyForwardLineupBadge';
@@ -7,11 +6,13 @@ import {
   artistDetailRowClass,
   artistIsHePresenting,
   artistSheTheyListSortRank,
+  artistsSheTheyLineupSubtitle,
 } from '../../utils/pronounDisplay';
 import { formatDescription } from '../../utils/formatDescription';
 import EventStatusControls from './EventStatusControls';
 import EventDetailsFriendSocial from './EventDetailsFriendSocial';
-import { fetchFriendEventRsvps } from '../../services/api';
+import { fetchFriendEventRsvps, fetchEventRsvpTotals } from '../../services/api';
+import { useUserEvents } from '../../context/UserEventsContext';
 
 function EventDetailsContent({
   event,
@@ -25,7 +26,10 @@ function EventDetailsContent({
   const contentRef = useRef(null);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [friendRsvps, setFriendRsvps] = useState({ attending: [], interested: [] });
-  const { get: friendCountsFor } = useFriendCounts();
+  const [siteRsvpTotals, setSiteRsvpTotals] = useState({ interested: 0, attending: 0 });
+
+  const { getStatus } = useUserEvents();
+  const myPlanStatus = event?.id != null ? getStatus(Number(event.id)) : null;
 
   const stripHtml = (html = '') => {
     const div = document.createElement('div');
@@ -64,6 +68,26 @@ function EventDetailsContent({
       cancelled = true;
     };
   }, [event?.id]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const id = event?.id;
+    if (!id) {
+      setSiteRsvpTotals({ interested: 0, attending: 0 });
+      return;
+    }
+    fetchEventRsvpTotals(id).then((totals) => {
+      if (!cancelled) {
+        setSiteRsvpTotals({
+          interested: totals?.interested ?? 0,
+          attending: totals?.attending ?? 0,
+        });
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [event?.id, myPlanStatus]);
 
 
   if (!event) {
@@ -118,7 +142,10 @@ function EventDetailsContent({
     return (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' });
   });
 
-  const friendCountProps = friendCountsFor(event.id);
+  const artistsSheTheySub =
+    sortedDisplayArtists.length > 0
+      ? artistsSheTheyLineupSubtitle(sortedDisplayArtists)
+      : null;
 
   return (
     <div
@@ -177,16 +204,40 @@ function EventDetailsContent({
 
         <h1 className="title mb-xs">{displayTitle}</h1>
 
-        <div className="mb-sm">
+        {actionButtons.length > 0 && (
+          <div className="event-details-actions event-details-actions--below-title mb-sm">
+            {actionButtons.map((btn, i) => (
+              <div key={i} className="event-details-actions__item">
+                <a
+                  href={btn.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="button mb-xs"
+                >
+                  {btn.label}
+                </a>
+                {btn.crowdNote ? (
+                  <span className="event-details-actions__crowd-note">{btn.crowdNote}</span>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="event-details-block event-details-block--status mb-sm">
+          <p className="event-details-kicker">Your plan</p>
           <EventStatusControls
             variant="pills"
+            className="event-status--pills-inline"
             eventId={event?.id}
-            friendsInterestedCount={friendCountProps.friendsInterested}
-            friendsAttendingCount={friendCountProps.friendsAttending}
+            showFriendCountHints={false}
+            siteInterestedTotal={siteRsvpTotals.interested}
+            siteAttendingTotal={siteRsvpTotals.attending}
           />
         </div>
 
-
+        <div className="event-details-block event-details-block--where mb-sm">
+          <p className="event-details-kicker event-details-kicker--where">Venue & info</p>
           <div className="event-venue-location flex">
             {venueName &&
               (venueName === "TBA" ? (
@@ -219,7 +270,11 @@ function EventDetailsContent({
           </div>
 
           <div>
-            {location && <p><i class="fa-regular fa-map"></i> {location}</p>}
+            {location && (
+              <p>
+                <i className="fa-regular fa-map" aria-hidden /> {location}
+              </p>
+            )}
           </div>
 
         {address && (
@@ -243,39 +298,90 @@ function EventDetailsContent({
           </p>
         )}
 
-        {genres.length > 0 && (
-          <div className="event-genres mb-xs">
-            <div className="event-details-pills">
-              {genres.map((genre) => (
-                <span
-                  key={genre.id || genre.name}
-                  className={`genre-pill ${genre.name}`}
-                  style={{
-                    backgroundColor: genre.hex_color || '#ccc',
-                    color: genre.font_color || '#000',
-                  }}
-                >
-                  {genre.short_name || genre.name}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
+        </div>
 
         <EventDetailsFriendSocial
           friendsAttending={friendRsvps.attending}
           friendsInterested={friendRsvps.interested}
           onNavigate={onClose}
+          fromEventId={event?.id}
         />
+
+        {(description || genres.length > 0) && (
+          <div className="event-description mb-sm">
+            <h2 className="event-details-section-head">
+              <span className="event-details-section-head__row">
+                <i className="fa-solid fa-align-left" aria-hidden />
+                &nbsp;Description
+              </span>
+            </h2>
+            {genres.length > 0 && (
+              <div className="event-description__genres event-genres mb-sm">
+                <div className="event-details-pills">
+                  {genres.map((genre) => (
+                    <span
+                      key={genre.id || genre.name}
+                      className={`genre-pill ${genre.name}`}
+                      style={{
+                        backgroundColor: genre.hex_color || '#ccc',
+                        color: genre.font_color || '#000',
+                      }}
+                    >
+                      {genre.short_name || genre.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {description &&
+              (showFullDescription ? (
+                <>
+                  <div dangerouslySetInnerHTML={{ __html: formatDescription(description) }} />
+                  {isLongDescription && (
+                    <button
+                      type="button"
+                      className="description-inline-toggle"
+                      onClick={() => setShowFullDescription(false)}
+                    >
+                      Show less
+                    </button>
+                  )}
+                </>
+              ) : (
+                <p className="description-preview">
+                  {previewDescription}
+                  {isLongDescription && (
+                    <>
+                      {' '}
+                      <button
+                        type="button"
+                        className="description-inline-toggle"
+                        onClick={() => setShowFullDescription(true)}
+                      >
+                        See full description
+                      </button>
+                    </>
+                  )}
+                </p>
+              ))}
+          </div>
+        )}
 
         {sortedDisplayArtists.length > 0 && (
           <div
             className={`event-artists mb-xs${sheTheyForwardTimeline ? ' event-artists--she-they' : ''}`}
           >
-            <p>
-              <i className="fa-solid fa-headphones"></i>&nbsp;
-              Artists:
-            </p>
+            <h2 className="event-details-section-head event-details-section-head--artists">
+              <span className="event-details-section-head__row event-details-section-head__row--artists">
+                <span className="event-details-section-head__title">
+                  <i className="fa-solid fa-headphones" aria-hidden />
+                  &nbsp;Artists
+                </span>
+                {artistsSheTheySub ? (
+                  <span className="event-details-section-head__inline-note">{artistsSheTheySub}</span>
+                ) : null}
+              </span>
+            </h2>
             <ul>
               {sortedDisplayArtists.map((artist, i) => (
                 <li
@@ -290,62 +396,12 @@ function EventDetailsContent({
         )}
 
 
-        {description && (
-          <div className="event-description mb-xs">
-            {showFullDescription ? (
-              <>
-                <div dangerouslySetInnerHTML={{ __html: formatDescription(description) }} />
-                {isLongDescription && (
-                  <button
-                    type="button"
-                    className="description-inline-toggle"
-                    onClick={() => setShowFullDescription(false)}
-                  >
-                    Show less
-                  </button>
-                )}
-              </>
-            ) : (
-              <p className="description-preview">
-                {previewDescription}
-                {isLongDescription && (
-                  <>
-                    {' '}
-                    <button
-                      type="button"
-                      className="description-inline-toggle"
-                      onClick={() => setShowFullDescription(true)}
-                    >
-                      See full description
-                    </button>
-                  </>
-                )}
-              </p>
-            )}
-          </div>
-        )}
-
         {ticketSaleMessage && (
           <p className="ticket-sale-message mb-xs">
             {ticketSaleMessage}
           </p>
         )}
 
-        {actionButtons.length > 0 && (
-          <div className="event-details-actions mb-sm">
-            {actionButtons.map((btn, i) => (
-              <a
-                key={i}
-                href={btn.url}
-                target="_blank"
-                rel="noreferrer"
-                className="button mb-xs"
-              >
-                {btn.label}
-              </a>
-            ))}
-          </div>
-        )}
       </div>
 
       {imageSrc && (

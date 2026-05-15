@@ -42,4 +42,21 @@
     color: var(--color-primary, #333);
     margin: 0;
   }
+
+  /* Event cards in venue detail: status strip aligned start (profile cards stay default). */
+  .event-card-footer {
+    justify-content: flex-start;
+  }
+
+  .event-card-footer .event-status--card {
+    justify-content: flex-start;
+  }
+
+  .event-status--compact.event-status--card {
+    align-items: flex-start;
+  }
+
+  .event-status--card .event-status__compact-hint-row {
+    justify-content: flex-start;
+  }
 }

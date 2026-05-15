@@ -67,7 +67,11 @@ export function UserEventsProvider({ children }) {
     [statusByEventId]
   );
 
-  const isAuthenticated = readHasAuthToken();
+  const isAuthenticated = useMemo(() => {
+    void location.pathname;
+    void location.key;
+    return readHasAuthToken();
+  }, [location.pathname, location.key]);
 
   const setStatus = useCallback(
     async (eventId, status) => {

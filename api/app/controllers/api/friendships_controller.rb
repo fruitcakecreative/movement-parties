@@ -52,7 +52,8 @@ class Api::FriendshipsController < ApplicationController
     end
 
     Friendship.create(user: current_user, friend: friend, status: "pending")
-    render json: { message: "Request sent to #{friend.username}" }
+    label = friend.name.presence || friend.email
+    render json: { message: "Request sent to #{label}" }
   end
 
   def accept
@@ -77,6 +78,28 @@ class Api::FriendshipsController < ApplicationController
     render json: { message: "Friend request rejected" }
   end
 
+  # Accepted friends of `user_id`. Viewer must be that user or an accepted friend.
+  # Omits the viewer from the list. Payload uses name + email (no username).
+  def friends_of_user
+    uid = Integer(params[:user_id], exception: false)
+    return render json: { error: "Not found" }, status: :not_found unless uid
+
+    other = User.find_by(id: uid)
+    return render json: { error: "Not found" }, status: :not_found unless other
+
+    unless other.id == current_user.id || accepted_friendship?(current_user, other)
+      return render json: { error: "Not found" }, status: :not_found
+    end
+
+    friends = other.friends.includes(avatar_attachment: :blob).to_a.reject { |u| u.id == current_user.id }
+    user_ids = friends.map(&:id)
+    status_by_id = friendship_status_with_viewer(user_ids)
+
+    render json: friends.map { |u|
+      serialize_friend_of_user_row(u, status_by_id[u.id] || "none")
+    }
+  end
+
   def destroy
     friend =
       if params[:user_id].present?
@@ -95,10 +118,25 @@ class Api::FriendshipsController < ApplicationController
 
   private
 
+  def accepted_friendship?(a, b)
+    Friendship.exists?(user: a, friend: b, status: "accepted") ||
+      Friendship.exists?(user: b, friend: a, status: "accepted")
+  end
+
+  def serialize_friend_of_user_row(u, friendship_status)
+    {
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      avatar_url: u.avatar.attached? ? url_for(u.avatar) : nil,
+      picture: u.picture.presence,
+      friendship_status: friendship_status
+    }
+  end
+
   def serialize_friend_user(u)
     {
       id: u.id,
-      username: u.username,
       name: u.name,
       email: u.email,
       avatar_url: u.avatar.attached? ? url_for(u.avatar) : nil,

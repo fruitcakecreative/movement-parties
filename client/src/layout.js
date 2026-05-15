@@ -13,12 +13,14 @@ function Layout() {
 
   return (
     <UserEventsProvider>
-      <MainHeader />
-      <main>
-        <Outlet />
-      </main>
+      <div className="app-layout">
+        <MainHeader />
+        <main className="app-layout__main">
+          <Outlet />
+        </main>
+      </div>
     </UserEventsProvider>
-  )
+  );
 }
 
 export default Layout;

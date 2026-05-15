@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import DateDropdown from '../../timeline/components/ui/DateDropdown';
 import FiltersDropdown from '../../timeline/components/ui/FiltersDropdown';
 import SheTheyForwardToggle from './SheTheyForwardToggle';
@@ -6,6 +7,7 @@ import JustAddedToggle from './JustAddedToggle';
 import FriendsTimelineToggle from './FriendsTimelineToggle';
 import { showSheTheyForwardFilter } from '../../utils/cityFeatureFlags';
 import { trackPlausible } from '../../utils/plausible';
+import { useUserEvents } from '../../context/UserEventsContext';
 
 function EventsToolbar({
   selectedDate,
@@ -29,6 +31,9 @@ function EventsToolbar({
   setFilteredVenues,
   sheTheyOver50LineupStats = null,
 }) {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useUserEvents();
+
   return (
     <>
       {showSheTheyForwardFilter && (
@@ -62,6 +67,10 @@ function EventsToolbar({
       <FriendsTimelineToggle
         enabled={!!filterSelections.friendsTimelineOnly}
         onChange={(next) => {
+          if (next && !isAuthenticated) {
+            navigate('/login');
+            return;
+          }
           trackPlausible('Friends Timeline Filter', { state: next ? 'on' : 'off' });
           setFilterSelections((prev) => ({ ...prev, friendsTimelineOnly: next }));
         }}

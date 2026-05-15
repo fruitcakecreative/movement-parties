@@ -1,5 +1,19 @@
 @use "../variables" as *;
 
+/* Column shell so the site header can stick to the viewport while the page scrolls. */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-layout__main {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: clip;
+  max-width: 100%;
+}
+
 .header-con {
   text-align: center;
   padding-bottom: 0;
@@ -11,8 +25,13 @@
 }
 
 .app-site-header {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 200;
   background-color: var(--color-bg-dark);
   border-bottom: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--color-text) 8%, transparent);
 }
 
 .app-site-header__inner {
@@ -44,9 +63,11 @@
   }
 }
 
+/* Single nav pattern: menu button at all breakpoints (no separate desktop row). */
 .app-site-header__nav {
   position: relative;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .app-site-header__menu-trigger {
@@ -56,19 +77,20 @@
   width: 2.75rem;
   height: 2.75rem;
   padding: 0;
-  border: 1px solid color-mix(in srgb, var(--color-text) 25%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-text-light, #ffeeda) 35%, transparent);
   border-radius: var(--radius-button, 9999rem);
-  color: var(--color-text);
+  color: var(--color-text-light, #ffeeda);
   cursor: pointer;
   background: none;
 
   &:hover {
-    background: var(--color-primary-hover, var(--color-soft));
+    background: color-mix(in srgb, var(--color-primary) 28%, transparent);
+    border-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
   }
 
   i {
     font-size: 1.25rem;
-    color: var(--color-text-light);
+    color: inherit;
   }
 }
 
@@ -76,7 +98,7 @@
   position: absolute;
   top: calc(100% + 0.35rem);
   right: 0;
-  z-index: 50;
+  z-index: 400;
   min-width: 11rem;
   padding: $space-2 0;
   margin: 0;
@@ -97,4 +119,10 @@
   &:hover {
     background: color-mix(in srgb, var(--color-primary) 35%, transparent);
   }
+}
+
+.app-site-header__panel-link--active {
+  background: color-mix(in srgb, var(--color-primary) 22%, transparent);
+  color: var(--color-text, #0c0c0c);
+  box-shadow: inset 3px 0 0 var(--color-primary, #ff6e26);
 }

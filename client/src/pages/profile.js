@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import ModalLayout from "../timeline/components/modals/ModalLayout";
-import MiniProgramBox from "../timeline/components/MiniProgramBox";
+import EventCard from "../components/EventCard";
+import EventDetailsShell from "../components/events/EventDetailsShell";
+import VenueDetailsShell from "../components/venues/VenueDetailsShell";
 
 import {
   userLogout,
@@ -15,9 +17,18 @@ import {
   acceptFriendRequest,
   rejectFriendRequest,
   isUnauthorized,
+  updateCurrentUser,
 } from "../services/api";
 import { FriendCountsProvider } from "../context/FriendCountsContext";
 import { getSortedEventDayEntries } from "../utils/profileEventsByDay";
+import { loadCityConfig } from "../services/cityConfig";
+
+const cfg = await loadCityConfig();
+const timelineTimeZone =
+  cfg.timezone ||
+  (process.env.REACT_APP_CITY_KEY === "movement"
+    ? "America/Detroit"
+    : "America/New_York");
 
 function Profile() {
   const [user, setUser] = useState(null);
@@ -37,6 +48,18 @@ function Profile() {
   const [incomingRequests, setIncomingRequests] = useState([]);
   const [friendBusy, setFriendBusy] = useState(false);
   const [friendError, setFriendError] = useState("");
+
+  const [selectedEventId, setSelectedEventId] = useState(null);
+  const [selectedVenueId, setSelectedVenueId] = useState(null);
+  const [fromVenueId, setFromVenueId] = useState(null);
+  const [fromEventId, setFromEventId] = useState(null);
+  const mainScrollRef = useRef(null);
+  const desktopScrollRef = useRef(0);
+
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [accountBusy, setAccountBusy] = useState(false);
+  const [accountError, setAccountError] = useState(null);
 
   const fileInputRef = useRef(null);
 
@@ -112,6 +135,13 @@ function Profile() {
     [localPreview]
   );
 
+  useEffect(() => {
+    if (!isOpen || !user) return;
+    setEditName(user.name || "");
+    setEditEmail(user.email || "");
+    setAccountError(null);
+  }, [isOpen, user]);
+
   const displayAvatarSrc = (u) =>
     u?.avatar_url || u?.picture || null;
 
@@ -184,6 +214,115 @@ function Profile() {
     return [...byId.values()];
   }, [userEvents]);
 
+  const allProfileEvents = useMemo(() => {
+    const attending = userEvents.attending || [];
+    const interested = userEvents.interested || [];
+    const byId = new Map();
+    for (const e of [...attending, ...interested]) {
+      if (e?.id != null) byId.set(String(e.id), e);
+    }
+    return [...byId.values()];
+  }, [userEvents]);
+
+  const sheTheyForwardTimeline = false;
+
+  const openEvent = (eventId, fromVenue) => {
+    const isMobile = window.innerWidth < 768;
+    if (!isMobile) {
+      if ((selectedEventId || selectedVenueId) && mainScrollRef.current) {
+        desktopScrollRef.current = mainScrollRef.current.scrollTop;
+      } else {
+        desktopScrollRef.current = window.scrollY;
+      }
+    }
+    setSelectedVenueId(null);
+    setFromEventId(null);
+    setSelectedEventId(String(eventId));
+    setFromVenueId(fromVenue ? String(fromVenue) : null);
+  };
+
+  const closeEvent = () => {
+    const isMobile = window.innerWidth < 768;
+    if (!isMobile && mainScrollRef.current) {
+      desktopScrollRef.current = mainScrollRef.current.scrollTop;
+    }
+    setSelectedEventId(null);
+    setFromVenueId(null);
+  };
+
+  const goBackToVenue = () => {
+    if (!fromVenueId) return;
+    setSelectedEventId(null);
+    setSelectedVenueId(String(fromVenueId));
+    setFromVenueId(null);
+  };
+
+  const openVenue = (venueId, fromEvent) => {
+    const isMobile = window.innerWidth < 768;
+    if (!isMobile) {
+      if ((selectedEventId || selectedVenueId) && mainScrollRef.current) {
+        desktopScrollRef.current = mainScrollRef.current.scrollTop;
+      } else {
+        desktopScrollRef.current = window.scrollY;
+      }
+    }
+    setSelectedEventId(null);
+    setFromVenueId(null);
+    setSelectedVenueId(String(venueId));
+    setFromEventId(fromEvent ? String(fromEvent) : null);
+  };
+
+  const closeVenue = () => {
+    const isMobile = window.innerWidth < 768;
+    if (!isMobile && mainScrollRef.current) {
+      desktopScrollRef.current = mainScrollRef.current.scrollTop;
+    }
+    setSelectedVenueId(null);
+    setFromEventId(null);
+  };
+
+  const goBackToEvent = () => {
+    if (!fromEventId) return;
+    setSelectedVenueId(null);
+    setSelectedEventId(fromEventId);
+    setFromEventId(null);
+  };
+
+  const persistUserToStorage = (data) => {
+    try {
+      const raw = localStorage.getItem("user");
+      if (!raw) return;
+      const u = JSON.parse(raw);
+      if (data.name != null) u.name = data.name;
+      if (data.email != null) u.email = data.email;
+      if (data.authentication_token) u.authentication_token = data.authentication_token;
+      if (data.authentication_token) u.token = data.authentication_token;
+      localStorage.setItem("user", JSON.stringify(u));
+    } catch (_) {
+      /* ignore */
+    }
+  };
+
+  const handleSaveAccount = async () => {
+    setAccountBusy(true);
+    setAccountError(null);
+    try {
+      const data = await updateCurrentUser({ name: editName, email: editEmail });
+      setUser(data);
+      setProfile(data);
+      persistUserToStorage(data);
+    } catch (err) {
+      const errs = err?.response?.data?.errors;
+      const msg =
+        Array.isArray(errs) && errs.length
+          ? errs.join(" ")
+          : err?.response?.data?.error || err?.message || "Could not save.";
+      setAccountError(typeof msg === "string" ? msg : "Could not save.");
+    } finally {
+      setAccountBusy(false);
+    }
+  };
+
   const refreshFriendsData = async () => {
     const [friendsData, pendingData] = await Promise.all([
       fetchFriendshipList(),
@@ -197,7 +336,7 @@ function Profile() {
     setFriendError("");
     setFriendBusy(true);
     try {
-      await sendFriendRequest({ user_id: candidate.id, username: candidate.username });
+      await sendFriendRequest({ user_id: candidate.id });
       setFriendSearchResults((results) =>
         results.map((u) =>
           u.id === candidate.id ? { ...u, friendship_status: "outgoing_pending" } : u
@@ -284,10 +423,27 @@ function Profile() {
   if (sessionError) {
     return (
       <div className="profile-page">
-        <p className="profile-page__empty">
-          You need to sign in to view your profile.{" "}
-          <a href="/login">Sign in</a>
-        </p>
+        <div
+          className="profile-page__guest-gate"
+          role="region"
+          aria-labelledby="profile-guest-heading"
+        >
+          <h1 id="profile-guest-heading" className="profile-page__guest-title">
+            Your profile
+          </h1>
+          <p className="profile-page__guest-lede">
+            Log in or create an account to save events, connect with friends, and manage your
+            festival plans.
+          </p>
+          <div className="profile-page__guest-actions">
+            <Link to="/login" className="profile-page__btn profile-page__btn--primary">
+              Log in
+            </Link>
+            <Link to="/signup" className="profile-page__btn profile-page__btn--ghost">
+              Create an account
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
@@ -296,10 +452,18 @@ function Profile() {
 
   const heroSrc = displayAvatarSrc(user);
   const modalPreview = localPreview || heroSrc;
+  const detailsOpen = !!(selectedEventId || selectedVenueId);
 
   return (
     <>
-      <div className="profile-page">
+      <FriendCountsProvider eventIds={profileEventIdsForCounts}>
+      <div
+        className={`profile-page${detailsOpen ? " user-profile-page has-selected-event" : ""}`}
+      >
+        <div
+          ref={mainScrollRef}
+          className={detailsOpen ? "user-profile-page__main" : undefined}
+        >
         <div className="profile-page__hero">
           <div className="profile-page__avatar-wrap">
             {heroSrc ? (
@@ -313,28 +477,28 @@ function Profile() {
                 className="profile-page__avatar profile-page__avatar--placeholder"
                 aria-hidden
               >
-                {(user.name || user.username || user.email || "?")
+                {(user.name || user.email || "?")
                   .charAt(0)
                   .toUpperCase()}
               </div>
             )}
           </div>
           <h1 className="profile-page__title">
-            Hi, {user.name || user.username || user.email}
+            Hi, {user.name || user.email}
           </h1>
         </div>
 
-        <div className="profile-page__actions">
+        <div className="profile-page__actions profile-page__actions--toolbar">
           <button
             type="button"
-            className="profile-page__btn profile-page__btn--primary"
+            className="profile-page__btn profile-page__btn--primary profile-page__btn--compact"
             onClick={openModal}
           >
-            Edit profile settings
+            Edit settings
           </button>
           <button
             type="button"
-            className="profile-page__btn profile-page__btn--ghost"
+            className="profile-page__btn profile-page__btn--ghost profile-page__btn--compact"
             onClick={userLogout}
           >
             Log out
@@ -347,7 +511,7 @@ function Profile() {
               type="text"
               value={friendSearch}
               onChange={(e) => setFriendSearch(e.target.value)}
-              placeholder="Search by name, username, or email"
+              placeholder="Search by name or email"
             />
             {friendSearchResults.length > 0 && (
               <div className="profile-page__friend-results-scroll">
@@ -366,15 +530,16 @@ function Profile() {
                             className="profile-page__friend-avatar profile-page__friend-avatar--placeholder"
                             aria-hidden
                           >
-                            {(candidate.name || candidate.username || "?")
+                            {(candidate.name || candidate.email || "?")
                               .charAt(0)
                               .toUpperCase()}
                           </div>
                         )}
                         <div className="profile-page__friend-row-text">
-                          <strong>{candidate.name || candidate.username}</strong>
-                          <p>@{candidate.username}</p>
-                          {candidate.email && <p>{candidate.email}</p>}
+                          <strong>{candidate.name || candidate.email || "?"}</strong>
+                          {candidate.email && candidate.name ? (
+                            <p>{candidate.email}</p>
+                          ) : null}
                         </div>
                       </div>
                       <div className="profile-page__friend-row-action">
@@ -408,12 +573,12 @@ function Profile() {
                             className="profile-page__friend-avatar profile-page__friend-avatar--placeholder"
                             aria-hidden
                           >
-                            {(req.name || req.username || "?").charAt(0).toUpperCase()}
+                            {(req.name || req.email || "?").charAt(0).toUpperCase()}
                           </div>
                         )}
                         <div className="profile-page__friend-row-text">
-                          <strong>{req.name || req.username}</strong>
-                          <p>@{req.username}</p>
+                          <strong>{req.name || req.email || "?"}</strong>
+                          {req.email && req.name ? <p>{req.email}</p> : null}
                         </div>
                       </div>
                       <div className="profile-page__friend-row-action profile-page__friend-actions">
@@ -442,45 +607,53 @@ function Profile() {
               {friends.length === 0 ? (
                 <p className="profile-page__empty-small">No friends yet.</p>
               ) : (
-                <ul className="profile-page__friends-tiles">
-                  {friends.map((friend) => (
-                    <li key={friend.id} className="profile-page__friend-tile-wrap">
-                      <Link
-                        to={`/users/${friend.id}`}
-                        className="profile-page__friend-tile"
-                      >
-                        {displayAvatarSrc(friend) ? (
-                          <img
-                            className="profile-page__friend-tile-img"
-                            src={displayAvatarSrc(friend)}
-                            alt=""
-                          />
-                        ) : (
-                          <div
-                            className="profile-page__friend-tile-avatar profile-page__friend-tile-avatar--placeholder"
-                            aria-hidden
-                          >
-                            {(friend.name || friend.username || "?")
-                              .charAt(0)
-                              .toUpperCase()}
-                          </div>
-                        )}
-                        <span className="profile-page__friend-tile-name">
-                          {friend.name || friend.username}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                <div className="profile-page__friends-scroll">
+                  <ul className="profile-page__friends-tiles">
+                    {friends.map((friend) => (
+                      <li key={friend.id} className="profile-page__friend-tile-wrap">
+                        <Link
+                          to={`/users/${friend.id}`}
+                          className="profile-page__friend-tile"
+                        >
+                          {displayAvatarSrc(friend) ? (
+                            <img
+                              className="profile-page__friend-tile-img"
+                              src={displayAvatarSrc(friend)}
+                              alt=""
+                            />
+                          ) : (
+                            <div
+                              className="profile-page__friend-tile-avatar profile-page__friend-tile-avatar--placeholder"
+                              aria-hidden
+                            >
+                              {(friend.name || friend.email || "?")
+                                .charAt(0)
+                                .toUpperCase()}
+                            </div>
+                          )}
+                          <span className="profile-page__friend-tile-name">
+                            <span className="profile-page__friend-tile-line">
+                              {friend.name || friend.email}
+                            </span>
+                            {friend.name && friend.email ? (
+                              <span className="profile-page__friend-tile-line profile-page__friend-tile-line--sub">
+                                {friend.email}
+                              </span>
+                            ) : null}
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
             </div>
           </div>
           {friendError && <p className="profile-page__error">{friendError}</p>}
         </section>
 
-        {hasEventsByDay && (
-          <FriendCountsProvider eventIds={profileEventIdsForCounts}>
-            {eventsByDay.map(([dayKey, dayData]) => (
+        {hasEventsByDay &&
+          eventsByDay.map(([dayKey, dayData]) => (
               <section key={dayKey} className="profile-page__group-day">
                 <h2 className="profile-page__section-title">{dayData.label}</h2>
 
@@ -488,10 +661,14 @@ function Profile() {
                   <div className="profile-page__status-group profile-page__status-group--attending">
                     <h3 className="profile-page__subsection-title">Attending</h3>
                     {dayData.attending.map((event, i) => (
-                      <MiniProgramBox
+                      <EventCard
                         key={`att-${event.id || i}`}
                         event={event}
-                        onClick={() => {}}
+                        timeZone={timelineTimeZone}
+                        sheTheyForwardTimeline={sheTheyForwardTimeline}
+                        showVenueName
+                        showArtists={false}
+                        onClick={() => openEvent(event.id)}
                       />
                     ))}
                   </div>
@@ -502,11 +679,15 @@ function Profile() {
                     <h3 className="profile-page__subsection-title">Interested</h3>
                     <div className="profile-page__interested-grid">
                       {dayData.interested.map((event, i) => (
-                        <MiniProgramBox
+                        <EventCard
                           key={`int-${event.id || i}`}
                           event={event}
-                          onClick={() => {}}
+                          timeZone={timelineTimeZone}
+                          sheTheyForwardTimeline={sheTheyForwardTimeline}
+                          showVenueName
+                          showArtists={false}
                           density="compact"
+                          onClick={() => openEvent(event.id)}
                         />
                       ))}
                     </div>
@@ -514,8 +695,6 @@ function Profile() {
                 )}
               </section>
             ))}
-          </FriendCountsProvider>
-        )}
 
         {!hasEventsByDay && (
             <p className="profile-page__empty">
@@ -525,12 +704,72 @@ function Profile() {
           )}
       </div>
 
+      <EventDetailsShell
+        eventId={selectedEventId}
+        allEvents={allProfileEvents}
+        onClose={closeEvent}
+        mainScrollRef={mainScrollRef}
+        desktopScrollRef={desktopScrollRef}
+        openVenue={openVenue}
+        fromVenueId={fromVenueId}
+        onBackToVenue={goBackToVenue}
+        timeZone={timelineTimeZone}
+        sheTheyForwardTimeline={sheTheyForwardTimeline}
+      />
+      <VenueDetailsShell
+        venueId={selectedVenueId}
+        allEvents={allProfileEvents}
+        onClose={closeVenue}
+        mainScrollRef={mainScrollRef}
+        desktopScrollRef={desktopScrollRef}
+        openEvent={openEvent}
+        fromEventId={fromEventId}
+        onBackToEvent={goBackToEvent}
+        timeZone={timelineTimeZone}
+        sheTheyForwardTimeline={sheTheyForwardTimeline}
+      />
+      </div>
+      </FriendCountsProvider>
+
       <ModalLayout
         isOpen={isOpen}
         onClose={closeModal}
         className="edit-profile"
         header={<h3>Edit profile settings</h3>}
       >
+        <div className="profile-account-editor">
+          <p className="profile-account-editor__label">Display name</p>
+          <input
+            type="text"
+            className="profile-account-editor__input"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            autoComplete="name"
+            maxLength={120}
+          />
+          <p className="profile-account-editor__label">Email</p>
+          <input
+            type="email"
+            className="profile-account-editor__input"
+            value={editEmail}
+            onChange={(e) => setEditEmail(e.target.value)}
+            autoComplete="email"
+          />
+          {accountError && (
+            <p className="profile-account-editor__error" role="alert">
+              {accountError}
+            </p>
+          )}
+          <button
+            type="button"
+            className="profile-account-editor__save"
+            disabled={accountBusy}
+            onClick={handleSaveAccount}
+          >
+            {accountBusy ? "Saving…" : "Save name & email"}
+          </button>
+        </div>
+
         <div className="profile-photo-editor">
           <p className="profile-photo-editor__label">Profile photo</p>
           {modalPreview ? (

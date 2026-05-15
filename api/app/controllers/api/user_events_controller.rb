@@ -188,8 +188,8 @@ class Api::UserEventsController < ApplicationController
   def friend_attendee_json(user)
     {
       id: user.id,
-      username: user.username,
       name: user.name,
+      email: user.email,
       avatar_url: user.avatar.attached? ? url_for(user.avatar) : nil,
       picture: user.picture.presence,
     }

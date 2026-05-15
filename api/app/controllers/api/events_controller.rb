@@ -1,5 +1,5 @@
 class Api::EventsController < ApplicationController
-  before_action :set_event, only: [:show, :update, :destroy]
+  before_action :set_event, only: [:show, :update, :destroy, :rsvp_totals]
   before_action :set_current_city_key
 
   def index
@@ -50,6 +50,16 @@ class Api::EventsController < ApplicationController
       include: [:venue, :artists, :genres],
       methods: [:formatted_start_time, :formatted_end_time, :top_artists, :poster_url]
     )
+  end
+
+  # Public: how many users saved this event as interested / attending (not RA counts).
+  def rsvp_totals
+    interested = UserEvent.where(event_id: @event.id, status: :interested).count
+    attending = UserEvent.where(event_id: @event.id, status: :attending).count
+    render json: {
+      app_interested_count: interested,
+      app_attending_count: attending,
+    }, status: :ok
   end
 
   def create
