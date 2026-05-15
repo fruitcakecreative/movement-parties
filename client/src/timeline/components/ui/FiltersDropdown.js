@@ -140,7 +140,7 @@ const FiltersDropdown = ({
               <div className="full-width option-item artists mb-sm">
                 <input
                   type="text"
-                  placeholder="Search Artists..."
+                  placeholder="Filter by Artist..."
                   className="full-width"
                   value={searchQuery}
                   onChange={(e) => {
@@ -182,7 +182,7 @@ const FiltersDropdown = ({
               <div className="full-width option-item venues mb-sm">
                 <input
                   type="text"
-                  placeholder="Search Venues..."
+                  placeholder="Filter by Venue..."
                   className="full-width"
                   value={venueSearchQuery}
                   onChange={(e) => {
