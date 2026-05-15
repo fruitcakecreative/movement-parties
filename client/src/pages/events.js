@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import EventsIntro from '../components/events/EventsIntro';
@@ -18,7 +18,7 @@ import { createEpg } from '../timeline/data/buildEpg';
 
 import useEventsData from '../hooks/useEventsData';
 import useEventFilters from '../hooks/useEventFilters';
-import { FriendCountsProvider } from '../context/FriendCountsContext';
+import { FriendCountsProvider, useFriendCounts } from '../context/FriendCountsContext';
 import {
   formatFestivalDayLong,
   getActiveTimelineDateKeys,
@@ -34,6 +34,94 @@ const showAllTimelineDays = !!cfg.showAllTimelineDays;
 const timelineTimeZone =
   cfg.timezone ||
   (process.env.REACT_APP_CITY_KEY === 'movement' ? 'America/Detroit' : 'America/New_York');
+
+function EventsTimelineSection({
+  activeDates,
+  selectedDate,
+  getFilteredEventsForDate,
+  filterSelections,
+  timelineTimeZone,
+  customDateRanges,
+  allEvents,
+  selectedEventId,
+  openEvent,
+  openVenue,
+  CustomChannelItem,
+  sheTheyForwardTimeline,
+}) {
+  const { get: friendCountsFor } = useFriendCounts();
+
+  const eventsForTimeline = useCallback(
+    (date) => {
+      let list = getFilteredEventsForDate(date).filter((e) => {
+        if (isEventHiddenFromTimelineRowByNextDayFourAm(e, date, timelineTimeZone))
+          return false;
+        if (isEventHiddenFromTimelineRowBySameDayEndThroughElevenAm(e, date, timelineTimeZone))
+          return false;
+        return true;
+      });
+
+      if (!filterSelections.friendsTimelineOnly) return list;
+
+      return list.filter((e) => {
+        const c = friendCountsFor(e.id);
+        if (
+          c.friendsAttending === undefined ||
+          c.friendsInterested === undefined
+        ) {
+          return true;
+        }
+        return (c.friendsAttending || 0) + (c.friendsInterested || 0) > 0;
+      });
+    },
+    [
+      getFilteredEventsForDate,
+      filterSelections.friendsTimelineOnly,
+      friendCountsFor,
+      timelineTimeZone,
+    ]
+  );
+
+  return (
+    <>
+      {(selectedDate === 'all' ? activeDates : [selectedDate]).map((date) => {
+        const dayEvents = eventsForTimeline(date);
+        const epg = createEpg(dayEvents);
+        const channels = createChannels(epg);
+
+        if (!epg.length) {
+          return (
+            <div key={date} style={{ textAlign: 'center', margin: '40px 0' }}>
+              <p style={{ fontStyle: 'italic', color: '#aaa' }}>
+                No events match your filters for{' '}
+                {formatFestivalDayLong(date, timelineTimeZone)}
+                .
+              </p>
+            </div>
+          );
+        }
+
+        return (
+          <MultiDayTimeline
+            key={date}
+            date={date}
+            epg={epg}
+            channels={channels}
+            startDate={customDateRanges[date].start}
+            endDate={customDateRanges[date].end}
+            allEvents={allEvents}
+            selectedEventId={selectedEventId}
+            openEvent={openEvent}
+            openVenue={openVenue}
+            CustomChannelItem={CustomChannelItem}
+            timeZone={timelineTimeZone}
+            sheTheyForwardTimeline={sheTheyForwardTimeline}
+          />
+        );
+      })}
+    </>
+  );
+}
 
 function Events() {
   // Recompute active festival days after each window end (e.g. Wed 10am) without a full reload.
@@ -253,47 +341,20 @@ function Events() {
                   eventSearchQuery={eventSearchQuery}
                   setEventSearchQuery={setEventSearchQuery}
                 />
-                {(selectedDate === 'all' ? activeDates : [selectedDate]).map((date) => {
-                  const dayEvents = getFilteredEventsForDate(date).filter((e) => {
-                    if (isEventHiddenFromTimelineRowByNextDayFourAm(e, date, timelineTimeZone))
-                      return false;
-                    if (isEventHiddenFromTimelineRowBySameDayEndThroughElevenAm(e, date, timelineTimeZone))
-                      return false;
-                    return true;
-                  });
-                  const epg = createEpg(dayEvents);
-                  const channels = createChannels(epg);
-
-                  if (!epg.length) {
-                    return (
-                      <div key={date} style={{ textAlign: 'center', margin: '40px 0' }}>
-                        <p style={{ fontStyle: 'italic', color: '#aaa' }}>
-                          No events match your filters for{' '}
-                          {formatFestivalDayLong(date, timelineTimeZone)}
-                          .
-                        </p>
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <MultiDayTimeline
-                      key={date}
-                      date={date}
-                      epg={epg}
-                      channels={channels}
-                      startDate={customDateRanges[date].start}
-                      endDate={customDateRanges[date].end}
-                      allEvents={allEvents}
-                      selectedEventId={selectedEventId}
-                      openEvent={openEvent}
-                      openVenue={openVenue}
-                      CustomChannelItem={CustomChannelItem}
-                      timeZone={timelineTimeZone}
-                      sheTheyForwardTimeline={sheTheyForwardTimeline}
-                    />
-                  );
-                })}
+                <EventsTimelineSection
+                  activeDates={activeDates}
+                  selectedDate={selectedDate}
+                  getFilteredEventsForDate={getFilteredEventsForDate}
+                  filterSelections={filterSelections}
+                  timelineTimeZone={timelineTimeZone}
+                  customDateRanges={customDateRanges}
+                  allEvents={allEvents}
+                  selectedEventId={selectedEventId}
+                  openEvent={openEvent}
+                  openVenue={openVenue}
+                  CustomChannelItem={CustomChannelItem}
+                  sheTheyForwardTimeline={sheTheyForwardTimeline}
+                />
 
                 <LoadCustomScript />
               </FriendCountsProvider>
