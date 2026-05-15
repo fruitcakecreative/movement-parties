@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { persistAuthUser, readAuthToken } from '../utils/authStorage';
 import { normalizeEventId } from '../utils/eventId';
+import { normalizeProfileExtra, profileExtraForApi } from '../utils/profileExtraInfo';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE;
 const city = process.env.REACT_APP_CITY_KEY;
@@ -185,19 +186,28 @@ export const fetchFriendEventRsvps = async (eventId) => {
 //user profile info
 export const fetchUserInfo = async () => {
   const response = await api.get('/user');
-  persistAuthUser(response.data);
-  return response.data;
+  const data = {
+    ...response.data,
+    profile_extra: normalizeProfileExtra(response.data?.profile_extra),
+  };
+  persistAuthUser(data);
+  return data;
 };
 
-/** PATCH /user — display name (`name`) and sign-in email. */
-export const updateCurrentUser = async ({ name, email }) => {
-  const { data } = await api.patch('/user', {
-    user: {
-      name: String(name ?? '').trim(),
-      email: String(email ?? '').trim(),
-    },
-  });
-  return data;
+/** PATCH /user — display name (`name`), email, and/or optional profile_extra fields. */
+export const updateCurrentUser = async ({ name, email, profile_extra }) => {
+  const user = {};
+  if (name != null) user.name = String(name).trim();
+  if (email != null) user.email = String(email).trim();
+  if (profile_extra != null) user.profile_extra = profileExtraForApi(profile_extra);
+
+  const { data } = await api.patch('/user', { user });
+  const normalized = {
+    ...data,
+    profile_extra: normalizeProfileExtra(data?.profile_extra),
+  };
+  persistAuthUser(normalized);
+  return normalized;
 };
 
 /** Another member’s profile — self or accepted friend only (404 otherwise). */

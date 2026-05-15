@@ -4,6 +4,17 @@ import ModalLayout from "../timeline/components/modals/ModalLayout";
 import EventCard from "../components/EventCard";
 import ProfileEventAddSearch from "../components/ProfileEventAddSearch";
 import ProfileScheduleShareButton from "../components/ProfileScheduleShareButton";
+import ProfileSubsectionLabel from "../components/profile/ProfileSubsectionLabel";
+import ProfileExtraInfoBanner from "../components/profile/ProfileExtraInfoBanner";
+import ProfileExtraInfoDisplay from "../components/profile/ProfileExtraInfoDisplay";
+import ProfileExtraInfoFields from "../components/profile/ProfileExtraInfoFields";
+import ProfileExtraInfoModal from "../components/profile/ProfileExtraInfoModal";
+import {
+  emptyProfileExtra,
+  hasAnyProfileExtra,
+  isProfileExtraBannerDismissed,
+  normalizeProfileExtra,
+} from "../utils/profileExtraInfo";
 import EventDetailsShell from "../components/events/EventDetailsShell";
 import VenueDetailsShell from "../components/venues/VenueDetailsShell";
 
@@ -40,6 +51,9 @@ function Profile() {
   const [profile, setProfile] = useState(null);
   const [userEvents, setUserEvents] = useState({});
   const [isOpen, setIsOpen] = useState(false);
+  const [extraInfoOpen, setExtraInfoOpen] = useState(false);
+  const [extraSaveBusy, setExtraSaveBusy] = useState(false);
+  const [extraSaveError, setExtraSaveError] = useState(null);
   const [sessionChecked, setSessionChecked] = useState(false);
   const [sessionError, setSessionError] = useState(false);
 
@@ -63,8 +77,10 @@ function Profile() {
 
   const [editName, setEditName] = useState("");
   const [editEmail, setEditEmail] = useState("");
+  const [editExtra, setEditExtra] = useState(emptyProfileExtra);
   const [accountBusy, setAccountBusy] = useState(false);
   const [accountError, setAccountError] = useState(null);
+  const [extraBannerHidden, setExtraBannerHidden] = useState(false);
 
   const fileInputRef = useRef(null);
 
@@ -79,6 +95,18 @@ function Profile() {
     document.body.style.overflow = "hidden";
     setUploadError(null);
     setIsOpen(true);
+  };
+
+  const openExtraInfoModal = () => {
+    document.body.style.overflow = "hidden";
+    setExtraSaveError(null);
+    setExtraInfoOpen(true);
+  };
+
+  const closeExtraInfoModal = () => {
+    document.body.style.overflow = "";
+    setExtraInfoOpen(false);
+    setExtraSaveError(null);
   };
 
   const closeModal = () => {
@@ -151,8 +179,9 @@ function Profile() {
     if (!isOpen || !user) return;
     setEditName(user.name || "");
     setEditEmail(user.email || "");
+    setEditExtra(normalizeProfileExtra(user.profile_extra));
     setAccountError(null);
-  }, [isOpen, user]);
+  }, [isOpen, user?.id]);
 
   const displayAvatarSrc = (u) =>
     u?.avatar_url || u?.picture || null;
@@ -307,6 +336,7 @@ function Profile() {
       const u = JSON.parse(raw);
       if (data.name != null) u.name = data.name;
       if (data.email != null) u.email = data.email;
+      if (data.profile_extra != null) u.profile_extra = data.profile_extra;
       if (data.authentication_token) u.authentication_token = data.authentication_token;
       if (data.authentication_token) u.token = data.authentication_token;
       localStorage.setItem("user", JSON.stringify(u));
@@ -315,14 +345,49 @@ function Profile() {
     }
   };
 
+  const handleSaveProfileExtra = async (extra) => {
+    const data = await updateCurrentUser({ profile_extra: extra });
+    setUser(data);
+    setProfile(data);
+    return data;
+  };
+
+  const handleSaveExtraInfoModal = async (extra) => {
+    setExtraSaveBusy(true);
+    setExtraSaveError(null);
+    try {
+      await handleSaveProfileExtra(extra);
+      closeExtraInfoModal();
+    } catch (err) {
+      const errs = err?.response?.data?.errors;
+      const msg =
+        Array.isArray(errs) && errs.length
+          ? errs.join(" ")
+          : err?.response?.data?.error || err?.message || "Could not save.";
+      setExtraSaveError(typeof msg === "string" ? msg : "Could not save.");
+    } finally {
+      setExtraSaveBusy(false);
+    }
+  };
+
+  const showExtraInfoBanner =
+    !extraBannerHidden &&
+    !isProfileExtraBannerDismissed() &&
+    !hasAnyProfileExtra(user?.profile_extra);
+
   const handleSaveAccount = async () => {
     setAccountBusy(true);
     setAccountError(null);
     try {
-      const data = await updateCurrentUser({ name: editName, email: editEmail });
+      const data = await updateCurrentUser({
+        name: editName,
+        email: editEmail,
+        profile_extra: editExtra,
+      });
       setUser(data);
       setProfile(data);
       persistUserToStorage(data);
+      closeModal();
     } catch (err) {
       const errs = err?.response?.data?.errors;
       const msg =
@@ -500,6 +565,15 @@ function Profile() {
           </h1>
         </div>
 
+        {showExtraInfoBanner && (
+          <ProfileExtraInfoBanner
+            onAdd={openExtraInfoModal}
+            onDismiss={() => setExtraBannerHidden(true)}
+          />
+        )}
+
+        <ProfileExtraInfoDisplay profileExtra={user?.profile_extra} />
+
         <div className="profile-page__actions profile-page__actions--toolbar">
           <button
             type="button"
@@ -566,12 +640,16 @@ function Profile() {
             )}
           </div>
 
-          <div className="profile-page__friend-columns">
+          <div
+            className={`profile-page__friend-columns${
+              incomingRequests.length > 0 ? "" : " profile-page__friend-columns--solo"
+            }`}
+          >
+            {incomingRequests.length > 0 && (
             <div>
-              <h3 className="profile-page__subsection-title">Requests</h3>
-              {incomingRequests.length === 0 ? (
-                <p className="profile-page__empty-small">No incoming requests.</p>
-              ) : (
+              <ProfileSubsectionLabel icon="fa-solid fa-inbox" variant="requests">
+                Friend requests
+              </ProfileSubsectionLabel>
                 <ul className="profile-page__friend-results">
                   {incomingRequests.map((req) => (
                     <li key={req.id} className="profile-page__friend-row">
@@ -614,10 +692,12 @@ function Profile() {
                     </li>
                   ))}
                 </ul>
-              )}
             </div>
+            )}
             <div>
-              <h3 className="profile-page__subsection-title">Friends</h3>
+              <ProfileSubsectionLabel icon="fa-solid fa-user-group" variant="friends">
+                Friends
+              </ProfileSubsectionLabel>
               {friends.length === 0 ? (
                 <p className="profile-page__empty-small">No friends yet.</p>
               ) : (
@@ -667,9 +747,20 @@ function Profile() {
         </section>
 
         <section className="profile-page__section profile-page__section--events">
-          <h2 className="profile-page__section-heading profile-page__section-heading--events">
-            Your Events
-          </h2>
+          <div className="profile-page__events-heading-row">
+            <h2 className="profile-page__section-heading profile-page__section-heading--events">
+              Your Events
+            </h2>
+            <ProfileScheduleShareButton
+              inline
+              eventsByDay={eventsByDay}
+              userName={user?.name || user?.email}
+              avatarUrl={displayAvatarSrc(user)}
+              profileExtra={user?.profile_extra}
+              timeZone={timelineTimeZone}
+              onSaveProfileExtra={handleSaveProfileExtra}
+            />
+          </div>
           <ProfileEventAddSearch
             timeZone={timelineTimeZone}
             includePastEvents={profileEventsIncludePast}
@@ -683,7 +774,12 @@ function Profile() {
 
                 {dayData.attending.length > 0 && (
                   <div className="profile-page__status-group profile-page__status-group--attending">
-                    <h3 className="profile-page__subsection-title">Attending</h3>
+                    <ProfileSubsectionLabel
+                      icon="fa-solid fa-circle-check"
+                      variant="attending"
+                    >
+                      Attending
+                    </ProfileSubsectionLabel>
                     {dayData.attending.map((event, i) => (
                       <EventCard
                         key={`att-${event.id || i}`}
@@ -701,7 +797,9 @@ function Profile() {
 
                 {dayData.interested.length > 0 && (
                   <div className="profile-page__status-group profile-page__status-group--interested">
-                    <h3 className="profile-page__subsection-title">Interested</h3>
+                    <ProfileSubsectionLabel icon="fa-solid fa-star" variant="interested">
+                      Interested
+                    </ProfileSubsectionLabel>
                     <div className="profile-page__interested-grid">
                       {dayData.interested.map((event, i) => (
                         <EventCard
@@ -721,12 +819,6 @@ function Profile() {
                 )}
               </section>
             ))}
-
-          <ProfileScheduleShareButton
-            eventsByDay={eventsByDay}
-            userName={user?.name || user?.email}
-            timeZone={timelineTimeZone}
-          />
 
           {!hasEventsByDay && (
             <p className="profile-page__empty profile-page__empty--schedule-hint">
@@ -763,30 +855,117 @@ function Profile() {
       </div>
       </FriendCountsProvider>
 
+      <ProfileExtraInfoModal
+        isOpen={extraInfoOpen}
+        onClose={closeExtraInfoModal}
+        onSave={handleSaveExtraInfoModal}
+        saveBusy={extraSaveBusy}
+        saveError={extraSaveError}
+      />
+
       <ModalLayout
         isOpen={isOpen}
         onClose={closeModal}
         className="edit-profile"
         header={<h3>Edit profile settings</h3>}
       >
-        <div className="profile-account-editor">
-          <p className="profile-account-editor__label">Display name</p>
-          <input
-            type="text"
-            className="profile-account-editor__input"
-            value={editName}
-            onChange={(e) => setEditName(e.target.value)}
-            autoComplete="name"
-            maxLength={120}
-          />
-          <p className="profile-account-editor__label">Email</p>
-          <input
-            type="email"
-            className="profile-account-editor__input"
-            value={editEmail}
-            onChange={(e) => setEditEmail(e.target.value)}
-            autoComplete="email"
-          />
+        <div className="edit-profile-body">
+          <section className="edit-profile-section" aria-labelledby="edit-profile-photo-heading">
+            <h4 id="edit-profile-photo-heading" className="edit-profile-section__title">
+              Profile photo
+            </h4>
+            <div className="profile-photo-editor profile-photo-editor--in-section">
+              {modalPreview ? (
+                <img
+                  className="profile-photo-editor__preview"
+                  src={modalPreview}
+                  alt=""
+                />
+              ) : (
+                <div
+                  className="profile-photo-editor__preview profile-page__avatar--placeholder"
+                  aria-hidden
+                >
+                  {(user.name || user.email || "?").charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div className="profile-photo-editor__actions">
+                <input
+                  ref={fileInputRef}
+                  id="profile-avatar-input"
+                  type="file"
+                  accept="image/*"
+                  className="profile-photo-editor__file"
+                  onChange={onAvatarFileChange}
+                />
+                <label
+                  htmlFor="profile-avatar-input"
+                  className="profile-photo-editor__file-trigger"
+                >
+                  Choose a photo
+                </label>
+                <p className="profile-photo-editor__hint">
+                  Square photos look best. Max 8MB. Upload saves immediately.
+                </p>
+                {uploadError && (
+                  <p className="profile-photo-editor__error" role="alert">
+                    {uploadError}
+                  </p>
+                )}
+                <button
+                  type="button"
+                  className="profile-photo-editor__upload"
+                  disabled={!avatarFile || uploadBusy}
+                  onClick={handleUploadAvatar}
+                >
+                  {uploadBusy ? "Uploading…" : "Upload photo"}
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section className="edit-profile-section" aria-labelledby="edit-profile-account-heading">
+            <h4 id="edit-profile-account-heading" className="edit-profile-section__title">
+              Account
+            </h4>
+            <div className="profile-account-editor profile-account-editor--fields-only">
+              <p className="profile-account-editor__label">Display name</p>
+              <input
+                type="text"
+                className="profile-account-editor__input"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                autoComplete="name"
+                maxLength={120}
+              />
+              <p className="profile-account-editor__label">Email</p>
+              <input
+                type="email"
+                className="profile-account-editor__input"
+                value={editEmail}
+                onChange={(e) => setEditEmail(e.target.value)}
+                autoComplete="email"
+              />
+            </div>
+          </section>
+
+          <section
+            className="edit-profile-section"
+            aria-labelledby="edit-profile-extra-heading"
+          >
+            <h4 id="edit-profile-extra-heading" className="edit-profile-section__title">
+              Extra profile info
+            </h4>
+            <ProfileExtraInfoFields
+              values={editExtra}
+              onChange={setEditExtra}
+              disabled={accountBusy}
+              idPrefix="profile-edit-extra"
+            />
+          </section>
+        </div>
+
+        <div className="edit-profile-footer">
           {accountError && (
             <p className="profile-account-editor__error" role="alert">
               {accountError}
@@ -794,62 +973,17 @@ function Profile() {
           )}
           <button
             type="button"
-            className="profile-account-editor__save"
+            className="edit-profile-footer__save profile-page__btn profile-page__btn--primary"
             disabled={accountBusy}
             onClick={handleSaveAccount}
           >
-            {accountBusy ? "Saving…" : "Save name & email"}
+            {accountBusy ? "Saving…" : "Save changes"}
           </button>
-        </div>
-
-        <div className="profile-photo-editor">
-          <p className="profile-photo-editor__label">Profile photo</p>
-          {modalPreview ? (
-            <img
-              className="profile-photo-editor__preview"
-              src={modalPreview}
-              alt=""
-            />
-          ) : (
-            <div
-              className="profile-photo-editor__preview profile-page__avatar--placeholder"
-              aria-hidden
-            >
-              {(user.name || user.email || "?").charAt(0).toUpperCase()}
-            </div>
-          )}
-
-          <input
-            ref={fileInputRef}
-            id="profile-avatar-input"
-            type="file"
-            accept="image/*"
-            className="profile-photo-editor__file"
-            onChange={onAvatarFileChange}
-          />
-          <label
-            htmlFor="profile-avatar-input"
-            className="profile-photo-editor__file-trigger"
-          >
-            Choose a photo
-          </label>
-          <p className="profile-photo-editor__hint">
-            Square photos look best. Max 8MB.
+          <p className="edit-profile-footer__note">
+            Saves name, email, and extra profile info. Photo uploads separately above.
           </p>
-          {uploadError && (
-            <p className="profile-photo-editor__error" role="alert">
-              {uploadError}
-            </p>
-          )}
-          <button
-            type="button"
-            className="profile-photo-editor__upload"
-            disabled={!avatarFile || uploadBusy}
-            onClick={handleUploadAvatar}
-          >
-            {uploadBusy ? "Uploading…" : "Save photo"}
-          </button>
         </div>
+
       </ModalLayout>
     </>
   );

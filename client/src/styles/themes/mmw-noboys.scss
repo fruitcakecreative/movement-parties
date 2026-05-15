@@ -279,3 +279,49 @@
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
   opacity: 0.95;
 }
+
+/* Profile movement-weekend badges — default tints use --color-bg-light (dark in this theme). */
+:root[data-she-they-theme='on'] .profile-extra-display__weekend-badge--rookie {
+  color: #ede9fe;
+  background: color-mix(in srgb, #6d28d9 42%, var(--color-background));
+  border-color: color-mix(in srgb, #a78bfa 55%, transparent);
+
+  i {
+    color: #c4b5fd;
+  }
+}
+
+:root[data-she-they-theme='on'] .profile-extra-display__weekend-badge--regular {
+  color: #bbf7d0;
+  background: color-mix(in srgb, #166534 48%, var(--color-background));
+  border-color: color-mix(in srgb, #4ade80 48%, transparent);
+
+  i {
+    color: #86efac;
+  }
+}
+
+:root[data-she-they-theme='on'] .profile-extra-display__weekend-badge--veteran {
+  color: #fde68a;
+  background: color-mix(in srgb, #b45309 42%, var(--color-background));
+  border-color: color-mix(in srgb, #fbbf24 52%, transparent);
+
+  i {
+    color: #fcd34d;
+  }
+}
+
+:root[data-she-they-theme='on'] .profile-extra-display__weekend-badge--king {
+  color: #fff7ed;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, #b45309 50%, var(--color-background)),
+    color-mix(in srgb, #d97706 38%, var(--color-background))
+  );
+  border-color: color-mix(in srgb, #fbbf24 58%, transparent);
+  box-shadow: 0 2px 12px rgba(251, 191, 36, 0.22);
+
+  i {
+    color: #fcd34d;
+  }
+}

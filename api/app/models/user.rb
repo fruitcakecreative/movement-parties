@@ -1,4 +1,6 @@
 class User < ApplicationRecord
+  include ProfileExtraInfo
+
   before_save :ensure_authentication_token
 
   def ensure_authentication_token

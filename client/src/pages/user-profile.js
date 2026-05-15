@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import EventDetailsShell from "../components/events/EventDetailsShell";
 import VenueDetailsShell from "../components/venues/VenueDetailsShell";
 import EventCard from "../components/EventCard";
+import ProfileExtraInfoDisplay from "../components/profile/ProfileExtraInfoDisplay";
 import {
   fetchUserPublicProfile,
   fetchUserEventsForUser,
@@ -357,6 +358,11 @@ export default function UserProfile() {
           <p className="user-profile-page__subtitle">{profile.email}</p>
         ) : null}
       </div>
+
+      <ProfileExtraInfoDisplay
+        profileExtra={profile.profile_extra}
+        className="user-profile-page__extra"
+      />
 
       {profile.is_self ? (
         <div className="user-profile-page__actions">

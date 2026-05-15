@@ -60,8 +60,21 @@ class Api::UsersController < ApplicationController
   end
 
   def update
-    permitted = params.require(:user).permit(:name, :email)
-    if current_user.update(permitted)
+    user_params = params.require(:user)
+    permitted = user_params.permit(:name, :email)
+    extra_permitted = user_params.permit(profile_extra: ProfileExtraInfo::PROFILE_EXTRA_KEYS)
+    has_extra = user_params.key?(:profile_extra) || extra_permitted.key?(:profile_extra)
+
+    ok = true
+    if permitted.present?
+      ok = current_user.update(permitted)
+    end
+    if ok && has_extra
+      current_user.assign_profile_extra!(extra_permitted[:profile_extra] || {})
+      ok = current_user.save(validate: false) if ok
+    end
+
+    if ok
       render json: current_user_json
     else
       render json: { errors: current_user.errors.full_messages }, status: :unprocessable_entity
@@ -98,7 +111,8 @@ class Api::UsersController < ApplicationController
       name: current_user.name,
       email: current_user.email,
       authentication_token: current_user.authentication_token,
-      avatar_url: current_user.avatar.attached? ? url_for(current_user.avatar) : current_user.picture
+      avatar_url: current_user.avatar.attached? ? url_for(current_user.avatar) : current_user.picture,
+      profile_extra: current_user.profile_extra_hash
     }
   end
 
@@ -116,7 +130,8 @@ class Api::UsersController < ApplicationController
       picture: user.picture.presence,
       avatar_url: user.avatar.attached? ? url_for(user.avatar) : nil,
       is_self: is_self,
-      is_friend: is_friend
+      is_friend: is_friend,
+      profile_extra: user.profile_extra_hash
     }
   end
 end

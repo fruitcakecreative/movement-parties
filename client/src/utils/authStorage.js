@@ -15,15 +15,19 @@ export function readStoredUser() {
 /** Merge API user payload into localStorage and normalize authentication_token. */
 export function persistAuthUser(apiUser) {
   if (!apiUser || typeof apiUser !== 'object') return;
-  const token = apiUser.authentication_token || apiUser.token;
-  if (!token) return;
-
   const prev = readStoredUser() || {};
+  const token =
+    apiUser.authentication_token || apiUser.token || prev.authentication_token || prev.token;
+  if (!token) return;
   localStorage.setItem(
     'user',
     JSON.stringify({
       ...prev,
       ...apiUser,
+      profile_extra:
+        apiUser.profile_extra != null && typeof apiUser.profile_extra === 'object'
+          ? apiUser.profile_extra
+          : {},
       authentication_token: token,
       token,
     })
