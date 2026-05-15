@@ -299,24 +299,6 @@ function measureSlotHeight(slot, { compact = false } = {}) {
   return h + LAYOUT.cellPad;
 }
 
-function wrapTextLines(ctx, text, maxWidth) {
-  const words = String(text || '').trim().split(/\s+/).filter(Boolean);
-  if (!words.length) return [];
-  const lines = [];
-  let line = words[0];
-  for (let i = 1; i < words.length; i += 1) {
-    const next = `${line} ${words[i]}`;
-    if (ctx.measureText(next).width <= maxWidth) {
-      line = next;
-    } else {
-      lines.push(line);
-      line = words[i];
-    }
-  }
-  lines.push(line);
-  return lines;
-}
-
 function profileTextColumnWidth(hasAvatar) {
   const textX = hasAvatar ? PAD + AVATAR_SIZE + AVATAR_GAP : PAD;
   return CANVAS_WIDTH - PAD - textX;

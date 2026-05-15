@@ -181,6 +181,7 @@ function Profile() {
     setEditEmail(user.email || "");
     setEditExtra(normalizeProfileExtra(user.profile_extra));
     setAccountError(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- re-seed when modal opens / account id changes only
   }, [isOpen, user?.id]);
 
   const displayAvatarSrc = (u) =>
