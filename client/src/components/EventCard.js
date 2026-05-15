@@ -14,6 +14,8 @@ function EventCard({
   showArtists = true,
   /** 'compact' — denser card (e.g. profile “interested” grid). */
   density = 'default',
+  /** After RSVP save — e.g. refresh profile day lists. */
+  onAfterRsvpChange,
 }) {
   const {
     displayTitle,
@@ -127,6 +129,7 @@ function EventCard({
           eventId={event?.id}
           friendsInterestedCount={fc.friendsInterested}
           friendsAttendingCount={fc.friendsAttending}
+          onAfterRsvpChange={onAfterRsvpChange}
         />
       </div>
     </div>

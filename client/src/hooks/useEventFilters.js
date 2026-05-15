@@ -9,6 +9,7 @@ import {
 } from '../utils/sheTheyTheme';
 import { sheTheyForwardLineupPercent } from '../utils/pronounDisplay';
 import { eventCreatedInLastWeek } from '../utils/eventRecency';
+import { eventMatchesTextSearch } from '../utils/eventTextSearch';
 
 const defaultFilters = {
   genre: [],
@@ -42,8 +43,11 @@ function useEventFilters({ eventsByDate, activeDates = [] }) {
   const [filteredArtists, setFilteredArtists] = useState([]);
   const [venueSearchQuery, setVenueSearchQuery] = useState('');
   const [filteredVenues, setFilteredVenues] = useState([]);
+  /** Free-text filter on event title / venue / artists (same idea as artist search in Filters dropdown). */
+  const [eventSearchQuery, setEventSearchQuery] = useState('');
 
   const hasActiveFilters = useMemo(() => {
+    if (eventSearchQuery.trim().length > 0) return true;
     const arrayKeys = Object.entries(filterSelections).filter(
       ([k]) =>
         k !== 'sheTheyForwardTimeline' &&
@@ -59,9 +63,10 @@ function useEventFilters({ eventsByDate, activeDates = [] }) {
       filterSelections.sheTheyForwardTimeline === true ||
       filterSelections.sheTheyOver50Lineup === true
     );
-  }, [filterSelections]);
+  }, [filterSelections, eventSearchQuery]);
 
-  const resetFilters = () =>
+  const resetFilters = () => {
+    setEventSearchQuery('');
     setFilterSelections((prev) => ({
       ...defaultFilters,
       sheTheyForwardTimeline: prev.sheTheyForwardTimeline,
@@ -69,6 +74,7 @@ function useEventFilters({ eventsByDate, activeDates = [] }) {
       addedLastWeekOnly: false,
       friendsTimelineOnly: false,
     }));
+  };
 
   useEffect(() => {
     if (selectedDate === 'all') return;
@@ -182,6 +188,12 @@ function useEventFilters({ eventsByDate, activeDates = [] }) {
       dayEvents = dayEvents.filter((event) => eventCreatedInLastWeek(event));
     }
 
+    if (eventSearchQuery.trim()) {
+      dayEvents = dayEvents.filter((event) =>
+        eventMatchesTextSearch(event, eventSearchQuery)
+      );
+    }
+
     return dayEvents;
   };
 
@@ -198,6 +210,8 @@ function useEventFilters({ eventsByDate, activeDates = [] }) {
     setVenueSearchQuery,
     filteredVenues,
     setFilteredVenues,
+    eventSearchQuery,
+    setEventSearchQuery,
     getFilteredEventsForDate,
     hasActiveFilters,
     resetFilters,

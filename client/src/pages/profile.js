@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import ModalLayout from "../timeline/components/modals/ModalLayout";
 import EventCard from "../components/EventCard";
+import ProfileEventAddSearch from "../components/ProfileEventAddSearch";
 import EventDetailsShell from "../components/events/EventDetailsShell";
 import VenueDetailsShell from "../components/venues/VenueDetailsShell";
 
@@ -20,6 +21,7 @@ import {
   updateCurrentUser,
 } from "../services/api";
 import { FriendCountsProvider } from "../context/FriendCountsContext";
+import { useUserEvents } from "../context/UserEventsContext";
 import { getSortedEventDayEntries } from "../utils/profileEventsByDay";
 import { loadCityConfig } from "../services/cityConfig";
 
@@ -29,8 +31,10 @@ const timelineTimeZone =
   (process.env.REACT_APP_CITY_KEY === "movement"
     ? "America/Detroit"
     : "America/New_York");
+const profileEventsIncludePast = !!cfg.showAllTimelineDays;
 
 function Profile() {
+  const { refresh: refreshUserEventContext } = useUserEvents();
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [userEvents, setUserEvents] = useState({});
@@ -62,6 +66,13 @@ function Profile() {
   const [accountError, setAccountError] = useState(null);
 
   const fileInputRef = useRef(null);
+
+  const syncUserSchedule = useCallback(() => {
+    refreshUserEventContext();
+    fetchUserEvents()
+      .then((data) => setUserEvents(data))
+      .catch(() => {});
+  }, [refreshUserEventContext]);
 
   const openModal = () => {
     document.body.style.overflow = "hidden";
@@ -504,8 +515,10 @@ function Profile() {
             Log out
           </button>
         </div>
-        <section className="profile-page__section">
-          <h2 className="profile-page__section-title">Friends</h2>
+        <section className="profile-page__section profile-page__section--friends">
+          <h2 className="profile-page__section-heading profile-page__section-heading--friends">
+            Your Friends
+          </h2>
           <div className="profile-page__friend-search">
             <input
               type="text"
@@ -652,10 +665,20 @@ function Profile() {
           {friendError && <p className="profile-page__error">{friendError}</p>}
         </section>
 
-        {hasEventsByDay &&
-          eventsByDay.map(([dayKey, dayData]) => (
+        <section className="profile-page__section profile-page__section--events">
+          <h2 className="profile-page__section-heading profile-page__section-heading--events">
+            Your Events
+          </h2>
+          <ProfileEventAddSearch
+            timeZone={timelineTimeZone}
+            includePastEvents={profileEventsIncludePast}
+            onAfterRsvpChange={syncUserSchedule}
+          />
+
+          {hasEventsByDay &&
+            eventsByDay.map(([dayKey, dayData]) => (
               <section key={dayKey} className="profile-page__group-day">
-                <h2 className="profile-page__section-title">{dayData.label}</h2>
+                <h3 className="profile-page__events-day-heading">{dayData.label}</h3>
 
                 {dayData.attending.length > 0 && (
                   <div className="profile-page__status-group profile-page__status-group--attending">
@@ -669,6 +692,7 @@ function Profile() {
                         showVenueName
                         showArtists={false}
                         onClick={() => openEvent(event.id)}
+                        onAfterRsvpChange={syncUserSchedule}
                       />
                     ))}
                   </div>
@@ -688,6 +712,7 @@ function Profile() {
                           showArtists={false}
                           density="compact"
                           onClick={() => openEvent(event.id)}
+                          onAfterRsvpChange={syncUserSchedule}
                         />
                       ))}
                     </div>
@@ -696,12 +721,12 @@ function Profile() {
               </section>
             ))}
 
-        {!hasEventsByDay && (
-            <p className="profile-page__empty">
-              When you mark events as interested or attending, they will show up
-              here.
+          {!hasEventsByDay && (
+            <p className="profile-page__empty profile-page__empty--schedule-hint">
+              When you mark events as interested or attending, they will show up here.
             </p>
           )}
+        </section>
       </div>
 
       <EventDetailsShell

@@ -387,7 +387,9 @@ export default function UserProfile() {
           className="profile-page__section user-profile-page__their-friends"
           aria-label="Their friends"
         >
-          <h2 className="profile-page__section-title">Their friends</h2>
+          <h2 className="profile-page__section-heading profile-page__section-heading--friends">
+            Their friends
+          </h2>
           {theirFriendsLoading && (
             <p className="profile-page__empty-small">Loading friends…</p>
           )}
@@ -456,7 +458,7 @@ export default function UserProfile() {
             hasEventsByDay &&
             eventsByDay.map(([dayKey, dayData]) => (
               <section key={dayKey} className="profile-page__group-day">
-                <h2 className="profile-page__section-title">{dayData.label}</h2>
+                <h3 className="profile-page__events-day-heading">{dayData.label}</h3>
 
                 {dayData.attending.length > 0 && (
                   <div className="profile-page__status-group profile-page__status-group--attending">

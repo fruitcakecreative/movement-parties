@@ -175,6 +175,8 @@ function Events() {
     setVenueSearchQuery,
     filteredVenues,
     setFilteredVenues,
+    eventSearchQuery,
+    setEventSearchQuery,
     getFilteredEventsForDate,
     hasActiveFilters,
     resetFilters,
@@ -235,6 +237,8 @@ function Events() {
               setVenueSearchQuery={setVenueSearchQuery}
               filteredVenues={filteredVenues}
               setFilteredVenues={setFilteredVenues}
+              eventSearchQuery={eventSearchQuery}
+              setEventSearchQuery={setEventSearchQuery}
             />
 
             {!isLoaded ? (
@@ -246,6 +250,8 @@ function Events() {
                   setFilterSelections={setFilterSelections}
                   hasActiveFilters={hasActiveFilters}
                   resetFilters={resetFilters}
+                  eventSearchQuery={eventSearchQuery}
+                  setEventSearchQuery={setEventSearchQuery}
                 />
                 {(selectedDate === 'all' ? activeDates : [selectedDate]).map((date) => {
                   const dayEvents = getFilteredEventsForDate(date).filter((e) => {

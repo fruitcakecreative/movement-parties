@@ -35,6 +35,8 @@ function EventStatusControls({
   /** All users on the app with this event saved (detail panel). */
   siteInterestedTotal,
   siteAttendingTotal,
+  /** Called after a successful interested/attending API save (e.g. refresh profile lists). */
+  onAfterRsvpChange,
 }) {
   const navigate = useNavigate();
   const {
@@ -69,26 +71,36 @@ function EventStatusControls({
 
   if (eventId == null) return null;
 
-  const onInterested = (e) => {
+  const onInterested = async (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (!isAuthenticated) {
       navigate("/login");
       return;
     }
-    toggleInterested(numericEventId);
-    triggerTapLabel(interestedOn ? "not interested" : "interested", "interested");
+    try {
+      await toggleInterested(numericEventId);
+      onAfterRsvpChange?.();
+      triggerTapLabel(interestedOn ? "not interested" : "interested", "interested");
+    } catch {
+      // Context reverts status on failure.
+    }
   };
 
-  const onAttending = (e) => {
+  const onAttending = async (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (!isAuthenticated) {
       navigate("/login");
       return;
     }
-    toggleAttending(numericEventId);
-    triggerTapLabel(attendingOn ? "not attending" : "attending", "attending");
+    try {
+      await toggleAttending(numericEventId);
+      onAfterRsvpChange?.();
+      triggerTapLabel(attendingOn ? "not attending" : "attending", "attending");
+    } catch {
+      // Context reverts status on failure.
+    }
   };
 
   const interestedOn = status === "interested";

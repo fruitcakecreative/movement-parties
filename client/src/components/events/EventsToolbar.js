@@ -29,6 +29,8 @@ function EventsToolbar({
   setVenueSearchQuery,
   filteredVenues,
   setFilteredVenues,
+  eventSearchQuery,
+  setEventSearchQuery,
   sheTheyOver50LineupStats = null,
 }) {
   const navigate = useNavigate();
@@ -84,22 +86,36 @@ function EventsToolbar({
       />
 
       {isLoaded && (
-        <FiltersDropdown
-          selected={filterSelections}
-          setSelected={setFilterSelections}
-          genreOptions={genreOptions}
-          artistOptions={artistOptions}
-          venueOptions={venueOptions}
-          locationOptions={locationOptions}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          filteredArtists={filteredArtists}
-          setFilteredArtists={setFilteredArtists}
-          venueSearchQuery={venueSearchQuery}
-          setVenueSearchQuery={setVenueSearchQuery}
-          filteredVenues={filteredVenues}
-          setFilteredVenues={setFilteredVenues}
-        />
+        <div className="events-toolbar-filters-cluster">
+          <FiltersDropdown
+            selected={filterSelections}
+            setSelected={setFilterSelections}
+            genreOptions={genreOptions}
+            artistOptions={artistOptions}
+            venueOptions={venueOptions}
+            locationOptions={locationOptions}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            filteredArtists={filteredArtists}
+            setFilteredArtists={setFilteredArtists}
+            venueSearchQuery={venueSearchQuery}
+            setVenueSearchQuery={setVenueSearchQuery}
+            filteredVenues={filteredVenues}
+            setFilteredVenues={setFilteredVenues}
+          />
+          <div className="events-toolbar-event-search">
+            <input
+              id="events-page-event-search"
+              type="search"
+              className="events-toolbar-event-search__input"
+              placeholder="Search events…"
+              value={eventSearchQuery}
+              onChange={(e) => setEventSearchQuery(e.target.value)}
+              autoComplete="off"
+              aria-label="Search events by name, venue, or artist"
+            />
+          </div>
+        </div>
       )}
     </>
   );

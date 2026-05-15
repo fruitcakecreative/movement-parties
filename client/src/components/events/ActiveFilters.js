@@ -7,11 +7,24 @@ function ActiveFilters({
   setFilterSelections,
   hasActiveFilters,
   resetFilters,
+  eventSearchQuery = '',
+  setEventSearchQuery,
 }) {
   if (!hasActiveFilters) return null;
 
+  const q = eventSearchQuery.trim();
+
   return (
     <div className="active-filters">
+      {q.length > 0 && (
+        <button
+          type="button"
+          className="filter-pill filter-pill--toggle filter-pill--event-search"
+          onClick={() => setEventSearchQuery?.('')}
+        >
+          Search: “{q.length > 40 ? `${q.slice(0, 40)}…` : q}” <span className="x">&times;</span>
+        </button>
+      )}
       {showSheTheyForwardFilter && filterSelections.sheTheyForwardTimeline && (
         <button
           type="button"
