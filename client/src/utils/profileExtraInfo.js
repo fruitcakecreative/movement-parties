@@ -27,8 +27,8 @@ export const PROFILE_EXTRA_FIELDS = [
   },
   {
     key: 'favorite_venue',
-    label: 'Favorite venue in Detroit',
-    shortLabel: 'Favorite venue',
+    label: 'Favourite venue in Detroit',
+    shortLabel: 'Favourite venue',
     placeholder: 'e.g. Masonic Temple',
     maxLength: 40,
     inputType: 'text',
