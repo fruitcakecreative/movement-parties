@@ -26,7 +26,10 @@ class Api::UserEventsController < ApplicationController
   def create
     Rails.logger.debug "Create UserEvent Params: #{params.inspect}"
     status = params.dig(:user_event, :status)
-    status = status.downcase
+    if status.blank?
+      return render json: { error: "Status required" }, status: :unprocessable_entity
+    end
+    status = status.to_s.downcase
     unless %w[attending interested].include?(status)
       return render json: { error: "Invalid status", received: status }, status: :unprocessable_entity
     end

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import ModalLayout from "../timeline/components/modals/ModalLayout";
 import EventCard from "../components/EventCard";
 import ProfileEventAddSearch from "../components/ProfileEventAddSearch";
+import ProfileScheduleShareButton from "../components/ProfileScheduleShareButton";
 import EventDetailsShell from "../components/events/EventDetailsShell";
 import VenueDetailsShell from "../components/venues/VenueDetailsShell";
 
@@ -720,6 +721,12 @@ function Profile() {
                 )}
               </section>
             ))}
+
+          <ProfileScheduleShareButton
+            eventsByDay={eventsByDay}
+            userName={user?.name || user?.email}
+            timeZone={timelineTimeZone}
+          />
 
           {!hasEventsByDay && (
             <p className="profile-page__empty profile-page__empty--schedule-hint">

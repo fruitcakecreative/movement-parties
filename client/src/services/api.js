@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { persistAuthUser, readAuthToken } from '../utils/authStorage';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE;
 const city = process.env.REACT_APP_CITY_KEY;
@@ -19,16 +20,8 @@ export const isUnauthorized = (err) => err?.response?.status === 401;
 api.interceptors.request.use((config) => {
   config.headers = config.headers || {};
   config.headers['X-City-Key'] = city;
-  try {
-    const raw = localStorage.getItem('user');
-    if (raw) {
-      const u = JSON.parse(raw);
-      const t = u.authentication_token || u.token;
-      if (t) config.headers.Authorization = `Bearer ${t}`;
-    }
-  } catch (_) {
-    /* ignore */
-  }
+  const t = readAuthToken();
+  if (t) config.headers.Authorization = `Bearer ${t}`;
   return config;
 });
 
@@ -49,6 +42,7 @@ export const fetchEventById = async (id) => {
 //login/logout
 export const userLogin = async (credentials) => {
   const response = await api.post('/login', { user: credentials });
+  if (response.data?.user) persistAuthUser(response.data.user);
   return response.data;
 };
 
@@ -85,6 +79,7 @@ export const resetPasswordWithToken = async ({
       password_confirmation: passwordConfirmation,
     },
   });
+  if (data?.user) persistAuthUser(data.user);
   return data;
 };
 
@@ -101,17 +96,25 @@ export const fetchUserEventsForUser = async (userId) => {
 };
 
 export const saveUserEventStatus = async (eventId, status) => {
+  const id = Number(eventId);
+  if (!Number.isFinite(id)) {
+    throw new Error('Invalid event id');
+  }
   return api.post('/user_events', {
     user_event: {
-      event_id: Number(eventId),
-      status,
+      event_id: id,
+      status: String(status),
     },
   });
 };
 
-export const deleteUserEventStatus = async (eventId, status) => {
+export const deleteUserEventStatus = async (eventId) => {
+  const id = Number(eventId);
+  if (!Number.isFinite(id)) {
+    throw new Error('Invalid event id');
+  }
   return api.delete('/user_events', {
-    data: { user_event: { event_id: eventId, status } },
+    data: { user_event: { event_id: id } },
   });
 };
 
@@ -179,8 +182,9 @@ export const fetchFriendEventRsvps = async (eventId) => {
 };
 
 //user profile info
-export const fetchUserInfo = async (token) => {
+export const fetchUserInfo = async () => {
   const response = await api.get('/user');
+  persistAuthUser(response.data);
   return response.data;
 };
 
@@ -211,9 +215,7 @@ export const fetchFriendsOfUser = async (userId) => {
 export const uploadUserAvatar = async (file) => {
   const formData = new FormData();
   formData.append('avatar', file);
-  const raw = localStorage.getItem('user');
-  const u = raw ? JSON.parse(raw) : {};
-  const token = u.authentication_token || u.token;
+  const token = readAuthToken();
   const base = (API_BASE_URL || '').replace(/\/+$/, '');
   const headers = { 'X-City-Key': city };
   if (token) headers.Authorization = `Bearer ${token}`;
@@ -243,7 +245,9 @@ export const loginWithFacebook = async (userData) => {
     body: JSON.stringify({ user: userData }),
   });
 
-  return res.json();
+  const data = await res.json();
+  if (data?.user) persistAuthUser(data.user);
+  return data;
 };
 
 export const fetchAllUsers = async () => {

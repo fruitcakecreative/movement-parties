@@ -39,6 +39,24 @@ function dayLabelFromKey(dayKey) {
   });
 }
 
+/** Parseable start instant for ordering (missing/invalid → sort last). */
+export function eventStartTimestamp(event) {
+  const raw =
+    event?.formatted_start_time ||
+    event?.start_time ||
+    event?.formatted_end_time ||
+    event?.end_time;
+  if (!raw) return Number.POSITIVE_INFINITY;
+  const t = new Date(raw).getTime();
+  return Number.isNaN(t) ? Number.POSITIVE_INFINITY : t;
+}
+
+export function sortEventsByStartTime(events) {
+  return [...(events || [])].sort(
+    (a, b) => eventStartTimestamp(a) - eventStartTimestamp(b)
+  );
+}
+
 export function getSortedEventDayEntries(userEvents) {
   const raw = userEvents || {};
   const attendingList = coalesceEventList(raw, 'attending', '1', 1);
@@ -67,6 +85,14 @@ export function getSortedEventDayEntries(userEvents) {
   }
 
   return Object.entries(grouped)
+    .map(([dayKey, dayData]) => [
+      dayKey,
+      {
+        ...dayData,
+        attending: sortEventsByStartTime(dayData.attending),
+        interested: sortEventsByStartTime(dayData.interested),
+      },
+    ])
     .filter(([, v]) => v.attending.length > 0 || v.interested.length > 0)
     .sort(([a], [b]) => a.localeCompare(b));
 }

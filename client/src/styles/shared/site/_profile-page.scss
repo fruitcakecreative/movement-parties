@@ -1258,3 +1258,34 @@ a.profile-page__friend-row-main--link {
   margin-top: $space-2;
   opacity: 0.82;
 }
+
+.profile-schedule-share {
+  margin: 0 0 $space-5;
+  padding: $space-3 $space-4;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 28%, var(--color-text));
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-background));
+}
+
+.profile-schedule-share__label {
+  margin: 0 0 $space-2;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--color-text) 78%, transparent);
+}
+
+.profile-schedule-share__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2;
+  justify-content: center;
+
+  @media (min-width: $bp-sm) {
+    justify-content: flex-start;
+  }
+}
+
+.profile-schedule-share__btn {
+  width: auto;
+  min-width: 0;
+}

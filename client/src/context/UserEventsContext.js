@@ -9,21 +9,12 @@ import React, {
 import { useLocation } from "react-router-dom";
 import {
   fetchUserEvents,
+  fetchUserInfo,
   saveUserEventStatus,
   deleteUserEventStatus,
 } from "../services/api";
 import { coalesceEventList } from "../utils/profileEventsByDay";
-
-function readHasAuthToken() {
-  try {
-    const raw = localStorage.getItem("user");
-    if (!raw) return false;
-    const u = JSON.parse(raw);
-    return !!(u.authentication_token || u.token);
-  } catch {
-    return false;
-  }
-}
+import { hasAuthToken } from "../utils/authStorage";
 
 /** Stable map key — JSON / DOM can give ids as numbers or digit strings. */
 function statusMapKey(eventId) {
@@ -43,9 +34,11 @@ export function UserEventsProvider({ children }) {
   const location = useLocation();
   const [statusByEventId, setStatusByEventId] = useState({});
   const [pending, setPending] = useState({});
+  /** Bumps when session bootstrap writes a token into localStorage. */
+  const [authRevision, setAuthRevision] = useState(0);
 
   const refresh = useCallback(async () => {
-    if (!readHasAuthToken()) {
+    if (!hasAuthToken()) {
       setStatusByEventId({});
       return;
     }
@@ -70,13 +63,28 @@ export function UserEventsProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    refresh();
+    let cancelled = false;
+    const bootstrap = async () => {
+      if (!hasAuthToken()) {
+        try {
+          await fetchUserInfo();
+          if (!cancelled && hasAuthToken()) setAuthRevision((n) => n + 1);
+        } catch {
+          /* not logged in */
+        }
+      }
+      if (!cancelled) await refresh();
+    };
+    bootstrap();
+    return () => {
+      cancelled = true;
+    };
   }, [refresh, location.pathname]);
 
   // iOS Safari: restore from back-forward cache can leave React state stale while session is fine.
   useEffect(() => {
     const onPageShow = (e) => {
-      if (e.persisted && readHasAuthToken()) refresh();
+      if (e.persisted && hasAuthToken()) refresh();
     };
     window.addEventListener("pageshow", onPageShow);
     return () => window.removeEventListener("pageshow", onPageShow);
@@ -100,8 +108,9 @@ export function UserEventsProvider({ children }) {
   const isAuthenticated = useMemo(() => {
     void location.pathname;
     void location.key;
-    return readHasAuthToken();
-  }, [location.pathname, location.key]);
+    void authRevision;
+    return hasAuthToken();
+  }, [location.pathname, location.key, authRevision]);
 
   const setStatus = useCallback(
     async (eventId, status) => {

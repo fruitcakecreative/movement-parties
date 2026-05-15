@@ -15,7 +15,8 @@ class Api::UsersController < ApplicationController
     Rails.logger.debug "User after find_or_initialize_by: #{@user.inspect}"
 
     if @user.persisted?
-      @user.update(name: user_data[:name], picture: user_data[:picture])
+      @user.assign_attributes(name: user_data[:name], picture: user_data[:picture])
+      @user.save(validate: false) if @user.authentication_token.blank?
       Rails.logger.debug "User updated: #{@user.inspect}"
     end
 
@@ -89,6 +90,9 @@ class Api::UsersController < ApplicationController
   private
 
   def current_user_json
+    if current_user.authentication_token.blank?
+      current_user.save(validate: false)
+    end
     {
       id: current_user.id,
       name: current_user.name,
