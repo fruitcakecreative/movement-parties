@@ -15,17 +15,11 @@ import {
 } from "../services/api";
 import { coalesceEventList } from "../utils/profileEventsByDay";
 import { hasAuthToken } from "../utils/authStorage";
+import { normalizeEventId } from "../utils/eventId";
 
 /** Stable map key — JSON / DOM can give ids as numbers or digit strings. */
 function statusMapKey(eventId) {
-  if (eventId == null || eventId === "") return null;
-  if (typeof eventId === "number") {
-    return Number.isFinite(eventId) ? eventId : null;
-  }
-  const s = String(eventId).trim();
-  if (s === "" || s === "null" || s === "undefined") return null;
-  if (/^\d+$/.test(s)) return Number(s);
-  return s;
+  return normalizeEventId(eventId);
 }
 
 const UserEventsContext = createContext(null);
@@ -120,7 +114,7 @@ export function UserEventsProvider({ children }) {
       setStatusByEventId((s) => ({ ...s, [k]: status }));
       setBusy(k, true);
       try {
-        await saveUserEventStatus(eventId, status);
+        await saveUserEventStatus(k, status);
       } catch {
         setStatusByEventId((s) => {
           const n = { ...s };
@@ -148,7 +142,7 @@ export function UserEventsProvider({ children }) {
       });
       setBusy(k, true);
       try {
-        await deleteUserEventStatus(eventId);
+        await deleteUserEventStatus(k);
       } catch {
         if (prev) {
           setStatusByEventId((s) => ({ ...s, [k]: prev }));

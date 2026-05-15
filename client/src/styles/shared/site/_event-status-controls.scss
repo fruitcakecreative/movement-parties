@@ -236,20 +236,32 @@ color-mix(in srgb, currentColor 78%, transparent);
 }
 
 /* Event details pills: match status semantics (yellow interested / green attending) */
-.event-status__pill--interested:hover:not(:disabled),
-.event-status__pill--interested:focus-visible:not(:disabled),
 .event-status__pill--interested.event-status__pill--active {
   border-color: #ca8a04;
   background: #ca8a04;
   color: #fff;
 }
 
-.event-status__pill--attending:hover:not(:disabled),
-.event-status__pill--attending:focus-visible:not(:disabled),
 .event-status__pill--attending.event-status__pill--active {
   border-color: #15803d;
   background: #15803d;
   color: #fff;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .event-status__pill--interested:hover:not(:disabled),
+  .event-status__pill--interested:focus-visible:not(:disabled) {
+    border-color: #ca8a04;
+    background: #ca8a04;
+    color: #fff;
+  }
+
+  .event-status__pill--attending:hover:not(:disabled),
+  .event-status__pill--attending:focus-visible:not(:disabled) {
+    border-color: #15803d;
+    background: #15803d;
+    color: #fff;
+  }
 }
 
 /* Timeline: narrow column to the RIGHT of the program box (sibling, not inside card) */
@@ -283,58 +295,60 @@ color-mix(in srgb, currentColor 78%, transparent);
   }
 }
 
-/* Hover / keyboard focus / press (incl. mobile :active while touching) — fully opaque */
-.event-status--timeline-rail .event-status__icon--interested:hover:not(:disabled),
-.event-status--timeline-rail .event-status__icon--interested:active:not(:disabled) {
-  opacity: 1;
-  background: #eab308;
-  border-color: #ca8a04;
-  color: #fff;
-
-  i {
-    color: #fff;
+/* Touch: only --on shows solid fill; hover/focus preview on pointer devices */
+@media (hover: hover) and (pointer: fine) {
+  .event-status--timeline-rail .event-status__icon--interested:hover:not(:disabled),
+  .event-status--timeline-rail .event-status__icon--interested:active:not(:disabled) {
     opacity: 1;
+    background: #eab308;
+    border-color: #ca8a04;
+    color: #fff;
+
+    i {
+      color: #fff;
+      opacity: 1;
+    }
   }
-}
 
-.event-status--timeline-rail .event-status__icon--interested:focus-visible:not(:disabled) {
-  opacity: 1;
-  background: #eab308;
-  border-color: #ca8a04;
-  color: #fff;
-  outline: 2px solid #713f12;
-  outline-offset: 2px;
-
-  i {
-    color: #fff;
+  .event-status--timeline-rail .event-status__icon--interested:focus-visible:not(:disabled) {
     opacity: 1;
+    background: #eab308;
+    border-color: #ca8a04;
+    color: #fff;
+    outline: 2px solid #713f12;
+    outline-offset: 2px;
+
+    i {
+      color: #fff;
+      opacity: 1;
+    }
   }
-}
 
-.event-status--timeline-rail .event-status__icon--attending:hover:not(:disabled),
-.event-status--timeline-rail .event-status__icon--attending:active:not(:disabled) {
-  opacity: 1;
-  background: #16a34a;
-  border-color: #15803d;
-  color: #fff;
-
-  i {
-    color: #fff;
+  .event-status--timeline-rail .event-status__icon--attending:hover:not(:disabled),
+  .event-status--timeline-rail .event-status__icon--attending:active:not(:disabled) {
     opacity: 1;
+    background: #16a34a;
+    border-color: #15803d;
+    color: #fff;
+
+    i {
+      color: #fff;
+      opacity: 1;
+    }
   }
-}
 
-.event-status--timeline-rail .event-status__icon--attending:focus-visible:not(:disabled) {
-  opacity: 1;
-  background: #16a34a;
-  border-color: #15803d;
-  color: #fff;
-  outline: 2px solid #bbf7d0;
-  outline-offset: 2px;
-
-  i {
-    color: #fff;
+  .event-status--timeline-rail .event-status__icon--attending:focus-visible:not(:disabled) {
     opacity: 1;
+    background: #16a34a;
+    border-color: #15803d;
+    color: #fff;
+    outline: 2px solid #bbf7d0;
+    outline-offset: 2px;
+
+    i {
+      color: #fff;
+      opacity: 1;
+    }
   }
 }
 
@@ -363,58 +377,92 @@ color-mix(in srgb, currentColor 78%, transparent);
   }
 }
 
-/* Match homepage status colors for card/footer controls too */
-.event-status--card .event-status__icon--interested:hover:not(:disabled),
-.event-status--card .event-status__icon--interested:active:not(:disabled) {
-  opacity: 1;
-  background: #eab308;
-  border-color: #ca8a04;
-  color: #fff;
+/* After toggle-off on touch, focus can linger — force idle look when not selected */
+.event-status--timeline-rail .event-status__icon--interested:not(.event-status__icon--on):focus,
+.event-status--timeline-rail .event-status__icon--interested:not(.event-status__icon--on):focus-visible,
+.event-status--timeline-rail .event-status__icon--attending:not(.event-status__icon--on):focus,
+.event-status--timeline-rail .event-status__icon--attending:not(.event-status__icon--on):focus-visible {
+  opacity: 0.5;
+  background: transparent;
+  border-color: rgba(255, 238, 218, 0.5);
+  color: color-mix(in srgb, var(--color-text) 58%, transparent);
+  outline: none;
 
   i {
-    color: #fff;
+    color: var(--color-text-light);
+    opacity: 0.5;
+  }
+}
+
+.event-status--card .event-status__icon--interested:not(.event-status__icon--on):focus,
+.event-status--card .event-status__icon--interested:not(.event-status__icon--on):focus-visible,
+.event-status--card .event-status__icon--attending:not(.event-status__icon--on):focus,
+.event-status--card .event-status__icon--attending:not(.event-status__icon--on):focus-visible {
+  opacity: 1;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  border-color: color-mix(in srgb, currentColor 30%, transparent);
+  color: color-mix(in srgb, currentColor 88%, transparent);
+  outline: none;
+
+  i {
+    color: inherit;
     opacity: 1;
   }
 }
 
-.event-status--card .event-status__icon--interested:focus-visible:not(:disabled) {
-  opacity: 1;
-  background: #eab308;
-  border-color: #ca8a04;
-  color: #fff;
-  outline: 2px solid #713f12;
-  outline-offset: 2px;
-
-  i {
-    color: #fff;
+@media (hover: hover) and (pointer: fine) {
+  .event-status--card .event-status__icon--interested:hover:not(:disabled),
+  .event-status--card .event-status__icon--interested:active:not(:disabled) {
     opacity: 1;
+    background: #eab308;
+    border-color: #ca8a04;
+    color: #fff;
+
+    i {
+      color: #fff;
+      opacity: 1;
+    }
   }
-}
 
-.event-status--card .event-status__icon--attending:hover:not(:disabled),
-.event-status--card .event-status__icon--attending:active:not(:disabled) {
-  opacity: 1;
-  background: #16a34a;
-  border-color: #15803d;
-  color: #fff;
-
-  i {
-    color: #fff;
+  .event-status--card .event-status__icon--interested:focus-visible:not(:disabled) {
     opacity: 1;
+    background: #eab308;
+    border-color: #ca8a04;
+    color: #fff;
+    outline: 2px solid #713f12;
+    outline-offset: 2px;
+
+    i {
+      color: #fff;
+      opacity: 1;
+    }
   }
-}
 
-.event-status--card .event-status__icon--attending:focus-visible:not(:disabled) {
-  opacity: 1;
-  background: #16a34a;
-  border-color: #15803d;
-  color: #fff;
-  outline: 2px solid #bbf7d0;
-  outline-offset: 2px;
-
-  i {
-    color: #fff;
+  .event-status--card .event-status__icon--attending:hover:not(:disabled),
+  .event-status--card .event-status__icon--attending:active:not(:disabled) {
     opacity: 1;
+    background: #16a34a;
+    border-color: #15803d;
+    color: #fff;
+
+    i {
+      color: #fff;
+      opacity: 1;
+    }
+  }
+
+  .event-status--card .event-status__icon--attending:focus-visible:not(:disabled) {
+    opacity: 1;
+    background: #16a34a;
+    border-color: #15803d;
+    color: #fff;
+    outline: 2px solid #bbf7d0;
+    outline-offset: 2px;
+
+    i {
+      color: #fff;
+      opacity: 1;
+    }
   }
 }
 

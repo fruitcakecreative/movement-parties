@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { persistAuthUser, readAuthToken } from '../utils/authStorage';
+import { normalizeEventId } from '../utils/eventId';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE;
 const city = process.env.REACT_APP_CITY_KEY;
@@ -96,8 +97,8 @@ export const fetchUserEventsForUser = async (userId) => {
 };
 
 export const saveUserEventStatus = async (eventId, status) => {
-  const id = Number(eventId);
-  if (!Number.isFinite(id)) {
+  const id = normalizeEventId(eventId);
+  if (id == null) {
     throw new Error('Invalid event id');
   }
   return api.post('/user_events', {
@@ -109,8 +110,8 @@ export const saveUserEventStatus = async (eventId, status) => {
 };
 
 export const deleteUserEventStatus = async (eventId) => {
-  const id = Number(eventId);
-  if (!Number.isFinite(id)) {
+  const id = normalizeEventId(eventId);
+  if (id == null) {
     throw new Error('Invalid event id');
   }
   return api.delete('/user_events', {

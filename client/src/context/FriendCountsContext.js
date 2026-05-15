@@ -6,6 +6,7 @@ import {
   useState,
 } from "react";
 import { fetchFriendEventCountsBatch } from "../services/api";
+import { normalizeEventId } from "../utils/eventId";
 
 const FriendCountsContext = createContext(null);
 
@@ -51,14 +52,15 @@ export function FriendCountsProvider({ eventIds, children }) {
   const value = useMemo(() => {
     return {
       get: (eventId) => {
-        if (eventId == null) {
+        const id = normalizeEventId(eventId);
+        if (id == null) {
           return { friendsInterested: undefined, friendsAttending: undefined };
         }
         if (counts === undefined) {
           return { friendsInterested: undefined, friendsAttending: undefined };
         }
         return (
-          counts[String(eventId)] || {
+          counts[String(id)] || {
             friendsInterested: 0,
             friendsAttending: 0,
           }

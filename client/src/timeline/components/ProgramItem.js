@@ -10,6 +10,7 @@ import {
   programSheTheyPctClassName,
   sheTheyForwardLineupPercent,
 } from '../../utils/pronounDisplay';
+import { normalizeEventId } from '../../utils/eventId';
 
 const ProgramItem = ({ program, scrollLeft, openEvent, sheTheyForwardTimeline = false, ...rest }) => {
   const { styles } = useProgram({ program, ...rest });
@@ -74,11 +75,15 @@ const ProgramItem = ({ program, scrollLeft, openEvent, sheTheyForwardTimeline = 
   const clampedOffset = Math.min(titleOffset, program.position.width - 100);
   const maxTitleWidth = program.position.width - (8 + clampedOffset + 12);
 
-  const handleClick = () => {
-    openEvent?.(program.data.event_id || program.data.id);
-  };
+  const timelineEventId = normalizeEventId(
+    program.data?.event_id ?? program.data?.id ?? program.event_id ?? program.id
+  );
 
-  const timelineEventId = program.data?.event_id ?? program.data?.id;
+  const handleClick = (e) => {
+    if (e?.target?.closest?.('.program-item-status-rail, .event-status')) return;
+    if (timelineEventId == null) return;
+    openEvent?.(timelineEventId);
+  };
 
   const { get: friendCountsFor } = useFriendCounts();
   const fc = friendCountsFor(timelineEventId);
@@ -263,6 +268,7 @@ const ProgramItem = ({ program, scrollLeft, openEvent, sheTheyForwardTimeline = 
       <div
         className="program-item-status-rail"
         style={railStyle}
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
         role="presentation"
       >

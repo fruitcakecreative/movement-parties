@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserEvents } from "../../context/UserEventsContext";
+import { normalizeEventId } from "../../utils/eventId";
 
 /**
  * Interested (star) + Attending (check) — one status per event (API enum).
@@ -47,9 +48,9 @@ function EventStatusControls({
     isPending,
   } = useUserEvents();
 
-  const numericEventId = Number(eventId);
-  const status = eventId == null ? null : getStatus(numericEventId);
-  const busy = eventId == null ? false : isPending(numericEventId);
+  const resolvedEventId = normalizeEventId(eventId);
+  const status = resolvedEventId == null ? null : getStatus(resolvedEventId);
+  const busy = resolvedEventId == null ? false : isPending(resolvedEventId);
   const [tapLabel, setTapLabel] = useState({ text: "", kind: "" });
   const tapTimerRef = useRef(null);
 
@@ -69,7 +70,11 @@ function EventStatusControls({
     };
   }, []);
 
-  if (eventId == null) return null;
+  if (resolvedEventId == null) return null;
+
+  const releaseTouchFocus = (e) => {
+    e.currentTarget?.blur?.();
+  };
 
   const onInterested = async (e) => {
     e.preventDefault();
@@ -79,11 +84,13 @@ function EventStatusControls({
       return;
     }
     try {
-      await toggleInterested(numericEventId);
+      await toggleInterested(resolvedEventId);
       onAfterRsvpChange?.();
       triggerTapLabel(interestedOn ? "not interested" : "interested", "interested");
     } catch {
       // Context reverts status on failure.
+    } finally {
+      releaseTouchFocus(e);
     }
   };
 
@@ -95,11 +102,13 @@ function EventStatusControls({
       return;
     }
     try {
-      await toggleAttending(numericEventId);
+      await toggleAttending(resolvedEventId);
       onAfterRsvpChange?.();
       triggerTapLabel(attendingOn ? "not attending" : "attending", "attending");
     } catch {
       // Context reverts status on failure.
+    } finally {
+      releaseTouchFocus(e);
     }
   };
 
