@@ -55,6 +55,43 @@ class Api::UsersController < ApplicationController
     end
   end
 
+  # Same-origin avatar bytes for schedule share canvas (avoids S3/OAuth CORS).
+  def schedule_share_avatar
+    if current_user.avatar.attached?
+      blob = current_user.avatar.blob
+      return send_data(
+        current_user.avatar.download,
+        type: blob.content_type.presence || "image/jpeg",
+        disposition: "inline"
+      )
+    end
+
+    remote = safe_remote_avatar_uri(current_user.picture)
+    unless remote
+      return head :not_found
+    end
+
+    response = Net::HTTP.start(
+      remote.host,
+      remote.port,
+      use_ssl: remote.scheme == "https",
+      open_timeout: 5,
+      read_timeout: 10
+    ) do |http|
+      http.request(Net::HTTP::Get.new(remote))
+    end
+
+    unless response.is_a?(Net::HTTPSuccess)
+      return head :not_found
+    end
+
+    content_type = response.content_type.presence || "image/jpeg"
+    send_data response.body, type: content_type, disposition: "inline"
+  rescue StandardError => e
+    Rails.logger.warn("schedule_share_avatar failed: #{e.class}: #{e.message}")
+    head :not_found
+  end
+
   def show
     render json: current_user_json
   end
@@ -101,6 +138,31 @@ class Api::UsersController < ApplicationController
   end
 
   private
+
+  REMOTE_AVATAR_HOST_SUFFIXES = %w[
+    googleusercontent.com
+    fbcdn.net
+    fbsbx.com
+    facebook.com
+  ].freeze
+
+  def safe_remote_avatar_uri(url)
+    uri = URI.parse(url.to_s.strip)
+    return nil unless uri.is_a?(URI::HTTP) && uri.host.present?
+
+    host = uri.host.downcase
+    return nil if host == "localhost" || host.end_with?(".local")
+    return nil if host.match?(/\A(10\.|127\.|169\.254\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/)
+
+    allowed = REMOTE_AVATAR_HOST_SUFFIXES.any? do |suffix|
+      host == suffix || host.end_with?(".#{suffix}")
+    end
+    return nil unless allowed
+
+    uri
+  rescue URI::InvalidURIError
+    nil
+  end
 
   def current_user_json
     if current_user.authentication_token.blank?

@@ -46,6 +46,7 @@ Rails.application.routes.draw do
     delete "friendships", to: "friendships#destroy"
     resource :user, only: [:show, :update] do
       post :upload_avatar
+      get :schedule_share_avatar
     end
   end
 

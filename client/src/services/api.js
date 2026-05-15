@@ -184,6 +184,14 @@ export const fetchFriendEventRsvps = async (eventId) => {
 };
 
 //user profile info
+/** Avatar bytes for schedule share image (same-origin; avoids canvas CORS). */
+export const fetchScheduleShareAvatarBlob = async () => {
+  const { data } = await api.get('/user/schedule_share_avatar', {
+    responseType: 'blob',
+  });
+  return data;
+};
+
 export const fetchUserInfo = async () => {
   const response = await api.get('/user');
   const data = {

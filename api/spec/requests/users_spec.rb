@@ -65,6 +65,16 @@ RSpec.describe 'Users API', type: :request do
     end
   end
 
+  describe 'GET /api/user/schedule_share_avatar' do
+    it 'returns 404 when user has no avatar source' do
+      user.update!(picture: nil)
+      get '/api/user/schedule_share_avatar', headers: auth_headers
+
+      expect(response).to have_http_status(:not_found)
+    end
+
+  end
+
   describe 'GET /api/users/:id' do
     it 'returns profile_extra for a friend' do
       friend = User.create!(

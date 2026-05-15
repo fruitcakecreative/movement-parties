@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { fetchScheduleShareAvatarBlob } from '../services/api';
 import {
-  downloadScheduleShareBlob,
+  deliverScheduleShareBlob,
   generateScheduleShareImage,
 } from '../utils/generateScheduleShareImage';
 import { hasAnyProfileExtra } from '../utils/profileExtraInfo';
@@ -33,11 +34,17 @@ function ProfileScheduleShareButton({
         eventsByDay,
         userName,
         avatarUrl,
+        fetchAvatarBlob: fetchScheduleShareAvatarBlob,
         profileExtra: extraForImage,
         timeZone,
       });
-      downloadScheduleShareBlob(blob);
-      trackPlausible('Schedule Share Image', { action: 'download' });
+      const delivery = await deliverScheduleShareBlob(
+        blob,
+        `${userName || 'My'} Movement Schedule`
+      );
+      trackPlausible('Schedule Share Image', {
+        action: delivery === 'shared' ? 'share' : 'download',
+      });
     } catch (err) {
       console.error(err);
       setError('Could not create image. Try again.');

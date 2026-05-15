@@ -139,7 +139,23 @@ export function scheduleShareTitle(userName) {
   return `${possessive} Movement Schedule`;
 }
 
-function loadAvatarImage(url) {
+function loadImageFromBlob(blob) {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(img);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('Could not decode avatar'));
+    };
+    img.src = objectUrl;
+  });
+}
+
+function loadAvatarImageFromUrl(url) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
@@ -147,6 +163,42 @@ function loadAvatarImage(url) {
     img.onerror = () => reject(new Error('Could not load avatar'));
     img.src = url;
   });
+}
+
+/** Load avatar for canvas — API proxy first, then direct URL / fetch fallback. */
+export async function loadAvatarForCanvas(avatarUrl, fetchAvatarBlob) {
+  if (typeof fetchAvatarBlob === 'function') {
+    try {
+      const blob = await fetchAvatarBlob();
+      if (blob && blob.size > 0) {
+        return await loadImageFromBlob(blob);
+      }
+    } catch {
+      /* fall through */
+    }
+  }
+
+  if (!avatarUrl) return null;
+
+  try {
+    return await loadAvatarImageFromUrl(avatarUrl);
+  } catch {
+    /* fall through */
+  }
+
+  try {
+    const res = await fetch(avatarUrl, { mode: 'cors', credentials: 'omit' });
+    if (res.ok) {
+      const blob = await res.blob();
+      if (blob.size > 0) {
+        return await loadImageFromBlob(blob);
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+
+  return null;
 }
 
 function eventTimeLabel(event, timeZone) {
@@ -897,6 +949,7 @@ export async function generateScheduleShareImage({
   eventsByDay,
   userName,
   avatarUrl,
+  fetchAvatarBlob,
   profileExtra,
   timeZone,
 }) {
@@ -910,14 +963,7 @@ export async function generateScheduleShareImage({
   const promo = scheduleShareSiteLabel();
   const cellW = (CANVAS_WIDTH - PAD * 2 - GUTTER) / 2;
 
-  let avatarImage = null;
-  if (avatarUrl) {
-    try {
-      avatarImage = await loadAvatarImage(avatarUrl);
-    } catch {
-      avatarImage = null;
-    }
-  }
+  const avatarImage = await loadAvatarForCanvas(avatarUrl, fetchAvatarBlob);
 
   const profileParts = partitionProfileExtraForShare(profileExtra);
   const hasAvatar = !!avatarImage;
@@ -985,6 +1031,36 @@ export function downloadScheduleShareBlob(blob, filename = 'my-schedule.png') {
   a.click();
   a.remove();
   window.setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+/** Mobile browsers: share sheet → Save Image lands in Photos better than <a download>. */
+export function prefersNativeShareForScheduleImage() {
+  if (typeof navigator === 'undefined' || !navigator.share) return false;
+  const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if (!mobile) return false;
+  try {
+    const probe = new File([], 'schedule.png', { type: 'image/png' });
+    return !!navigator.canShare?.({ files: [probe] });
+  } catch {
+    return false;
+  }
+}
+
+export async function deliverScheduleShareBlob(blob, title) {
+  const file = new File([blob], 'my-schedule.png', { type: 'image/png' });
+  if (prefersNativeShareForScheduleImage() && navigator.canShare?.({ files: [file] })) {
+    try {
+      await navigator.share({
+        files: [file],
+        title: title || 'My Movement Schedule',
+      });
+      return 'shared';
+    } catch (err) {
+      if (err?.name === 'AbortError') return 'cancelled';
+    }
+  }
+  downloadScheduleShareBlob(blob);
+  return 'downloaded';
 }
 
 export async function shareScheduleShareBlob(blob, title) {
