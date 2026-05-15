@@ -3,7 +3,8 @@
  * @param {{ attending?: object[], interested?: object[] }} userEvents
  * @returns { [string, { label: string, attending: object[], interested: object[] }][] }
  */
-function coalesceEventList(raw, ...keys) {
+/** Resolves Rails `group_by(&:status)` payloads that use either name keys or enum ordinals (`"0"` / `"1"`). */
+export function coalesceEventList(raw, ...keys) {
   if (!raw || typeof raw !== 'object') return [];
   for (const k of keys) {
     const v = raw[k];

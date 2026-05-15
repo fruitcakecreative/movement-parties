@@ -4,6 +4,7 @@ import { loginWithFacebook } from '../../services/api';
 
 /**
  * Optional: set on Netlify to the exact origin you whitelist in Meta (e.g. https://movementparties.com).
+ * Must match “Valid OAuth Redirect URIs” for each path you use (/login, /signup) when Strict Mode is on.
  * Avoids www vs apex mismatch on /signup and /login when Strict Mode redirect URIs are enabled.
  * Omit on localhost so dev still uses the current origin.
  */
@@ -37,27 +38,8 @@ function redirectUriFromPathname(pathname) {
 const FB_APP_ID =
   process.env.REACT_APP_FB_APP_ID || process.env.REACT_APP_FACEBOOK_APP_ID || '';
 
-/** Graph `user_friends`: only friends who also use this same Meta app (not your whole FB friends list). */
-const FB_LOGIN_SCOPE = 'public_profile,email,user_friends';
-
-/**
- * One successful `/me/friends` call satisfies Meta’s “API test” for `user_friends` while Facebook Login is in testing.
- * Uses the session from the login that just completed; does not block sign-in if it fails.
- */
-function callFacebookAppFriendsList() {
-  if (typeof window === 'undefined' || !window.FB?.api) {
-    return Promise.resolve(null);
-  }
-  return new Promise((resolve) => {
-    window.FB.api('/me/friends', { fields: 'id,name' }, (res) => {
-      if (res?.error) {
-        // eslint-disable-next-line no-console
-        console.warn('Facebook /me/friends:', res.error);
-      }
-      resolve(res);
-    });
-  });
-}
+/** Login scopes only — `user_friends` is not valid on Facebook Login for most apps (Meta rejects it in the dialog). */
+const FB_LOGIN_SCOPE = 'public_profile,email';
 
 function FacebookLoginButton({
   textButton = 'Continue with Facebook',
@@ -83,7 +65,7 @@ function FacebookLoginButton({
 
     if (response?.status === 'unknown') {
       onFacebookNotice?.(
-        'Facebook could not complete sign-in. If the Meta app is still in development, only invited testers can use this—or use email below.'
+        'Facebook could not complete sign-in. Add this site’s URL under Meta → App → Facebook Login → Settings (Valid OAuth Redirect URIs). If the app is still in Development mode, only invited testers can sign in—or use email below.'
       );
       // eslint-disable-next-line no-console
       console.error('Facebook login cancelled or failed.');
@@ -96,8 +78,6 @@ function FacebookLoginButton({
       );
       return;
     }
-
-    await callFacebookAppFriendsList();
 
     const userData = {
       name: response.name,

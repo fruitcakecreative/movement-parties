@@ -12,6 +12,7 @@ import {
   saveUserEventStatus,
   deleteUserEventStatus,
 } from "../services/api";
+import { coalesceEventList } from "../utils/profileEventsByDay";
 
 function readHasAuthToken() {
   try {
@@ -22,6 +23,18 @@ function readHasAuthToken() {
   } catch {
     return false;
   }
+}
+
+/** Stable map key — JSON / DOM can give ids as numbers or digit strings. */
+function statusMapKey(eventId) {
+  if (eventId == null || eventId === "") return null;
+  if (typeof eventId === "number") {
+    return Number.isFinite(eventId) ? eventId : null;
+  }
+  const s = String(eventId).trim();
+  if (s === "" || s === "null" || s === "undefined") return null;
+  if (/^\d+$/.test(s)) return Number(s);
+  return s;
 }
 
 const UserEventsContext = createContext(null);
@@ -39,11 +52,16 @@ export function UserEventsProvider({ children }) {
     try {
       const data = await fetchUserEvents();
       const map = {};
-      (data.interested || []).forEach((e) => {
-        if (e?.id != null) map[e.id] = "interested";
+      // Same shape as profile: API may use `interested`/`attending` or enum keys `"0"`/`"1"`.
+      const interestedList = coalesceEventList(data, "interested", "0", 0);
+      const attendingList = coalesceEventList(data, "attending", "1", 1);
+      interestedList.forEach((e) => {
+        const k = statusMapKey(e?.id);
+        if (k != null) map[k] = "interested";
       });
-      (data.attending || []).forEach((e) => {
-        if (e?.id != null) map[e.id] = "attending";
+      attendingList.forEach((e) => {
+        const k = statusMapKey(e?.id);
+        if (k != null) map[k] = "attending";
       });
       setStatusByEventId(map);
     } catch {
@@ -55,14 +73,26 @@ export function UserEventsProvider({ children }) {
     refresh();
   }, [refresh, location.pathname]);
 
+  // iOS Safari: restore from back-forward cache can leave React state stale while session is fine.
+  useEffect(() => {
+    const onPageShow = (e) => {
+      if (e.persisted && readHasAuthToken()) refresh();
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, [refresh]);
+
   const setBusy = useCallback((eventId, isBusy) => {
-    setPending((p) => ({ ...p, [eventId]: isBusy }));
+    const k = statusMapKey(eventId);
+    if (k == null) return;
+    setPending((p) => ({ ...p, [k]: isBusy }));
   }, []);
 
   const getStatus = useCallback(
     (eventId) => {
-      if (eventId == null) return null;
-      return statusByEventId[eventId] || null;
+      const k = statusMapKey(eventId);
+      if (k == null) return null;
+      return statusByEventId[k] ?? null;
     },
     [statusByEventId]
   );
@@ -75,22 +105,23 @@ export function UserEventsProvider({ children }) {
 
   const setStatus = useCallback(
     async (eventId, status) => {
-      if (eventId == null) return;
-      const prev = statusByEventId[eventId];
-      setStatusByEventId((s) => ({ ...s, [eventId]: status }));
-      setBusy(eventId, true);
+      const k = statusMapKey(eventId);
+      if (k == null) return;
+      const prev = statusByEventId[k];
+      setStatusByEventId((s) => ({ ...s, [k]: status }));
+      setBusy(k, true);
       try {
         await saveUserEventStatus(eventId, status);
       } catch {
         setStatusByEventId((s) => {
           const n = { ...s };
-          if (prev) n[eventId] = prev;
-          else delete n[eventId];
+          if (prev) n[k] = prev;
+          else delete n[k];
           return n;
         });
         throw new Error("Could not save");
       } finally {
-        setBusy(eventId, false);
+        setBusy(k, false);
       }
     },
     [statusByEventId, setBusy]
@@ -98,23 +129,24 @@ export function UserEventsProvider({ children }) {
 
   const clearStatus = useCallback(
     async (eventId) => {
-      if (eventId == null) return;
-      const prev = statusByEventId[eventId];
+      const k = statusMapKey(eventId);
+      if (k == null) return;
+      const prev = statusByEventId[k];
       setStatusByEventId((s) => {
         const n = { ...s };
-        delete n[eventId];
+        delete n[k];
         return n;
       });
-      setBusy(eventId, true);
+      setBusy(k, true);
       try {
         await deleteUserEventStatus(eventId);
       } catch {
         if (prev) {
-          setStatusByEventId((s) => ({ ...s, [eventId]: prev }));
+          setStatusByEventId((s) => ({ ...s, [k]: prev }));
         }
         throw new Error("Could not remove");
       } finally {
-        setBusy(eventId, false);
+        setBusy(k, false);
       }
     },
     [statusByEventId, setBusy]
@@ -122,7 +154,9 @@ export function UserEventsProvider({ children }) {
 
   const toggleInterested = useCallback(
     async (eventId) => {
-      const cur = statusByEventId[eventId];
+      const k = statusMapKey(eventId);
+      if (k == null) return;
+      const cur = statusByEventId[k];
       if (cur === "interested") await clearStatus(eventId);
       else await setStatus(eventId, "interested");
     },
@@ -131,7 +165,9 @@ export function UserEventsProvider({ children }) {
 
   const toggleAttending = useCallback(
     async (eventId) => {
-      const cur = statusByEventId[eventId];
+      const k = statusMapKey(eventId);
+      if (k == null) return;
+      const cur = statusByEventId[k];
       if (cur === "attending") await clearStatus(eventId);
       else await setStatus(eventId, "attending");
     },
@@ -145,7 +181,10 @@ export function UserEventsProvider({ children }) {
       toggleAttending,
       refresh,
       isAuthenticated,
-      isPending: (eventId) => !!pending[eventId],
+      isPending: (eventId) => {
+        const k = statusMapKey(eventId);
+        return k != null && !!pending[k];
+      },
     }),
     [
       getStatus,
