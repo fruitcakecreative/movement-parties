@@ -55,7 +55,7 @@ function ProfileScheduleShareButton({
   if (!hasEvents) return null;
 
   return (
-    <div className="profile-schedule-share">
+    <div className="profile-schedule-share hide">
       <p className="profile-schedule-share__label">Share your lineup</p>
       <div className="profile-schedule-share__actions">
         <button
