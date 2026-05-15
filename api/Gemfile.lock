@@ -463,7 +463,7 @@ DEPENDENCIES
   image_processing (~> 1.2)
   omniauth-facebook (~> 10.0)
   pg (~> 1.1)
-  postmark-rails
+  postmark-rails (~> 0.22)
   puma (>= 5.0)
   rack-attack
   rack-cors

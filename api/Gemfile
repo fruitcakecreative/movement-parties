@@ -66,4 +66,4 @@ gem "rspec-rails", "~> 8.0", :groups => [:development, :test]
 gem "honeybadger", "~> 5.28"
 
 # Transactional email (password reset, etc.) — https://github.com/ActiveCampaign/postmark-rails
-gem "postmark-rails", group: :production
+gem "postmark-rails", "~> 0.22", group: :production

@@ -33,16 +33,12 @@ class Users::PasswordsController < Devise::PasswordsController
     self.resource = resource_class.reset_password_by_token(resource_params)
 
     if resource.errors.empty?
+      ensure_authentication_token_for_spa!(resource)
       if Devise.sign_in_after_reset_password
         begin
           sign_in(resource_name, resource, remember: true)
         rescue StandardError => e
-          # Password is already persisted; session/cookie sign-in can fail cross-origin.
           log_password_mail_failure("update/sign_in", resource.id, e)
-          return render json: {
-            message: "Your password has been changed.",
-            user: resource.slice(:id, :email, :username, :authentication_token)
-          }, status: :ok
         end
       end
       render json: {
@@ -68,6 +64,13 @@ class Users::PasswordsController < Devise::PasswordsController
   end
 
   private
+
+  def ensure_authentication_token_for_spa!(user)
+    return if user.authentication_token.present?
+
+    user.update_columns(authentication_token: SecureRandom.hex(20), updated_at: Time.current)
+    user.reload
+  end
 
   def log_password_mail_failure(context, user_id, error)
     Rails.logger.error(

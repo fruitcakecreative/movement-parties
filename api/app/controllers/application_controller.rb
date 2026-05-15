@@ -6,7 +6,7 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
   skip_before_action :verify_authenticity_token, if: -> { request.path.start_with?("/api") }
 
-  # SPA often runs on a different origin than the API; session cookies are unreliable cross-origin.
+  # SPA is on another origin; session cookies are unreliable cross-origin.
   # Clients send Authorization: Bearer <authentication_token> (see login/signup JSON).
   prepend_before_action :authenticate_user_from_bearer_token
 

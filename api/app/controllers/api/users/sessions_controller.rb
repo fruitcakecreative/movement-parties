@@ -1,9 +1,9 @@
-include ActionController::Flash
-include ActionController::Cookies
-include ActionController::MimeResponds
-
 class Api::Users::SessionsController < Devise::SessionsController
+  include ActionController::Flash
+  include ActionController::Cookies
+  include ActionController::MimeResponds
   include ActionController::RequestForgeryProtection
+
   protect_from_forgery with: :exception
   # JSON API + SPA (cookies via CORS); same as ApplicationController for /api
   skip_before_action :verify_authenticity_token, if: -> { request.path.start_with?("/api") }
@@ -22,8 +22,7 @@ class Api::Users::SessionsController < Devise::SessionsController
         id: resource.id,
         email: resource.email,
         username: resource.username,
-        authentication_token: resource.authentication_token,
-        # avatar_url: resource.avatar_url
+        authentication_token: resource.authentication_token
       }
     }
   end
@@ -33,17 +32,13 @@ class Api::Users::SessionsController < Devise::SessionsController
     render json: { message: "Logged out" }, status: :ok
   end
 
-
   private
 
   def custom_respond_with(resource)
-    render json: { user: { id: resource.id, email: resource.email }}
+    render json: { user: { id: resource.id, email: resource.email } }
   end
 
   def respond_to_on_destroy
-    render json: { message: current_user ? 'Logged out.' : 'Already logged out.' }, status: (current_user ? :ok : :unauthorized)
+    render json: { message: current_user ? "Logged out." : "Already logged out." }, status: (current_user ? :ok : :unauthorized)
   end
-
-
-
 end

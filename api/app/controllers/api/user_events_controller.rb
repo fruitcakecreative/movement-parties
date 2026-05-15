@@ -1,11 +1,9 @@
 class Api::UserEventsController < ApplicationController
-  before_action :authenticate_user!, only: [:create, :destroy]
-  before_action :set_event, only: [:create, :destroy]
+  before_action :authenticate_user!
+  before_action :set_event, only: [:create]
 
   # GET /api/users/:user_id/user_events — only for self or accepted friends
   def for_user
-    return render json: {}, status: :unauthorized unless current_user
-
     target_id = Integer(params[:user_id], exception: false)
     return render json: { error: "Not found" }, status: :not_found unless target_id
 
@@ -17,53 +15,24 @@ class Api::UserEventsController < ApplicationController
     end
 
     events = target.user_events.includes(event: [:venue, :genres, :artists])
-    grouped = events.group_by(&:status).transform_values do |user_events|
-      user_events.map do |ue|
-        ue.event.as_json(
-          include: {
-            venue: {},
-            genres: {},
-            artists: {}
-          },
-          methods: [:formatted_start_time, :formatted_end_time]
-        ).merge(status: ue.status)
-      end
-    end
-
-    render json: grouped, status: :ok
+    render json: grouped_user_events_json(events), status: :ok
   end
 
   def index
-    return render json: {}, status: :unauthorized unless current_user
-    events = current_user.user_events.includes(:event)
-    grouped = events.group_by(&:status).transform_values do |user_events|
-      user_events.map do |ue|
-        ue.event.as_json(
-          include: {
-            venue: {},
-            genres: {},
-            artists: {}
-          },
-          methods: [:formatted_start_time, :formatted_end_time]
-        ).merge(status: ue.status)
-      end
-    end
-
-    render json: grouped, status: :ok
+    events = current_user.user_events.includes(event: [:venue, :genres, :artists])
+    render json: grouped_user_events_json(events), status: :ok
   end
-
 
   def create
     Rails.logger.debug "Create UserEvent Params: #{params.inspect}"
     status = params.dig(:user_event, :status)
     status = status.downcase
     unless %w[attending interested].include?(status)
-      return render json: { error: 'Invalid status', received: status }, status: :unprocessable_entity
+      return render json: { error: "Invalid status", received: status }, status: :unprocessable_entity
     end
 
     user_event = current_user.user_events.find_or_initialize_by(event: @event)
     user_event.assign_attributes(status: status.to_sym)
-
 
     if user_event.save
       render json: {
@@ -74,23 +43,25 @@ class Api::UserEventsController < ApplicationController
       Rails.logger.error user_event.errors.full_messages
       render json: { errors: user_event.errors.full_messages }, status: :unprocessable_entity
     end
-
   end
 
-  def destroy
-    user_event = current_user.user_events.find_by(event: @event)
+  # DELETE /api/user_events — body: { user_event: { event_id } } (SPA client)
+  def destroy_by_params
+    event_id = params.dig(:user_event, :event_id).presence || params[:event_id]
+    return render json: { error: "Event not found" }, status: :not_found if event_id.blank?
+
+    event = Event.find_by(id: event_id)
+    return render json: { error: "Event not found" }, status: :not_found unless event
+
+    user_event = current_user.user_events.find_by(event: event)
     if user_event&.destroy
-      render json: { message: 'Event removed from profile' }, status: :ok
+      render json: { message: "Event removed from profile" }, status: :ok
     else
-      render json: { error: 'Event not found' }, status: :not_found
+      render json: { error: "Event not found" }, status: :not_found
     end
   end
 
   def friend_attendees
-    unless current_user
-      return render json: { error: "Unauthorized" }, status: :unauthorized
-    end
-
     eid = Integer(params[:event_id], exception: false)
     return render json: { error: "Not found" }, status: :not_found unless eid
 
@@ -98,12 +69,7 @@ class Api::UserEventsController < ApplicationController
     render json: ordered.map { |u| friend_attendee_json(u) }
   end
 
-  # GET /api/user_events/:event_id/friend_rsvps — accepted friends attending + interested (detail UI)
   def friend_rsvps
-    unless current_user
-      return render json: { error: "Unauthorized" }, status: :unauthorized
-    end
-
     eid = Integer(params[:event_id], exception: false)
     return render json: { error: "Not found" }, status: :not_found unless eid
 
@@ -113,12 +79,7 @@ class Api::UserEventsController < ApplicationController
     render json: { attending: attending, interested: interested }, status: :ok
   end
 
-  # GET /api/user_events/:event_id/friend_counts — accepted friends with this event saved (by status)
   def friend_counts
-    unless current_user
-      return render json: { error: "Unauthorized" }, status: :unauthorized
-    end
-
     event_id = params[:event_id].presence
     return render json: { error: "Not found" }, status: :not_found unless event_id
 
@@ -131,16 +92,11 @@ class Api::UserEventsController < ApplicationController
 
     render json: {
       friends_attending: attending,
-      friends_interested: interested,
+      friends_interested: interested
     }, status: :ok
   end
 
-  # POST /api/user_events/friend_counts_batch body: { event_ids: [1, 2, 3] }
   def friend_counts_batch
-    unless current_user
-      return render json: { error: "Unauthorized" }, status: :unauthorized
-    end
-
     raw_ids = params[:event_ids]
     ids = Array(raw_ids).map { |x| Integer(x, exception: false) }.compact.uniq
     ids = ids.first(500)
@@ -168,10 +124,28 @@ class Api::UserEventsController < ApplicationController
     render json: { counts: result }, status: :ok
   end
 
-
   private
 
-  # Preserves UserEvent row order within status; loads avatars in one query.
+  def grouped_user_events_json(events_relation)
+    events_relation.group_by(&:status).transform_values do |user_events|
+      user_events.map do |ue|
+        ue.event.as_json(
+          include: {
+            venue: {},
+            genres: {},
+            artists: {}
+          },
+          methods: [:formatted_start_time, :formatted_end_time]
+        ).merge(status: ue.status)
+      end
+    end
+  end
+
+  def accepted_friendship?(a, b)
+    Friendship.exists?(user: a, friend: b, status: "accepted") ||
+      Friendship.exists?(user: b, friend: a, status: "accepted")
+  end
+
   def ordered_friend_users_for_event(event_id, status)
     friend_ids = current_user.friends.pluck(:id)
     return [] if friend_ids.empty?
@@ -188,16 +162,11 @@ class Api::UserEventsController < ApplicationController
   def friend_attendee_json(user)
     {
       id: user.id,
+      username: user.username,
       name: user.name,
-      email: user.email,
       avatar_url: user.avatar.attached? ? url_for(user.avatar) : nil,
-      picture: user.picture.presence,
+      picture: user.picture.presence
     }
-  end
-
-  def accepted_friendship?(a, b)
-    Friendship.exists?(user: a, friend: b, status: "accepted") ||
-      Friendship.exists?(user: b, friend: a, status: "accepted")
   end
 
   def set_event

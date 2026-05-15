@@ -1,6 +1,6 @@
 class Api::UsersController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create_from_facebook]
-  before_action :authenticate_user!, except: [:create_from_facebook]  # Skip for Facebook login creation
+  before_action :authenticate_user!, except: [:create_from_facebook] # Skip for Facebook login creation
 
   # This method handles the data from Facebook login (when user is not logged in)
   def create_from_facebook
@@ -19,28 +19,29 @@ class Api::UsersController < ApplicationController
       Rails.logger.debug "User updated: #{@user.inspect}"
     end
 
-     @user.username = @user.email if @user.username.blank?
+    @user.username = @user.email if @user.username.blank?
 
     if @user.save
       sign_in(:user, @user, remember: true)
       warden.set_user(@user, scope: :user, store: true)
       Rails.logger.debug "SIGNED IN USER: #{current_user&.email}"
       Rails.logger.debug "SESSION AFTER SIGN IN: #{session.to_hash.inspect}"
+      token = @user.authentication_token
       render json: {
-        message: 'User created/updated from Facebook',
+        message: "User created/updated from Facebook",
         user: {
           id: @user.id,
           name: @user.name,
           email: @user.email,
           username: @user.username,
           picture: @user.picture,
-          authentication_token: @user.authentication_token,
-          token: @user.authentication_token
+          token: token,
+          authentication_token: token
         }
       }, status: :created
     else
       Rails.logger.debug "Errors: #{@user.errors.full_messages}"
-      render json: { error: 'Failed to save user data' }, status: :unprocessable_entity
+      render json: { error: "Failed to save user data" }, status: :unprocessable_entity
     end
   end
 
@@ -52,7 +53,6 @@ class Api::UsersController < ApplicationController
       render json: { error: "No file uploaded" }, status: :unprocessable_entity
     end
   end
-
 
   def show
     render json: current_user_json
@@ -107,9 +107,10 @@ class Api::UsersController < ApplicationController
     {
       id: user.id,
       name: user.name,
-      email: user.email,
-      avatar_url: user.avatar.attached? ? url_for(user.avatar) : nil,
+      username: user.username,
+      email: is_self ? user.email : nil,
       picture: user.picture.presence,
+      avatar_url: user.avatar.attached? ? url_for(user.avatar) : nil,
       is_self: is_self,
       is_friend: is_friend
     }

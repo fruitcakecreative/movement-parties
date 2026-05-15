@@ -1,6 +1,6 @@
-include Devise::Controllers::Helpers
-
 class Api::FriendshipsController < ApplicationController
+  include Devise::Controllers::Helpers
+
   before_action :authenticate_user!
 
   def index
@@ -22,7 +22,7 @@ class Api::FriendshipsController < ApplicationController
       .where.not(id: current_user.id)
       .where(
         "username ILIKE :q OR email ILIKE :q OR name ILIKE :q",
-        q: "%#{q}%"
+        q: "%#{ActiveRecord::Base.sanitize_sql_like(q)}%"
       )
       .limit(20)
       .to_a
@@ -79,7 +79,6 @@ class Api::FriendshipsController < ApplicationController
   end
 
   # Accepted friends of `user_id`. Viewer must be that user or an accepted friend.
-  # Omits the viewer from the list. Payload uses name + email (no username).
   def friends_of_user
     uid = Integer(params[:user_id], exception: false)
     return render json: { error: "Not found" }, status: :not_found unless uid
@@ -127,6 +126,7 @@ class Api::FriendshipsController < ApplicationController
     {
       id: u.id,
       name: u.name,
+      username: u.username,
       email: u.email,
       avatar_url: u.avatar.attached? ? url_for(u.avatar) : nil,
       picture: u.picture.presence,
@@ -137,6 +137,7 @@ class Api::FriendshipsController < ApplicationController
   def serialize_friend_user(u)
     {
       id: u.id,
+      username: u.username,
       name: u.name,
       email: u.email,
       avatar_url: u.avatar.attached? ? url_for(u.avatar) : nil,
@@ -144,7 +145,6 @@ class Api::FriendshipsController < ApplicationController
     }
   end
 
-  # For search results: relationship from current_user to this user_id.
   def friendship_status_with_viewer(user_ids)
     return {} if user_ids.blank?
 
