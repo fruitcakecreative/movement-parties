@@ -44,9 +44,19 @@ function EventsIntro({
         )}
         <p className="mb-lg" style={{ lineHeight: 1.45, fontSize: '0.9rem', opacity: 0.88 }}>
           Welcome! This website is a community-driven, unbiased, all-inclusive event listing hub for events happening in Detroit on Memorial Day weekend. 
-          I auto-import events from Resident Advisor twice a day, otherwise everything is manually entered by me. If you see any wrong information or something is missing, please reach out via my socials below.
+          I auto-import events from Resident Advisor twice a day, otherwise everything is manually entered by me. If you see any wrong information or something is missing, please reach out via socials.
         </p>
-        <h4 className="mini-heading">
+        <div className="mb-sm">
+          <a
+            className="button mb-sm"
+            href="https://instagram.com/movementparties"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i className="fa-brands fa-instagram" aria-hidden /> Follow @movementparties on Insta
+          </a>
+        </div>
+        <h4 className="mini-heading mt-lg">
           What&apos;s new{' '}
           <i className="fa-solid fa-circle-info" aria-hidden />
         </h4>

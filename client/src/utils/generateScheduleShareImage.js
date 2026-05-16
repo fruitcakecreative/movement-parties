@@ -314,18 +314,18 @@ function slotHasEvents(slot) {
 }
 
 /** Left accent bar beside weekday + date — shared with drawDayHeading for alignment */
-const DAY_ACCENT = { insetX: 16, top: 20, width: 4, height: 26 };
+const DAY_ACCENT = { insetX: 20, top: 22, width: 4, height: 26 };
 const DAY_TEXT_X = DAY_ACCENT.insetX + DAY_ACCENT.width + 10;
 /** Nudge heading font — visually centers better vs the accent bar */
 const DAY_HEADING_TEXT_OFFSET_Y = 3;
 
 const LAYOUT = {
-  cellPad: 18,
-  dayHeader: 56,
-  dayToSectionsGap: 20,
-  sectionGap: 12,
+  cellPad: 24,
+  dayHeader: 54,
+  dayToSectionsGap: 16,
+  sectionGap: 14,
   sectionHeading: 24,
-  sectionPad: 4,
+  sectionPad: 6,
   moreLine: 28,
 };
 
@@ -894,7 +894,11 @@ function drawQuadrant(ctx, theme, x, y, w, h, label, slot) {
   if (!hasEvents) {
     ctx.fillStyle = theme.muted;
     ctx.font = '400 20px system-ui, sans-serif';
-    ctx.fillText('—', x + DAY_TEXT_X, y + 96);
+    ctx.fillText(
+      '—',
+      x + DAY_TEXT_X,
+      y + DAY_ACCENT.top + DAY_ACCENT.height / 2 + DAY_HEADING_TEXT_OFFSET_Y
+    );
     return;
   }
 
