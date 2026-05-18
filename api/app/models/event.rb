@@ -42,6 +42,7 @@ class Event < ApplicationRecord
     %w[upcoming all].each do |mode|
       Rails.cache.delete("events-v8:#{city_key}:#{mode}")
       Rails.cache.delete("events-v9:#{city_key}:#{mode}")
+      Rails.cache.delete("events-v10:#{city_key}:#{mode}")
     end
   end
 

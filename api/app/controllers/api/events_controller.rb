@@ -5,7 +5,7 @@ class Api::EventsController < ApplicationController
   def index
     city = current_city_key
     include_past = city == "mmw" && request.headers["X-Include-Past-Events"].to_s == "1"
-    cache_key = "events-v9:#{city}:#{include_past ? 'all' : 'upcoming'}"
+    cache_key = "events-v10:#{city}:#{include_past ? 'all' : 'upcoming'}"
 
     result = Rails.cache.fetch(cache_key, expires_in: 5.minutes) do
       scope = Event
@@ -94,6 +94,8 @@ class Api::EventsController < ApplicationController
       event_json = {
         id:                   event.id,
         title:                event.title,
+        short_title:          event.short_title,
+        even_shorter_title:   event.even_shorter_title,
         created_at:           event.created_at,
         updated_at:           event.updated_at,
         date:                 event.date,
@@ -101,13 +103,24 @@ class Api::EventsController < ApplicationController
         end_time:             event.end_time,
         description:          event.description,
         event_url:            event.event_url,
-        ticket_url:           event.try(:ticket_url),
-        ra_url:               event.try(:ra_url),
-        dice_url:             event.try(:dice_url),
+        ticket_url:           event.ticket_url,
+        ticket_price:         event.ticket_price,
+        ticket_tier:          event.ticket_tier,
+        ticket_wave:          event.ticket_wave,
+        free_event:           event.free_event,
+        ra_url:               event.ra_url,
+        dice_url:             event.dice_url,
+        ra_has_ticketing:     event.ra_has_ticketing,
+        ra_is_free_ticketing: event.ra_is_free_ticketing,
+        ra_ticket_status:     event.ra_ticket_status,
+        ra_ticket_on_sale_at: event.ra_ticket_on_sale_at,
         source:               event.source,
         city_key:             event.city_key,
-        bg_color:             event.try(:bg_color),
-        font_color:           event.try(:font_color),
+        age:                  event.age,
+        attending_count:      event.attending_count,
+        event_image_url:      event.event_image_url,
+        bg_color:             event.bg_color,
+        font_color:           event.font_color,
         formatted_start_time: event.formatted_start_time,
         formatted_end_time:   event.formatted_end_time,
         poster_url:           poster_url_for(event),
