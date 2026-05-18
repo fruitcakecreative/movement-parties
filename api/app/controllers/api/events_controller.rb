@@ -146,7 +146,6 @@ class Api::EventsController < ApplicationController
       bg_color:              venue.bg_color,
       font_color:            venue.font_color,
       subheading:            venue.subheading,
-      source:                venue.source,
       parent_venue_id:       venue.parent_venue_id,
       logo_url:              logo_url_for(venue),
       venue_ids_for_events:  venue_ids_for_events_for(venue),
