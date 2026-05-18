@@ -3,44 +3,40 @@ class Api::EventsController < ApplicationController
   before_action :set_current_city_key
 
   def index
-    request.env["action_dispatch.request_start_time"] = Time.now
-
     city = current_city_key
     include_past = city == "mmw" && request.headers["X-Include-Past-Events"].to_s == "1"
     cache_key = "events-v8:#{city}:#{include_past ? 'all' : 'upcoming'}"
 
-    events = Rails.cache.fetch(cache_key, expires_in: 5.minutes) do
-      scope = Event.where(city_key: city)
-                   .includes(:genres, :artists, venue: [:parent_venue, :child_venues])
+    result = Rails.cache.fetch(cache_key, expires_in: 5.minutes) do
+      scope = Event
+        .where(city_key: city)
+        .includes(
+          :genres,
+          :artists,
+          logo_attachment: :blob,                         # event poster_url
+          venue: [
+            :parent_venue,
+            { child_venues: { logo_attachment: :blob } }, # child venue logo_url
+            logo_attachment: :blob                        # venue logo_url
+          ]
+        )
+
       scope = scope.not_past unless include_past
-      scope.order(start_time: :asc, end_time: :asc)
-           .as_json(
-             include: {
-               genres: { only: [:id, :name, :short_name, :hex_color, :font_color] },
-               artists: { only: [:id, :name, :pronouns] },
-               venue: {
-                 methods: [:logo_url, :venue_ids_for_events, :display_venue_for_json],
-                 only: [
-                   :id, :name, :age, :image_filename, :address, :location,
-                   :venue_url, :description, :distance, :serves_alcohol,
-                   :venue_type, :additional_images, :bg_color, :font_color, :subheading, :source,
-                   :parent_venue_id
-                 ]
-               }
-             },
-             methods: [:formatted_start_time, :formatted_end_time, :top_artists, :poster_url]
-           )
+      events = scope.order(start_time: :asc, end_time: :asc).to_a
+
+      {
+        events: serialize_events(events),
+        last_updated: events.map(&:updated_at).max,
+        past_count: Event.where(city_key: city).past_for_list.count
+      }
     end
 
-    past_count = Event.where(city_key: city).past_for_list.count
-
-    Rails.logger.info("[RAILS] Completed Api::EventsController#index city=#{city} events=#{events.length} in #{(Time.now - request.env["action_dispatch.request_start_time"]) * 1000}ms")
     render json: {
-      events: events,
+      events: result[:events],
       meta: {
-        last_updated: Event.where(city_key: city).maximum(:updated_at),
-        total_count: events.size,
-        past_count: past_count
+        last_updated: result[:last_updated],
+        total_count: result[:events].size,
+        past_count: result[:past_count]
       }
     }
   end
@@ -52,13 +48,12 @@ class Api::EventsController < ApplicationController
     )
   end
 
-  # Public: how many users saved this event as interested / attending (not RA counts).
   def rsvp_totals
     interested = UserEvent.where(event_id: @event.id, status: :interested).count
-    attending = UserEvent.where(event_id: @event.id, status: :attending).count
+    attending  = UserEvent.where(event_id: @event.id, status: :attending).count
     render json: {
       app_interested_count: interested,
-      app_attending_count: attending,
+      app_attending_count:  attending
     }, status: :ok
   end
 
@@ -79,18 +74,152 @@ class Api::EventsController < ApplicationController
       Event.clear_public_index_cache!(@event.city_key)
       render json: @event
     else
-      render json: { errors: @event.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: event.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   def destroy
     city = @event.city_key
     @event.destroy
-      Event.clear_public_index_cache!(city)
+    Event.clear_public_index_cache!(city)
     head :no_content
   end
 
   private
+
+  def serialize_events(events)
+    events.map do |event|
+      venue = event.venue
+
+      event_json = {
+        id:                   event.id,
+        title:                event.title,
+        date:                 event.date,
+        start_time:           event.start_time,
+        end_time:             event.end_time,
+        description:          event.description,
+        event_url:            event.event_url,
+        ticket_url:           event.try(:ticket_url),
+        ra_url:               event.try(:ra_url),
+        dice_url:             event.try(:dice_url),
+        source:               event.source,
+        city_key:             event.city_key,
+        bg_color:             event.try(:bg_color),
+        font_color:           event.try(:font_color),
+        formatted_start_time: event.formatted_start_time,
+        formatted_end_time:   event.formatted_end_time,
+        poster_url:           poster_url_for(event),
+        top_artists:          top_artists_for(event),
+        genres: event.genres.map { |g|
+          {
+            id:          g.id,
+            name:        g.name,
+            short_name:  g.short_name,
+            hex_color:   g.hex_color,
+            font_color:  g.font_color
+          }
+        },
+        artists: event.artists.map { |a|
+          { id: a.id, name: a.name, pronouns: a.pronouns }
+        },
+        venue: venue ? serialize_venue(venue) : nil
+      }
+
+      event_json
+    end
+  end
+
+  def serialize_venue(venue)
+    {
+      id:                    venue.id,
+      name:                  venue.name,
+      age:                   venue.age,
+      image_filename:        venue.image_filename,
+      address:               venue.address,
+      location:              venue.location,
+      venue_url:             venue.venue_url,
+      description:           venue.description,
+      distance:              venue.distance,
+      serves_alcohol:        venue.serves_alcohol,
+      venue_type:            venue.venue_type,
+      additional_images:     venue.additional_images,
+      bg_color:              venue.bg_color,
+      font_color:            venue.font_color,
+      subheading:            venue.subheading,
+      source:                venue.source,
+      parent_venue_id:       venue.parent_venue_id,
+      logo_url:              logo_url_for(venue),
+      venue_ids_for_events:  venue_ids_for_events_for(venue),
+      display_venue_for_json: display_venue_for_json_for(venue)
+    }
+  end
+
+  # Avoids calling logo.attached? per record — attachment already eager loaded
+  def logo_url_for(venue)
+    return nil unless venue.logo_attachment
+
+    Rails.application.routes.url_helpers.rails_blob_url(
+      venue.logo, disposition: :inline, only_path: false
+    )
+  end
+
+  def poster_url_for(event)
+    if event.logo_attachment
+      Rails.application.routes.url_helpers.rails_blob_url(
+        event.logo, disposition: :inline, only_path: false
+      )
+    else
+      event.event_image_url
+    end
+  end
+
+  def top_artists_for(event)
+    event.artists
+         .sort_by { |a| -(a.ra_followers || 0) }
+         .first(100)
+         .map { |a| { id: a.id, name: a.name, ra_followers: a.ra_followers, pronouns: a.pronouns } }
+  end
+
+  # All in memory — no extra queries since parent_venue + child_venues already loaded
+  def venue_ids_for_events_for(venue)
+    if venue.parent_venue_id.present?
+      parent = venue.parent_venue
+      [parent.id] + parent.child_venues.map(&:id)
+    elsif venue.child_venues.any?
+      [venue.id] + venue.child_venues.map(&:id)
+    else
+      [venue.id]
+    end
+  end
+
+  def display_venue_for_json_for(venue)
+    return nil unless venue.parent_venue_id.present? || venue.child_venues.any?
+
+    dv = venue.parent_venue || venue
+    {
+      id:                   dv.id,
+      name:                 dv.name,
+      description:          dv.description,
+      subheading:           dv.subheading,
+      address:              dv.address,
+      location:             dv.location,
+      age:                  dv.age,
+      venue_url:            dv.venue_url,
+      venue_type:           dv.venue_type,
+      logo_url:             logo_url_for(dv),
+      bg_color:             dv.bg_color,
+      font_color:           dv.font_color,
+      parent_section_label: dv.try(:parent_section_label),
+      child_venues:         dv.child_venues.map { |c|
+        {
+          id:        c.id,
+          name:      c.name,
+          subheading: c.subheading,
+          logo_url:  logo_url_for(c)
+        }
+      }
+    }
+  end
 
   def current_city_key
     (params[:city].presence || request.headers["X-City-Key"].presence || "movement").downcase
