@@ -5,7 +5,7 @@ class Api::EventsController < ApplicationController
   def index
     city = current_city_key
     include_past = city == "mmw" && request.headers["X-Include-Past-Events"].to_s == "1"
-    cache_key = "events-v8:#{city}:#{include_past ? 'all' : 'upcoming'}"
+    cache_key = "events-v9:#{city}:#{include_past ? 'all' : 'upcoming'}"
 
     result = Rails.cache.fetch(cache_key, expires_in: 5.minutes) do
       scope = Event
@@ -94,6 +94,8 @@ class Api::EventsController < ApplicationController
       event_json = {
         id:                   event.id,
         title:                event.title,
+        created_at:           event.created_at,
+        updated_at:           event.updated_at,
         date:                 event.date,
         start_time:           event.start_time,
         end_time:             event.end_time,
